@@ -64,7 +64,7 @@ void Console_Load(struct Game *game) {
 	game->_priv.console = NULL;
 	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),al_get_display_height(game->display)*0.025,0 );
 	if (al_get_display_height(game->display)*0.025 >= 16) {
-		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"),16,0 );
+        game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"),16 * ((al_get_display_height(game->display) > 1080) ? 2 : 1) ,0 );
 	} else {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), al_get_display_height(game->display)*0.025,0 );
 	}
@@ -85,6 +85,8 @@ void Console_Unload(struct Game *game) {
 void SetupViewport(struct Game *game) {
 	game->viewport.width = 320;
 	game->viewport.height = 180;
+
+	al_clear_to_color(al_map_rgb(0,0,0));
 
 	int resolution = al_get_display_width(game->display) / 320;
 	if (al_get_display_height(game->display) / 180 < resolution) resolution = al_get_display_height(game->display) / 180;
@@ -237,7 +239,7 @@ void FatalError(struct Game *game, bool fatal, char* format, ...) {
 		al_set_target_backbuffer(game->display);
 		al_clear_to_color(al_map_rgb(0,0,170));
 
-		char *header = "TICKLE MONSTER";
+        char *header = "MEDIATOR";
 
 		al_draw_filled_rectangle(al_get_display_width(game->display)/2 - al_get_text_width(game->_priv.font_bsod, header)/2 - 4, (int)(al_get_display_height(game->display) * 0.32), 4 + al_get_display_width(game->display)/2 + al_get_text_width(game->_priv.font_bsod, header)/2, (int)(al_get_display_height(game->display) * 0.32) + al_get_font_line_height(game->_priv.font_bsod), al_map_rgb(170,170,170));
 
@@ -317,7 +319,7 @@ char* GetDataFilePath(struct Game *game, char* filename) {
 	}
 
 	TestPath(filename, "data/", &result);
-	TestPath(filename, "../share/ticklemonster/data/", &result);
+    TestPath(filename, "../share/mediator/data/", &result);
 	TestPath(filename, "../data/", &result);
 #ifdef ALLEGRO_MACOSX
 	TestPath(filename, "../Resources/data/", &result);
@@ -499,14 +501,14 @@ void AnimateCharacter(struct Game *game, struct Character *character, float spee
 			character->pos_tmp = 0;
 			character->pos++;
 		}
-		if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
-			character->pos=0;
-			if (character->spritesheet->kill) {
+        if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
+            character->pos=0;
+            if (character->spritesheet->kill) {
 				character->dead = true;
 			} else if (character->successor) {
-				SelectSpritesheet(game, character, character->successor);
+                SelectSpritesheet(game, character, character->successor);
 			}
-		}
+        }
 	}
 }
 
@@ -524,7 +526,53 @@ void SetCharacterPosition(struct Game *game, struct Character *character, int x,
 	character->angle = angle;
 }
 
-void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags) {
+bool GetAbstractIsItBonusLevelTimeNowFactoryProvider(struct Game *game) {
+	return game->mediator.strike && (game->mediator.strike % 5 == 0);
+}
+
+void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
 	if (character->dead) return;
-	al_draw_tinted_bitmap_region(character->spritesheet->bitmap, tilt, al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols),al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols),al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), character->x, character->y, flags);
+    int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
+    int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);
+    al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, character->x + al_get_bitmap_width(character->bitmap)/2, character->y + al_get_bitmap_height(character->bitmap)/2, 1, 1, character->angle, flags);
+}
+
+void AdvanceLevel(struct Game *game, bool won) {
+    if (won) {
+        game->mediator.score++;
+				game->mediator.strike++;
+    } else {
+        game->mediator.lives--;
+				game->mediator.strike = 0;
+    }
+		game->mediator.modificator *= 1.025;
+    SelectSpritesheet(game, game->mediator.heart, "heart");
+}
+
+void ShowLevelStatistics(struct Game *game) {
+    // show as many bitmaps as there are lives
+    // show additional one as a animated character
+
+    al_draw_filled_rectangle(0, 0, 320, 240, al_map_rgba(0, 0, 0, 192));
+
+    int x = 75;
+
+    int pos = game->mediator.heart->pos;
+    struct Spritesheet *a = game->mediator.heart->spritesheet;
+
+    for (int i = 0; i < game->mediator.lives; i++) {
+        SetCharacterPosition(game, game->mediator.heart, x, 50, 0);
+        SelectSpritesheet(game, game->mediator.heart, "heart");
+        DrawCharacter(game, game->mediator.heart, al_map_rgb(255, 255, 255), 0);
+        x += 48;
+    }
+    game->mediator.heart->pos = pos;
+    game->mediator.heart->spritesheet = a;
+
+    if (game->mediator.lives >= 0) {
+        SetCharacterPosition(game, game->mediator.heart, x, 50, 0);
+        DrawCharacter(game, game->mediator.heart, al_map_rgb(255, 255, 255), 0);
+    }
+
+    //DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), 50, 50, 0, text);
 }

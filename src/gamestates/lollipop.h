@@ -19,10 +19,24 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-struct dosowiskoResources {
+struct RocketsResources {
         ALLEGRO_FONT *font;
-				ALLEGRO_BITMAP *bitmap, *icon;
-				ALLEGRO_SAMPLE *sample;
-				ALLEGRO_SAMPLE_INSTANCE *sound;
-        int tick;
+        ALLEGRO_BITMAP *bg, *earth, *earth2, *earth3, *earth4, *pixelator, *combined, *clouds;
+        struct Character *riot, *faces;
+
+        int counter, hearts;
+
+        ALLEGRO_SAMPLE *boom_sample, *rainbow_sample, *jump_sample;
+        ALLEGRO_SAMPLE_INSTANCE *boom_sound, *rainbow_sound, *jump_sound;
+
+        bool lost, won;
+
+        int oldstate;
+
+        int timelimit, spawnspeed, currentspawn, spawncounter;
+
+        float dx;
+        float currentpos;
+
+        struct Timeline *timeline;
 };

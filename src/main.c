@@ -45,9 +45,16 @@ void DrawGamestates(struct Game *game) {
 		}
 		tmp = tmp->next;
 	}
+
+	if (game->mediator.pause) {
+		al_draw_filled_rectangle(0, 0, 320, 180, al_map_rgba(0,0,0,192));
+		DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 - 25, ALLEGRO_ALIGN_CENTRE, "Game paused!");
+		DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 + 5, ALLEGRO_ALIGN_CENTRE, "SPACE to resume");
+	}
 }
 
 void LogicGamestates(struct Game *game) {
+	if (game->mediator.pause) return;
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -67,6 +74,28 @@ void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	}
 }
 
+void PauseGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if ((tmp->loaded) && (tmp->started)) {
+			(*tmp->api.Gamestate_Pause)(game, tmp->data);
+		}
+		tmp = tmp->next;
+	}
+}
+
+
+void ResumeGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if ((tmp->loaded) && (tmp->started)) {
+			(*tmp->api.Gamestate_Resume)(game, tmp->data);
+		}
+		tmp = tmp->next;
+	}
+}
+
+
 void derp(int sig) {
 	int __attribute__((unused)) n = write(STDERR_FILENO, "Segmentation fault\nI just don't know what went wrong!\n", 54);
 	abort();
@@ -78,7 +107,7 @@ int main(int argc, char **argv){
 	srand(time(NULL));
 
 	al_set_org_name("Super Derpy");
-	al_set_app_name("Tickle Monster");
+    al_set_app_name("Mediator");
 
 	if(!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
@@ -132,6 +161,11 @@ int main(int argc, char **argv){
 		fprintf(stderr, "failed to initialize primitives!\n");
 		return -1;
 	}
+
+    if(!al_install_mouse()) {
+        fprintf(stderr, "failed to initialize the mouse!\n");
+        return -1;
+    }
 	
 	al_init_font_addon();
 
@@ -158,13 +192,13 @@ int main(int argc, char **argv){
 
 	PrintConsole(&game, "Viewport %dx%d", game.viewport.width, game.viewport.height);
 
-	ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/ticklemonster.png"));
-	al_set_window_title(game.display, "Tickle Monster vs Suits");
+    ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/mediator.png"));
+	al_set_window_title(game.display, "Mediator");
 	al_set_display_icon(game.display, icon);
 	al_destroy_bitmap(icon);
 
-	if (game.config.fullscreen) al_hide_mouse_cursor(game.display);
-	al_inhibit_screensaver(true);
+    if (game.config.fullscreen) al_hide_mouse_cursor(game.display);
+    al_inhibit_screensaver(true);
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR);
 
@@ -191,7 +225,8 @@ int main(int argc, char **argv){
 	al_set_mixer_gain(game.audio.voice, game.config.voice/10.0);
 
 	al_register_event_source(game._priv.event_queue, al_get_display_event_source(game.display));
-	al_register_event_source(game._priv.event_queue, al_get_keyboard_event_source());
+    al_register_event_source(game._priv.event_queue, al_get_mouse_event_source());
+    al_register_event_source(game._priv.event_queue, al_get_keyboard_event_source());
 
 	game._priv.showconsole = game.config.debug;
 
@@ -211,6 +246,19 @@ int main(int argc, char **argv){
 	game.shuttingdown = false;
 	game.restart = false;
 
+    game.mediator.lives = 3;
+    game.mediator.score = 0;
+    game.mediator.modificator = 1;
+		game.mediator.strike = 0;
+		game.mediator.next = "lollipop";
+		game.mediator.pause = false;
+
+    game.mediator.heart = CreateCharacter(&game, "heart");
+    RegisterSpritesheet(&game, game.mediator.heart, "heart");
+    RegisterSpritesheet(&game, game.mediator.heart, "blank");
+    LoadSpritesheets(&game, game.mediator.heart);
+    SelectSpritesheet(&game, game.mediator.heart, "heart");
+
 	char* gamestate = strdup("dosowisko"); // FIXME: don't hardcore gamestate
 
 	int c;
@@ -228,12 +276,14 @@ int main(int argc, char **argv){
 		}
 
 	LoadGamestate(&game, gamestate);
-	game._priv.gamestates->showLoading = false; // we have only one gamestate right now
-	StartGamestate(&game, gamestate);
+    LoadGamestate(&game, "burndt");
+    game._priv.gamestates->showLoading = false; // we have only one gamestate right now
+    game._priv.gamestates->next->showLoading = false; // well, now two
+    StartGamestate(&game, gamestate);
 	free(gamestate);
 
 	char libname[1024] = {};
-	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENTION, "ticklemonster");
+    snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENTION, "mediator");
 	void *handle = dlopen(libname, RTLD_NOW);
 	if (!handle) {
 		FatalError(&game, true, "Error while initializing loading screen %s", dlerror());
@@ -278,6 +328,8 @@ int main(int argc, char **argv){
 			// FIXME: move to function
 			// TODO: support dependences
 
+			double t = -1;
+
 			while (tmp) {
 				if ((tmp->pending_load) && (tmp->loaded)) {
 					PrintConsole(&game, "Unloading gamestate \"%s\"...", tmp->name);
@@ -293,7 +345,7 @@ int main(int argc, char **argv){
 					al_stop_timer(game._priv.timer);
 					// TODO: take proper game name
 					char libname[1024];
-					snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENTION, "ticklemonster", tmp->name);
+                    snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENTION, "mediator", tmp->name);
 					tmp->handle = dlopen(libname,RTLD_NOW);
 					if (!tmp->handle) {
 						//PrintConsole(&game, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
@@ -321,6 +373,7 @@ int main(int argc, char **argv){
 						if (!(tmp->api.Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
 
 						int p = 0;
+
 						void progress(struct Game *game) {
 							p++;
 							DrawGamestates(game);
@@ -328,16 +381,24 @@ int main(int argc, char **argv){
 							if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), p, *(tmp->api.Gamestate_ProgressCount));
 							if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
 							DrawConsole(game);
-							al_flip_display();
+							if (al_get_time() - t >= 1/60.0) {
+								al_flip_display();
+							}
+							t = al_get_time();
 						}
+
+						t = al_get_time();
 
 						// initially draw loading screen with empty bar
 						DrawGamestates(&game);
 						if (tmp->showLoading) {
-							(*game._priv.loading.Draw)(&game, game._priv.loading.data, 0);
+                            (*game._priv.loading.Draw)(&game, game._priv.loading.data, loaded/(float)toLoad);
 						}
 						DrawConsole(&game);
-						al_flip_display();
+						if (al_get_time() - t >= 1/60.0) {
+							al_flip_display();
+						}
+						t = al_get_time();
 						tmp->data = (*tmp->api.Gamestate_Load)(&game, &progress); // feel free to replace "progress" with empty function if you want to compile with clang
 						loaded++;
 
@@ -423,13 +484,22 @@ int main(int argc, char **argv){
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game.config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
 				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 				char filename[255] = { };
-				snprintf(filename, 255, "TickleMonster_%ld_%ld.png", time(NULL), clock());
+				snprintf(filename, 255, "Mediator_%ld_%ld.png", time(NULL), clock());
 				al_set_path_filename(path, filename);
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game.display));
 				PrintConsole(&game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 				al_destroy_path(path);
+			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_SPACE)) {
+				game.mediator.pause = !game.mediator.pause;
+				if (game.mediator.pause) {
+					PauseGamestates(&game);
+				} else {
+					ResumeGamestates(&game);
+				}
 			} else {
-				EventGamestates(&game, &ev);
+				if (!game.mediator.pause) {
+					EventGamestates(&game, &ev);
+				}
 			}
 		}
 	}

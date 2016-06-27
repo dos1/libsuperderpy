@@ -55,7 +55,7 @@ bool FadeOut(struct Game *game, struct TM_Action *action, enum TM_ActionState st
 }
 
 bool End(struct Game *game, struct TM_Action *action, enum TM_ActionState state) {
-	if (state == TM_ACTIONSTATE_RUNNING) SwitchGamestate(game, "dosowisko", "menu");
+    if (state == TM_ACTIONSTATE_RUNNING) SwitchGamestate(game, "dosowisko", "burndt");
 	return true;
 }
 
@@ -150,7 +150,7 @@ void Gamestate_Start(struct Game *game, struct dosowiskoResources* data) {
 void Gamestate_ProcessEvent(struct Game *game, struct dosowiskoResources* data, ALLEGRO_EVENT *ev) {
 	TM_HandleEvent(data->timeline, ev);
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		SwitchGamestate(game, "dosowisko", "menu");
+        SwitchGamestate(game, "dosowisko", "menu");
 	}
 }
 
@@ -223,5 +223,9 @@ void Gamestate_Unload(struct Game *game, struct dosowiskoResources* data) {
 
 void Gamestate_Reload(struct Game *game, struct dosowiskoResources* data) {}
 
-void Gamestate_Resume(struct Game *game, struct dosowiskoResources* data) {}
-void Gamestate_Pause(struct Game *game, struct dosowiskoResources* data) {}
+void Gamestate_Resume(struct Game *game, struct dosowiskoResources* data) {
+	TM_Resume(data->timeline);
+}
+void Gamestate_Pause(struct Game *game, struct dosowiskoResources* data) {
+	TM_Pause(data->timeline);
+}

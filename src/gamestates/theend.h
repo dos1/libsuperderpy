@@ -21,8 +21,8 @@
 
 struct dosowiskoResources {
         ALLEGRO_FONT *font;
-				ALLEGRO_BITMAP *bitmap, *icon;
+        ALLEGRO_BITMAP *bitmap;
 				ALLEGRO_SAMPLE *sample;
 				ALLEGRO_SAMPLE_INSTANCE *sound;
-        int tick;
+				int score;
 };
