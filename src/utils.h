@@ -23,9 +23,9 @@
 #include "main.h"
 
 #ifdef ALLEGRO_WINDOWS
-#define LIBRARY_EXTENTION ".dll"
+#define LIBRARY_EXTENSION ".dll"
 #else
-#define LIBRARY_EXTENTION ".so"
+#define LIBRARY_EXTENSION ".so"
 #endif
 
 

@@ -45,16 +45,9 @@ void DrawGamestates(struct Game *game) {
 		}
 		tmp = tmp->next;
 	}
-
-	if (game->mediator.pause) {
-		al_draw_filled_rectangle(0, 0, 320, 180, al_map_rgba(0,0,0,192));
-		DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 - 25, ALLEGRO_ALIGN_CENTRE, "Game paused!");
-		DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 + 5, ALLEGRO_ALIGN_CENTRE, "SPACE to resume");
-	}
 }
 
 void LogicGamestates(struct Game *game) {
-	if (game->mediator.pause) return;
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -101,13 +94,14 @@ void derp(int sig) {
 	abort();
 }
 
+// TODO: let's break it up and move the binary out of libsuperderpy!
 int main(int argc, char **argv){
 	signal(SIGSEGV, derp);
 
 	srand(time(NULL));
 
-	al_set_org_name("Super Derpy");
-    al_set_app_name("Mediator");
+	al_set_org_name("dosowisko.net");
+	al_set_app_name(LIBSUPERDERPY_GAMENAME);
 
 	if(!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
@@ -192,8 +186,8 @@ int main(int argc, char **argv){
 
 	PrintConsole(&game, "Viewport %dx%d", game.viewport.width, game.viewport.height);
 
-    ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/mediator.png"));
-	al_set_window_title(game.display, "Mediator");
+    ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/" LIBSUPERDERPY_GAMENAME ".png"));
+	al_set_window_title(game.display, LIBSUPERDERPY_GAMENAME_PRETTY);
 	al_set_display_icon(game.display, icon);
 	al_destroy_bitmap(icon);
 
@@ -246,20 +240,7 @@ int main(int argc, char **argv){
 	game.shuttingdown = false;
 	game.restart = false;
 
-    game.mediator.lives = 3;
-    game.mediator.score = 0;
-    game.mediator.modificator = 1;
-		game.mediator.strike = 0;
-		game.mediator.next = "lollipop";
-		game.mediator.pause = false;
-
-    game.mediator.heart = CreateCharacter(&game, "heart");
-    RegisterSpritesheet(&game, game.mediator.heart, "heart");
-    RegisterSpritesheet(&game, game.mediator.heart, "blank");
-    LoadSpritesheets(&game, game.mediator.heart);
-    SelectSpritesheet(&game, game.mediator.heart, "heart");
-
-	char* gamestate = strdup("dosowisko"); // FIXME: don't hardcore gamestate
+    char* gamestate = strdup(LIBSUPERDERPY_INITIAL_GAMESTATE); // FIXME: don't hardcore gamestate
 
 	int c;
 	while ((c = getopt (argc, argv, "l:s:")) != -1)
@@ -276,14 +257,12 @@ int main(int argc, char **argv){
 		}
 
 	LoadGamestate(&game, gamestate);
-    LoadGamestate(&game, "burndt");
     game._priv.gamestates->showLoading = false; // we have only one gamestate right now
-    game._priv.gamestates->next->showLoading = false; // well, now two
     StartGamestate(&game, gamestate);
 	free(gamestate);
 
 	char libname[1024] = {};
-    snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENTION, "mediator");
+    snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME);
 	void *handle = dlopen(libname, RTLD_NOW);
 	if (!handle) {
 		FatalError(&game, true, "Error while initializing loading screen %s", dlerror());
@@ -345,7 +324,7 @@ int main(int argc, char **argv){
 					al_stop_timer(game._priv.timer);
 					// TODO: take proper game name
 					char libname[1024];
-                    snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENTION, "mediator", tmp->name);
+                    snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME, tmp->name);
 					tmp->handle = dlopen(libname,RTLD_NOW);
 					if (!tmp->handle) {
 						//PrintConsole(&game, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
@@ -484,23 +463,14 @@ int main(int argc, char **argv){
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game.config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
 				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 				char filename[255] = { };
-				snprintf(filename, 255, "Mediator_%ld_%ld.png", time(NULL), clock());
+				snprintf(filename, 255, LIBSUPERDERPY_GAMENAME_PRETTY "_%ld_%ld.png", time(NULL), clock());
 				al_set_path_filename(path, filename);
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game.display));
 				PrintConsole(&game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 				al_destroy_path(path);
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_SPACE)) {
-				game.mediator.pause = !game.mediator.pause;
-				if (game.mediator.pause) {
-					PauseGamestates(&game);
-				} else {
-					ResumeGamestates(&game);
-				}
-			} else {
-				if (!game.mediator.pause) {
-					EventGamestates(&game, &ev);
-				}
-			}
+            } else {
+                EventGamestates(&game, &ev);
+            }
 		}
 	}
 	game.shuttingdown = true;

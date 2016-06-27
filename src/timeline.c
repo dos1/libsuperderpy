@@ -135,7 +135,7 @@ void PauseTimers(struct Timeline* timeline, bool pause) {
 	}
 }
 
-void Propagate(struct Timeline* timeline, enum TM_ActionState action) {
+void TM_Propagate(struct Timeline* timeline, enum TM_ActionState action) {
 	if (timeline->queue) {
 		if ((*timeline->queue->function) && (timeline->queue->active)) {
 			(*timeline->queue->function)(timeline->game, timeline->queue, action);
@@ -154,18 +154,18 @@ void Propagate(struct Timeline* timeline, enum TM_ActionState action) {
 }
 
 void TM_Draw(struct Timeline* timeline) {
-	Propagate(timeline, TM_ACTIONSTATE_DRAW);
+    TM_Propagate(timeline, TM_ACTIONSTATE_DRAW);
 }
 
 void TM_Pause(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: Pause.", timeline->name);
 	PauseTimers(timeline, true);
-	Propagate(timeline, TM_ACTIONSTATE_PAUSE);
+    TM_Propagate(timeline, TM_ACTIONSTATE_PAUSE);
 }
 
 void TM_Resume(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: Resume.", timeline->name);
-	Propagate(timeline, TM_ACTIONSTATE_RESUME);
+    TM_Propagate(timeline, TM_ACTIONSTATE_RESUME);
 	PauseTimers(timeline, false);
 }
 
