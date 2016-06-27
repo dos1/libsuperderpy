@@ -25,7 +25,7 @@
 void Progress(struct Game *game, struct LoadingResources *data, float p) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 	al_draw_bitmap(data->loading_bitmap,0,0,0);
-	al_draw_filled_rectangle(0, game->viewport.height*0.985, p*game->viewport.width, game->viewport.height, al_map_rgba(255,255,255,255));
+	al_draw_filled_rectangle(0, game->viewport.height-1, p*game->viewport.width, game->viewport.height, al_map_rgba(128,128,128,128));
 }
 
 void Draw(struct Game *game, struct LoadingResources *data, float p) {
@@ -39,15 +39,10 @@ void* Load(struct Game *game) {
 
 	data->loading_bitmap = al_create_bitmap(game->viewport.width, game->viewport.height);
 
-	data->image = LoadScaledBitmap(game, "loading.png", game->viewport.height*2, game->viewport.height);
-
 	al_set_target_bitmap(data->loading_bitmap);
-	al_clear_to_color(al_map_rgb(193,225,218));
-	al_draw_bitmap(data->image, game->viewport.width-al_get_bitmap_width(data->image), 0, 0);
-	DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.0234, game->viewport.height*0.84, ALLEGRO_ALIGN_LEFT, "Loading...");
-	al_draw_filled_rectangle(0, game->viewport.height*0.985, game->viewport.width, game->viewport.height, al_map_rgba(128,128,128,128));
+	al_clear_to_color(al_map_rgb(0,0,0));
+	al_draw_filled_rectangle(0, game->viewport.height-1, game->viewport.width, game->viewport.height, al_map_rgba(32,32,32,32));
 	al_set_target_bitmap(al_get_backbuffer(game->display));
-	al_destroy_bitmap(data->image);
 	return data;
 }
 

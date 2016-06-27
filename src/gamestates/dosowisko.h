@@ -23,7 +23,7 @@ struct dosowiskoResources {
 		ALLEGRO_FONT *font;
 		ALLEGRO_SAMPLE *sample, *kbd_sample, *key_sample;
 		ALLEGRO_SAMPLE_INSTANCE *sound, *kbd, *key;
-		ALLEGRO_BITMAP *bitmap, *checkerboard;
+		ALLEGRO_BITMAP *bitmap, *checkerboard, *pixelator;
 		int pos, fade, tick, tan;
 		char text[255];
 		bool underscore, fadeout;

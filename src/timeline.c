@@ -226,6 +226,7 @@ struct TM_Action* TM_AddAction(struct Timeline* timeline, bool (*func)(struct Ga
 }
 
 struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name) {
+	// FIXME: some action wasn't freed!
 	struct TM_Action *action = malloc(sizeof(struct TM_Action));
 	if (timeline->background) {
 		struct TM_Action *pom = timeline->background;
@@ -297,8 +298,9 @@ void TM_CleanQueue(struct Timeline* timeline) {
 	while (pom!=NULL) {
 		if (pom->active) {
 			if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
-			else {
-				if (pom->timer) al_destroy_timer(pom->timer);
+			if (pom->timer) {
+				al_stop_timer(pom->timer);
+				al_destroy_timer(pom->timer);
 			}
 		} else {
 			TM_DestroyArgs(pom->arguments);
@@ -311,23 +313,25 @@ void TM_CleanQueue(struct Timeline* timeline) {
 			free(pom->name);
 			free(pom);
 			tmp2 = tmp;
-			if (!tmp) pom=timeline->background->next;
+			if (!tmp) pom=timeline->queue->next;
 			else pom=tmp->next;
 			tmp = tmp2;
 		}
 	}
+	// TODO: it shouldn't be needed, but is. Debug!
+	timeline->queue = NULL;
 }
 
 void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: cleaning background queue", timeline->name);
-	struct TM_Action *tmp, *tmp2, *pom = timeline->queue;
+	struct TM_Action *tmp, *tmp2, *pom = timeline->background;
 	tmp = NULL;
-	pom=timeline->background;
 	while (pom!=NULL) {
 		if (pom->active) {
 			if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
-			else {
-				if (pom->timer) al_destroy_timer(pom->timer);
+			if (pom->timer) {
+				al_stop_timer(pom->timer);
+				al_destroy_timer(pom->timer);
 			}
 		} else {
 			TM_DestroyArgs(pom->arguments);
@@ -345,6 +349,8 @@ void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 			tmp = tmp2;
 		}
 	}
+	// TODO: it shouldn't be needed, but is. Debug!
+	timeline->background = NULL;
 }
 
 void TM_Destroy(struct Timeline* timeline) {
@@ -363,6 +369,8 @@ struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...) {
 	struct TM_Arguments* tmp = args;
 	for(i = 0; i < num; i++) {
 		if (!tmp) {
+			//FIXME: on some occasions some arguments weren't freed. Check it out.
+			// TM_AddQueuedBackgroundAction? possibly not only.
 			tmp = malloc(sizeof(struct TM_Arguments));
 			tmp->value = va_arg(ap, void*);
 			tmp->next = NULL;

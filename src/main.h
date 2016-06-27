@@ -35,6 +35,8 @@ struct Gamestate;
 struct Game {
 		ALLEGRO_DISPLAY *display; /*!< Main Allegro display. */
 
+		ALLEGRO_TRANSFORM projection;
+
 		struct {
 			int width; /*!< Actual available width of viewport. */
 			int height; /*!< Actual available height of viewport. */

@@ -26,33 +26,33 @@
 struct Game;
 
 struct Gamestate {
-	char* name;
-	void* handle;
-	bool loaded, pending_load;
-	bool started, pending_start;
-	bool showLoading;
-	bool paused;
-	bool fade; // TODO: or maybe should it be in API?
-	unsigned char fade_counter;
-	char** after; // TODO: and this one too?
-	struct Gamestate* next;
-	void* data;
-	struct {
-			void (*Gamestate_Draw)(struct Game *game, void* data);
-			void (*Gamestate_Logic)(struct Game *game, void* data);
+		char* name;
+		void* handle;
+		bool loaded, pending_load;
+		bool started, pending_start;
+		bool showLoading;
+		bool paused;
+		bool fade; // TODO: or maybe should it be in API?
+		unsigned char fade_counter;
+		char** after; // TODO: and this one too?
+		struct Gamestate* next;
+		void* data;
+		struct {
+				void (*Gamestate_Draw)(struct Game *game, void* data);
+				void (*Gamestate_Logic)(struct Game *game, void* data);
 
-			void* (*Gamestate_Load)(struct Game *game, void (*progress)(struct Game *game));
-			void (*Gamestate_Start)(struct Game *game, void* data);
-			void (*Gamestate_Pause)(struct Game *game, void* data);
-			void (*Gamestate_Resume)(struct Game *game, void* data);
-			void (*Gamestate_Stop)(struct Game *game, void* data);
-			void (*Gamestate_Unload)(struct Game *game, void* data);
+				void* (*Gamestate_Load)(struct Game *game, void (*progress)(struct Game *game));
+				void (*Gamestate_Start)(struct Game *game, void* data);
+				void (*Gamestate_Pause)(struct Game *game, void* data);
+				void (*Gamestate_Resume)(struct Game *game, void* data);
+				void (*Gamestate_Stop)(struct Game *game, void* data);
+				void (*Gamestate_Unload)(struct Game *game, void* data);
 
-			void (*Gamestate_ProcessEvent)(struct Game *game, void* data, ALLEGRO_EVENT *ev);
-			void (*Gamestate_Reload)(struct Game *game, void* data);
+				void (*Gamestate_ProcessEvent)(struct Game *game, void* data, ALLEGRO_EVENT *ev);
+				void (*Gamestate_Reload)(struct Game *game, void* data);
 
-			int *Gamestate_ProgressCount;
-	} api;
+				int *Gamestate_ProgressCount;
+		} api;
 };
 
 void LoadGamestate(struct Game *game, const char* name);

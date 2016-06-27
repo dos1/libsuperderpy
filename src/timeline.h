@@ -39,11 +39,11 @@ enum TM_ActionState {
 
 /*! \brief Timeline structure. */
 struct Timeline {
-	struct TM_Action *queue; /*!< Main timeline queue. */
-	struct TM_Action *background; /*!< Background queue. */
-	char* name; /*!< Name of the timeline. */
-	unsigned int lastid; /*!< Last ID given to timeline action. */
-	struct Game* game; /*!< Reference to the game object. */
+		struct TM_Action *queue; /*!< Main timeline queue. */
+		struct TM_Action *background; /*!< Background queue. */
+		char* name; /*!< Name of the timeline. */
+		unsigned int lastid; /*!< Last ID given to timeline action. */
+		struct Game* game; /*!< Reference to the game object. */
 };
 
 /*! \brief Arguments for TM_Action. */
