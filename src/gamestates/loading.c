@@ -25,7 +25,7 @@
 void Progress(struct Game *game, struct LoadingResources *data, float p) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 	al_draw_bitmap(data->loading_bitmap,0,0,0);
-	al_draw_filled_rectangle(0, game->viewport.height-1, p*game->viewport.width, game->viewport.height, al_map_rgba(128,128,128,128));
+	al_draw_filled_rectangle(0, game->viewport.height/2 - 1, p*game->viewport.width, game->viewport.height/2 + 1, al_map_rgba(128,128,128,128));
 }
 
 void Draw(struct Game *game, struct LoadingResources *data, float p) {
@@ -38,10 +38,12 @@ void* Load(struct Game *game) {
 	al_clear_to_color(al_map_rgb(0,0,0));
 
 	data->loading_bitmap = al_create_bitmap(game->viewport.width, game->viewport.height);
+	data->bg = al_load_bitmap( GetDataFilePath(game, "bg.png") );
 
 	al_set_target_bitmap(data->loading_bitmap);
 	al_clear_to_color(al_map_rgb(0,0,0));
-	al_draw_filled_rectangle(0, game->viewport.height-1, game->viewport.width, game->viewport.height, al_map_rgba(32,32,32,32));
+	al_draw_bitmap(data->bg, 0, 0, 0);
+	al_draw_filled_rectangle(0, game->viewport.height/2 - 1, game->viewport.width, game->viewport.height/2 + 1, al_map_rgba(32,32,32,32));
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 	return data;
 }
@@ -50,5 +52,6 @@ void Start(struct Game *game, struct LoadingResources *data) {}
 void Stop(struct Game *game, struct LoadingResources *data) {}
 void Unload(struct Game *game, struct LoadingResources *data) {
 	al_destroy_bitmap(data->loading_bitmap);
+	al_destroy_bitmap(data->bg);
 	free(data);
 }

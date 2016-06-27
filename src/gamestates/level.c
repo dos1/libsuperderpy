@@ -1,5 +1,5 @@
-/*! \file level.c
- *  \brief Playable Level code.
+/*! \file menu.c
+ *  \brief Main Menu view.
  */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
@@ -18,435 +18,692 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+#include <stdio.h>
+#include <math.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_primitives.h>
+#include "../config.h"
 #include "../utils.h"
 #include "../timeline.h"
-#include "../config.h"
 #include "level.h"
 
-#include <stdio.h>
+#define TILE_SIZE 20
+#define MAX_FUN 250.0
+#define FLOOR_OF_FUN 0.68
+#define CEIL_OF_FUN 0.88
 
-// TODO: move this file to better place
-// it's now a place for level related utilities - certainly not a gamestate
+int Gamestate_ProgressCount = 8;
 
-void SelectSpritesheet(struct Game *game, struct Character *character, char* name) {
-	struct Spritesheet *tmp = character->spritesheets;
-	PrintConsole(game, "Selecting spritesheet for %s: %s", character->name, name);
-	if (!tmp) {
-		PrintConsole(game, "ERROR: No spritesheets registered for %s!", character->name);
+void SaveScore(struct Game *game, struct LevelResources *data) {
+
+	if (((data->score / (double)(data->time / 10)) > (data->savedScore / (double)data->savedTime)) || ((data->score / (double)(data->time / 10)) == (data->savedScore / (double)data->savedTime) && (data->score > data->savedScore))) {
+		char *text = malloc(255*sizeof(char));
+		snprintf(text, 255, "%d", data->score);
+		SetConfigOption(game, "TickleMonster", "score", text);
+		snprintf(text, 255, "%d", data->time / 10);
+		SetConfigOption(game, "TickleMonster", "time", text);
+	}
+
+}
+
+void AnimateBadguys(struct Game *game, struct LevelResources *data, int i) {
+	struct Kid *tmp = data->kids[i];
+	while (tmp) {
+		AnimateCharacter(game, tmp->character, tmp->tickled ? 1 : tmp->speed * data->kidSpeed);
+		tmp=tmp->next;
+	}
+}
+
+void MoveBadguys(struct Game *game, struct LevelResources *data, int i, float dx) {
+	struct Kid *tmp = data->kids[i];
+	while (tmp) {
+
+		if (!tmp->grownup) {
+			if ((!tmp->character->spritesheet->kill) && (!tmp->tickled)) {
+				MoveCharacter(game, tmp->character, dx * tmp->speed * data->kidSpeed, 0, 0);
+			}
+
+			if (tmp->character->x < 30) {
+				if (tmp->fun > FLOOR_OF_FUN * MAX_FUN && tmp->fun < CEIL_OF_FUN * MAX_FUN) {
+					tmp->happy = true;
+					al_set_sample_instance_playing(data->click, true);
+					data->score++;
+				} else {
+					if (rand() % 3 == 0) {
+						tmp->grownup = true;
+						tmp->right = true;
+						tmp->character->spritesheets = data->suit->spritesheets;
+						SelectSpritesheet(game, tmp->character, "walk");
+						MoveCharacter(game, tmp->character, 0, -8, 0);
+					}
+				}
+			}
+		} else {
+			// grownup
+			MoveCharacter(game, tmp->character, (tmp->right ? -1 : 1) * dx * tmp->speed * data->kidSpeed / 2, 0, 0);
+			if (tmp->character->x > 270) {
+				tmp->right = false;
+			} else if (tmp->character->x < 42) {
+				if (rand() % 2) { // 50% chance for getting rid
+					tmp->right = true;
+				} else {
+					if (!tmp->right) {
+						tmp->happy = true;
+					}
+				}
+			}
+		}
+
+		if (tmp->grownup) {
+			if ((tmp->character->x > data->monster->x) && (tmp->character->x + 10 < data->monster->x + 20) && (abs(tmp->character->y - data->monster->y) < 5)) {
+				data->lost = true;
+				al_stop_sample_instance(data->laughter);
+				al_stop_timer(data->timer);
+				SaveScore(game, data);
+			}
+		}
+
+		if (tmp->happy) {
+			if (tmp->prev) {
+				tmp->prev->next = tmp->next;
+				if (tmp->next) tmp->next->prev = tmp->prev;
+			} else {
+				data->kids[i] = tmp->next;
+				if (tmp->next) tmp->next->prev = NULL;
+			}
+			struct Kid *old = tmp;
+			tmp = tmp->next;
+			old->character->dead = true;
+			old->prev = NULL;
+			old->next = data->destroyQueue;
+			if (data->destroyQueue) data->destroyQueue->prev = old;
+			data->destroyQueue = old;
+		} else {
+			tmp = tmp->next;
+		}
+
+	}
+}
+
+void CheckForEnd(struct Game *game, struct LevelResources *data) {
+	return;
+
+	int i;
+	bool lost = false;
+	for (i=0; i<6; i++) {
+		struct Kid *tmp = data->kids[i];
+		while (tmp) {
+			if (tmp->character->x <= (139-(i*10))-10) {
+				lost = true;
+				break;
+			}
+			tmp=tmp->next;
+		}
+		if (lost) break;
+	}
+
+	if (lost) {
+
+		data->soloactive=false;
+		data->soloanim=0;
+		data->soloflash=0;
+		data->soloready=0;
+
+		SelectSpritesheet(game, data->monster, "cry");
+	}
+}
+
+void DrawBadguys(struct Game *game, struct LevelResources *data, int i) {
+	struct Kid *tmp = data->kids[i];
+	while (tmp) {
+		if (!tmp->happy) {
+			DrawCharacter(game, tmp->character, al_map_rgb(255,255,255), (tmp->grownup && !tmp->right) ? ALLEGRO_FLIP_HORIZONTAL : 0);
+		}
+		tmp=tmp->next;
+	}
+}
+
+void Gamestate_Draw(struct Game *game, struct LevelResources* data) {
+
+	al_set_target_bitmap(al_get_backbuffer(game->display));
+
+	al_clear_to_color(al_map_rgb(3, 213, 255));
+
+	al_draw_bitmap(data->bg,0, 0,0);
+
+	for (int i=0; i<6; i++) {
+		DrawBadguys(game, data, i);
+		if ((int)((data->monster->y + 18) / 20) > i) {
+			DrawCharacter(game, data->monster, al_map_rgb(255,255,255), 0);
+		}
+	}
+
+	al_draw_bitmap(data->buildings,0, 0,0);
+	if (data->savedScore) {
+		al_draw_bitmap(data->hid2,0, 0,0);
+	} else {
+		al_draw_bitmap(data->hid,0, 0,0);
+	}
+
+	if (data->tickling && data->haskid) {
+		al_draw_bitmap(data->meter,0, 0,0);
+		int length = (data->tickledKid->fun / MAX_FUN) * 151;
+		al_draw_filled_rectangle(160, 163, 160 + ((length > 151) ? 151 : length), 173, al_map_rgb(255,255,255));
+		if ((data->tickledKid->fun / MAX_FUN) > FLOOR_OF_FUN) {
+			al_draw_filled_rectangle(160 + 151 * FLOOR_OF_FUN, 163, 160 + ((length > 151 * CEIL_OF_FUN) ? (151 * CEIL_OF_FUN) : length), 173, al_map_rgb(192, 255, 192));
+		}
+	}
+
+	if (data->soloflash) {
+		al_draw_filled_rectangle(0, 0, 320, 180, al_map_rgb(255,255,255));
+	}
+
+	char *text = malloc(255*sizeof(char));
+	snprintf(text, 255, "%d", data->score);
+	DrawTextWithShadow(data->font, al_map_rgb(255,255,255), 21, 162, 0, text);
+	snprintf(text, 255, "%d", data->time / 10);
+	DrawTextWithShadow(data->font, al_map_rgb(255,255,255), 61, 162, 0, text);
+	if (data->savedScore) {
+		snprintf(text, 255, "%d / %d", data->savedScore, data->savedTime);
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), 106, 162, 0, text);
+	}
+	free(text);
+
+	if (data->lost) {
+		al_draw_filled_rectangle(0, 0, 320, 180, al_map_rgba(0,0,0,128));
+		al_draw_bitmap(data->busted,0, 0,0);
+
+		char *text = malloc(255*sizeof(char));
+		snprintf(text, 255, "Score: %d", data->score);
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), 200, 118, 0, text);
+		snprintf(text, 255, "Time: %d", data->time / 10);
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), 200, 128, 0, text);
+		free(text);
+	}
+
+	if (data->paused) {
+		al_draw_filled_rectangle(0, 0, 320, 180, al_map_rgba(0,0,0,128));
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 - 25, ALLEGRO_ALIGN_CENTRE, "Game paused!");
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 + 5, ALLEGRO_ALIGN_CENTRE, "SPACE to resume");
+		DrawTextWithShadow(data->font, al_map_rgb(255,255,255), game->viewport.width*0.5, game->viewport.height*0.5 + 15, ALLEGRO_ALIGN_CENTRE, "ESCAPE to leave");
+	}
+}
+
+void AddBadguy(struct Game *game, struct LevelResources* data, int i) {
+	struct Kid *n = malloc(sizeof(struct Kid));
+	n->next = NULL;
+	n->prev = NULL;
+	n->speed = (rand() % 3) * 0.25 + 1;
+	n->tickled = false;
+	n->grownup = false;
+	n->happy = false;
+	n->fun = 0;
+	n->character = CreateCharacter(game, "kid");
+	n->character->spritesheets = data->kid->spritesheets;
+	n->character->shared = true;
+	SelectSpritesheet(game, n->character, "walk");
+	SetCharacterPosition(game, n->character, 280, 20+(i*TILE_SIZE), 0);
+
+	if (data->kids[i]) {
+		struct Kid *tmp = data->kids[i];
+		while (tmp->next) {
+			tmp=tmp->next;
+		}
+		tmp->next = n;
+		n->prev = tmp;
+	} else {
+		data->kids[i] = n;
+	}
+}
+
+void Fire(struct Game *game, struct LevelResources *data) {
+
+	if (data->movedown || data->moveup) return;
+
+	if (data->tickling) {
+
+		if (data->haskid) {
+			data->tickledKid->tickled = false;
+			SelectSpritesheet(game, data->tickledKid->character, "walk");
+			data->haskid = false;
+			al_set_sample_instance_playing(data->laughter, false);
+			MoveCharacter(game, data->tickledKid->character, 0, 3, 0);
+			data->tickledKid = NULL;
+		}
+
+		SelectSpritesheet(game, data->monster, "stand");
+		MoveCharacter(game, data->monster, 2, -2, 0);
+		data->tickling = false;
 		return;
 	}
-	while (tmp) {
-		if (!strcmp(tmp->name, name)) {
-			character->spritesheet = tmp;
-			//game->level.sheet_rows = tmp->rows;
-			//game->level.sheet_cols = tmp->cols;
-			//game->level.sheet_blanks = tmp->blanks;
-			//game->level.sheet_speed_modifier = tmp->speed;
-			character->pos = 0;
-			//game->level.sheet_scale = tmp->scale;
-			//game->level.sheet_successor = tmp->successor;
-			if (character->bitmap) al_destroy_bitmap(character->bitmap);
-			character->bitmap = al_create_bitmap((game->viewport.height*0.25)*tmp->aspect*tmp->scale, (game->viewport.height*0.25)*tmp->scale); // FIXME: dimensions!
-			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, name, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap));
-			return;
-		}
-		tmp = tmp->next;
-	}
-	PrintConsole(game, "ERROR: No spritesheets registered for %s with given name: %s", character->name, name);
-	return;
+
+	SelectSpritesheet(game, data->monster, "ticklefail");
+	MoveCharacter(game, data->monster, -2, 2, 0);
+
+	data->tickling = true;
+
+	//PrintConsole(game, "MONSTAH %f", data->monster->x);
 }
 
-void LoadSpritesheets(struct Game *game, struct Character *character) {
-	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
-	struct Spritesheet *tmp = character->spritesheets;
-	while (tmp) {
-		if (!tmp->bitmap) {
-			char filename[255] = { };
-			snprintf(filename, 255, "levels/%s/%s.png", character->name, tmp->name);
-			tmp->bitmap = LoadScaledBitmap(game, filename, (int)(game->viewport.height*0.25*tmp->aspect*tmp->scale)*tmp->cols, (int)(game->viewport.height*0.25*tmp->scale)*tmp->rows);
-		}
-		tmp = tmp->next;
-	}
-}
+void Gamestate_Logic(struct Game *game, struct LevelResources* data) {
 
-void UnloadSpritesheets(struct Game *game, struct Character *character) {
-	PrintConsole(game, "Unloading spritesheets for character %s...", character->name);
-	struct Spritesheet *tmp = character->spritesheets;
-	while (tmp) {
-		if (tmp->bitmap) al_destroy_bitmap(tmp->bitmap);
-		tmp->bitmap = NULL;
-		tmp = tmp->next;
-	}
-}
+	if ((data->lost) || (data->paused)) return;
 
-void RegisterSpritesheet(struct Game *game, struct Character *character, char* name) {
-	struct Spritesheet *s = character->spritesheets;
-	while (s) {
-		if (!strcmp(s->name, name)) {
-			//PrintConsole(game, "%s spritesheet %s already registered!", character->name, name);
-			return;
-		}
-		s = s->next;
-	}
-	PrintConsole(game, "Registering %s spritesheet: %s", character->name, name);
-	char filename[255] = { };
-	snprintf(filename, 255, "levels/%s/%s.ini", character->name, name);
-	ALLEGRO_CONFIG *config = al_load_config_file(GetDataFilePath(game, filename));
-	s = malloc(sizeof(struct Spritesheet));
-	s->name = strdup(name);
-	s->bitmap = NULL;
-	s->cols = atoi(al_get_config_value(config, "", "cols"));
-	s->rows = atoi(al_get_config_value(config, "", "rows"));
-	s->blanks = atoi(al_get_config_value(config, "", "blanks"));
-	s->speed = atof(al_get_config_value(config, "", "speed"));
-	s->aspect = atof(al_get_config_value(config, "", "aspect"));
-	s->scale = atof(al_get_config_value(config, "", "scale"));
-	s->successor=NULL;
-	const char* successor = al_get_config_value(config, "", "successor");
-	if (successor) {
-		s->successor = malloc(255*sizeof(char));
-		strncpy(s->successor, successor, 255);
-	}
-	s->next = character->spritesheets;
-	character->spritesheets = s;
-	al_destroy_config(config);
-}
-
-struct Character* CreateCharacter(struct Game *game, char* name) {
-	PrintConsole(game, "Creating character %s...", name);
-	struct Character *character = malloc(sizeof(struct Character));
-	character->name = strdup(name);
-	character->angle = 0;
-	character->bitmap = NULL;
-	character->data = NULL;
-	character->pos = 0;
-	character->pos_tmp = 0;
-	character->x = -1;
-	character->y = -1;
-	character->spritesheets = NULL;
-	character->spritesheet = NULL;
-	return character;
-}
-
-void DestroyCharacter(struct Game *game, struct Character *character) {
-	PrintConsole(game, "Destroying character %s...", character->name);
-	UnloadSpritesheets(game, character);
-	struct Spritesheet *tmp, *s = character->spritesheets;
-	tmp = s;
-	while (s) {
-		tmp = s;
-		s = s->next;
-		free(tmp);
+	if (strcmp(data->monster->spritesheet->name, "fail") == 0) {
+		data->tickling = false;
+		MoveCharacter(game, data->monster, 2, -2, 0);
+		SelectSpritesheet(game, data->monster, "stand");
 	}
 
-	if (character->bitmap) al_destroy_bitmap(character->bitmap);
-	free(character->name);
-	free(character);
-}
-
-void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier) {
-	if ((character->spritesheet->speed) && (speed_modifier)) {
-		character->pos_tmp+=character->spritesheet->speed*speed_modifier;
-		while (character->pos_tmp >= 1) {
-			character->pos++;
-			character->pos_tmp--;
-		}
-		if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
-			character->pos=0;
-			if (character->spritesheet->successor) {
-				SelectSpritesheet(game, character, character->spritesheet->successor);
+	if (data->tickling) {
+		if (!data->haskid) {
+			struct Kid *tmp = data->kids[(int)((data->monster->y - 15) / 20)];
+			while (tmp) {
+				if ((tmp->character->x > data->monster->x + 16) && (tmp->character->x < data->monster->x + 23)) {
+					if (tmp->grownup) {
+						data->lost = true;
+						al_stop_sample_instance(data->laughter);
+						al_stop_timer(data->timer);
+						SaveScore(game, data);
+					} else {
+						tmp->tickled = true;
+						SelectSpritesheet(game, data->monster, "tickle");
+						SelectSpritesheet(game, tmp->character, "laugh");
+						data->haskid = true;
+						data->tickledKid = tmp;
+						SetCharacterPosition(game, tmp->character, data->monster->x + 22, tmp->character->y - 3, 0);
+						al_set_sample_instance_playing(data->laughter, true);
+					}
+					break;
+				}
+				tmp=tmp->next;
 			}
 		}
-	}
-}
 
-void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle) {
-	character->x += x;
-	character->y += y;
-	character->angle += angle;
-}
-
-void SetCharacterPosition(struct Game *game, struct Character *character, float x, float y, float angle) {
-	character->x = x;
-	character->y = y;
-	character->angle = angle;
-}
-
-void AdvanceLevel(struct Game *game, int current_level, bool last) {
-	if (!last) {
-		int available = atoi(GetConfigOptionDefault(game, "MuffinAttack", "level", "1"));
-		available++;
-		if ((available<2) || (available>7)) available=1;
-		if (available==(current_level+1)) {
-			char* text = malloc(255*sizeof(char));
-			snprintf(text, 255, "%d", available);
-			SetConfigOption(game, "MuffinAttack", "level", text);
-			free(text);
+		if (data->haskid) {
+			data->tickledKid->fun++;
 		}
-	} else {
-		SetConfigOption(game, "MuffinAttack", "completed", "1");
 	}
-}
 
-/*char* GetLevelFilename(struct Game *game, char* filename) {
-	// FIXME: it should work with larger numbers too
-	char* name = strdup(filename);
-	char* ch = strchr(name, '?');
-	ch[0] = '0' + game->level.current_level;
-	return name;
-}*/
 
-void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags) {
-	al_set_target_bitmap(character->bitmap);
-	al_clear_to_color(al_map_rgba(0,0,0,0));
-	al_draw_bitmap_region(character->spritesheet->bitmap, al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols),al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols),al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap),0,0,0);
-	al_set_target_bitmap(al_get_backbuffer(game->display));
+	if (data->keys.lastkey == data->keys.key) {
+		data->keys.delay = data->keys.lastdelay; // workaround for random bugus UP/DOWN events
+	}
 
-	al_draw_tinted_rotated_bitmap(character->bitmap, tilt, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap)/2, character->x*game->viewport.width + al_get_bitmap_width(character->bitmap), character->y*game->viewport.height + al_get_bitmap_height(character->bitmap)/2, character->angle, flags); // FIXME: viewport height? omg character should have its dimensions ;_;
+	if (data->moveup && data->monster->y < 14) {
+		data->moveup = false;
+	}
+	if (data->movedown && data->monster->y > 112) {
+		data->movedown = false;
+	}
 
-}
+	if (data->moveup) {
+		MoveCharacter(game, data->monster, 0, -1, 0);
+	} else if (data->movedown) {
+		MoveCharacter(game, data->monster, 0, 1, 0);
+	}
 
-/*
-void Level_Logic(struct Game *game) {
-	LEVELS(Logic, game);
+	if ((int)(data->monster->y + 7) % TILE_SIZE == 0) {
+		data->moveup = false;
+		data->movedown = false;
+	}
 
-	if ((game->level.sheet_speed) && (game->level.sheet_speed_modifier)) {
-		game->level.sheet_tmp+=1;
-		if (game->level.sheet_tmp >= (game->level.sheet_speed/game->level.speed_modifier)/game->level.sheet_speed_modifier) {
-			game->level.sheet_pos++;
-			game->level.sheet_tmp -= (game->level.sheet_speed/game->level.speed_modifier)/game->level.sheet_speed_modifier;
+	data->cloud_position-=0.1;
+	if (data->cloud_position<-40) { data->cloud_position=100; PrintConsole(game, "cloud_position"); }
+	AnimateCharacter(game, data->monster, 1);
+
+		if ((data->keys.key) && (data->keys.delay < 3)) {
+
+			if (!data->tickling) {
+				if (data->keys.key==ALLEGRO_KEY_LEFT) {
+					if (data->monster->x > 42) {
+						MoveCharacter(game, data->monster, -1, 0, 0);
+					}
+				}
+
+				if (data->keys.key==ALLEGRO_KEY_RIGHT) {
+					if (data->monster->x < 256) {
+						MoveCharacter(game, data->monster, 1, 0, 0);
+					}
+				}
+			}
+
+			if (data->keys.delay == INT_MIN) data->keys.delay = 3;
+			else data->keys.delay += 3;
+
+		} else if (data->keys.key) {
+			data->keys.delay-=3;
 		}
-		if (game->level.sheet_pos>=game->level.sheet_cols*game->level.sheet_rows-game->level.sheet_blanks) {
-			game->level.sheet_pos=0;
-			if (game->level.sheet_successor) {
-				SelectDerpySpritesheet(game, game->level.sheet_successor);
+
+		AnimateBadguys(game, data, 0);
+		AnimateBadguys(game, data, 1);
+		AnimateBadguys(game, data, 2);
+		AnimateBadguys(game, data, 3);
+		AnimateBadguys(game, data, 4);
+		AnimateBadguys(game, data, 5);
+
+		MoveBadguys(game, data, 0, -0.17);
+		MoveBadguys(game, data, 1, -0.18);
+		MoveBadguys(game, data, 2, -0.19);
+		MoveBadguys(game, data, 3, -0.2);
+		MoveBadguys(game, data, 4, -0.21);
+		MoveBadguys(game, data, 5, -0.22);
+
+		data->timeTillNextBadguy--;
+		if (data->timeTillNextBadguy <= 0) {
+			data->timeTillNextBadguy = data->kidRate * 2;
+			data->kidRate -= data->kidRate * 0.005;
+			if (data->kidRate < 50) {
+				data->kidRate = 50;
+			}
+
+			data->kidSpeed+= 0.0005;
+			AddBadguy(game, data, rand() % 6);
+		}
+
+		if (data->usage) { data->usage--; }
+		if (data->lightanim) { data->lightanim++;}
+		if (data->lightanim > 25) { data->lightanim = 0; }
+
+		CheckForEnd(game, data);
+
+	data->soloanim++;
+	if (data->soloanim >= 60) data->soloanim=0;
+
+	if (data->soloflash) data->soloflash--;
+
+	data->keys.lastkey = data->keys.key;
+	data->keys.lastdelay = data->keys.delay;
+
+	TM_Process(data->timeline);
+}
+
+void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
+
+	struct LevelResources *data = malloc(sizeof(struct LevelResources));
+
+	data->timer = al_create_timer(0.1);
+	al_register_event_source(game->_priv.event_queue, al_get_timer_event_source(data->timer));
+
+	data->timeline = TM_Init(game, "main");
+	(*progress)(game);
+
+	data->bg = al_load_bitmap( GetDataFilePath(game, "bg2.png") );
+	data->buildings = al_load_bitmap( GetDataFilePath(game, "buildings.png") );
+	data->hid = al_load_bitmap( GetDataFilePath(game, "hid.png") );
+	data->hid2 = al_load_bitmap( GetDataFilePath(game, "hid2.png") );
+	data->meter = al_load_bitmap( GetDataFilePath(game, "meter.png") );
+	data->busted = al_load_bitmap( GetDataFilePath(game, "busted.png") );
+	data->click_sample = al_load_sample( GetDataFilePath(game, "point.flac") );
+	(*progress)(game);
+
+	data->click = al_create_sample_instance(data->click_sample);
+	al_attach_sample_instance_to_mixer(data->click, game->audio.fx);
+	al_set_sample_instance_playmode(data->click, ALLEGRO_PLAYMODE_ONCE);
+	(*progress)(game);
+
+
+	data->sample = al_load_sample( GetDataFilePath(game, "laughter.flac") );
+	(*progress)(game);
+
+	data->laughter = al_create_sample_instance(data->sample);
+	al_attach_sample_instance_to_mixer(data->laughter, game->audio.fx);
+	al_set_sample_instance_playmode(data->laughter, ALLEGRO_PLAYMODE_LOOP);
+	(*progress)(game);
+
+	data->font_title = al_load_ttf_font(GetDataFilePath(game, "fonts/MonkeyIsland.ttf"),game->viewport.height*0.16,0 );
+	data->font = al_load_ttf_font(GetDataFilePath(game, "fonts/MonkeyIsland.ttf"),12,0 );
+	(*progress)(game);
+
+	data->monster = CreateCharacter(game, "monster");
+	RegisterSpritesheet(game, data->monster, "stand");
+	RegisterSpritesheet(game, data->monster, "tickle");
+	RegisterSpritesheet(game, data->monster, "ticklefail");
+	RegisterSpritesheet(game, data->monster, "fail");
+	RegisterSpritesheet(game, data->monster, "jump");
+	LoadSpritesheets(game, data->monster);
+	(*progress)(game);
+
+	data->suit = CreateCharacter(game, "suit");
+	RegisterSpritesheet(game, data->suit, "walk");
+	LoadSpritesheets(game, data->suit);
+	(*progress)(game);
+
+	data->kid = CreateCharacter(game, "kid");
+	RegisterSpritesheet(game, data->kid, "walk");
+	RegisterSpritesheet(game, data->kid, "laugh");
+	LoadSpritesheets(game, data->kid);
+
+	al_set_target_backbuffer(game->display);
+	return data;
+}
+
+void DestroyBadguys(struct Game *game, struct LevelResources* data, int i) {
+	struct Kid *tmp = data->kids[i];
+	if (!tmp) {
+		tmp = data->destroyQueue;
+		data->destroyQueue = NULL;
+	}
+	while (tmp) {
+		DestroyCharacter(game, tmp->character);
+		struct Kid *old = tmp;
+		tmp = tmp->next;
+		free(old);
+		if ((!tmp) && (data->destroyQueue)) {
+			tmp = data->destroyQueue;
+			data->destroyQueue = NULL;
+		}
+	}
+	data->kids[i] = NULL;
+}
+
+void Gamestate_Stop(struct Game *game, struct LevelResources* data) {
+	int i;
+	for (i=0; i<6; i++) {
+		DestroyBadguys(game, data, i);
+	}
+	al_set_sample_instance_playing(data->laughter, false);
+}
+
+void Gamestate_Unload(struct Game *game, struct LevelResources* data) {
+	al_destroy_bitmap(data->bg);
+	al_destroy_bitmap(data->buildings);
+	al_destroy_bitmap(data->hid);
+	al_destroy_bitmap(data->hid2);
+	al_destroy_bitmap(data->meter);
+	al_destroy_bitmap(data->busted);
+	al_destroy_font(data->font_title);
+	al_destroy_font(data->font);
+	al_destroy_sample_instance(data->laughter);
+	al_destroy_sample_instance(data->click);
+	al_destroy_sample(data->sample);
+	al_destroy_sample(data->click_sample);
+	DestroyCharacter(game, data->monster);
+	DestroyCharacter(game, data->suit);
+	DestroyCharacter(game, data->kid);
+	TM_Destroy(data->timeline);
+}
+
+// TODO: refactor to single Enqueue_Anim
+bool Anim_CowLook(struct Game *game, struct TM_Action *action, enum TM_ActionState state) {
+	struct LevelResources *data = action->arguments->value;
+	if (state == TM_ACTIONSTATE_START) {
+		ChangeSpritesheet(game, data->suit, "look");
+		TM_AddQueuedBackgroundAction(data->timeline, &Anim_CowLook, TM_AddToArgs(NULL, 1, data), 54*1000, "cow_look");
+	}
+	return true;
+}
+
+bool Anim_FixGuitar(struct Game *game, struct TM_Action *action, enum TM_ActionState state) {
+	struct LevelResources *data = action->arguments->value;
+	if (state == TM_ACTIONSTATE_START) {
+		ChangeSpritesheet(game, data->monster, "fix");
+		TM_AddQueuedBackgroundAction(data->timeline, &Anim_FixGuitar, TM_AddToArgs(NULL, 1, data), 30*1000, "fix_guitar");
+	}
+	return true;
+}
+
+void StartGame(struct Game *game, struct LevelResources *data) {
+	TM_CleanQueue(data->timeline);
+	TM_CleanBackgroundQueue(data->timeline);
+	ChangeSpritesheet(game, data->monster, "stand");
+ }
+
+void Gamestate_Start(struct Game *game, struct LevelResources* data) {
+	data->cloud_position = 100;
+	SetCharacterPosition(game, data->monster, 150, 73, 0);
+	SetCharacterPosition(game, data->suit, 65, 88, 0);
+
+	al_start_timer(data->timer);
+
+	data->score = 0;
+	data->time = 0;
+	data->paused = false;
+
+	data->lost = false;
+	data->tickling = false;
+	data->haskid = false;
+
+	data->movedown = false;
+	data->moveup = false;
+
+	data->markx = 119;
+	data->marky = 2;
+
+	data->soloactive = false;
+	data->soloanim = 0;
+	data->soloflash = 0;
+	data->soloready = 0;
+
+	data->keys.key = 0;
+	data->keys.delay = 0;
+	data->keys.shift = false;
+	data->keys.lastkey = -1;
+
+	data->lightanim=0;
+
+	data->kidSpeed = 0.8;
+
+	data->usage = 0;
+
+	SelectSpritesheet(game, data->monster, "stand");
+	//TM_AddQueuedBackgroundAction(data->timeline, &Anim_FixGuitar, TM_AddToArgs(NULL, 1, data), 15*1000, "fix_guitar");
+	//TM_AddQueuedBackgroundAction(data->timeline, &Anim_CowLook, TM_AddToArgs(NULL, 1, data), 5*1000, "cow_look");
+
+	data->kids[0] = NULL;
+	data->kids[1] = NULL;
+	data->kids[2] = NULL;
+	data->kids[3] = NULL;
+	data->kids[4] = NULL;
+	data->kids[5] = NULL;
+	data->destroyQueue = NULL;
+
+	data->kidRate = 100;
+	data->timeTillNextBadguy = 0;
+
+	char *end = "";
+
+	data->savedScore = strtol(GetConfigOptionDefault(game, "TickleMonster", "score", "0"), &end, 10);
+	data->savedTime = strtol(GetConfigOptionDefault(game, "TickleMonster", "time", "-1"), &end, 10);
+
+}
+
+void Gamestate_ProcessEvent(struct Game *game, struct LevelResources* data, ALLEGRO_EVENT *ev) {
+	TM_HandleEvent(data->timeline, ev);
+
+	if (ev->type == ALLEGRO_EVENT_TIMER) {
+		if (ev->timer.source == data->timer) {
+			data->time++;
+		}
+	}
+
+ if (ev->type == ALLEGRO_EVENT_KEY_DOWN) {
+	 if (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+		 if ((data->paused) || (data->lost)) {
+			 SwitchGamestate(game, "level", "menu");
+		 }
+		 al_stop_timer(data->timer);
+		 data->paused = true;
+		 return;
+	 }
+	 if (data->lost && ev->keyboard.keycode == ALLEGRO_KEY_ENTER) {
+		 SwitchGamestate(game, "level", "menu");
+		 return;
+	 }
+ }
+	if (data->lost) return;
+
+		if (ev->type == ALLEGRO_EVENT_KEY_DOWN) {
+
+			switch (ev->keyboard.keycode) {
+				case ALLEGRO_KEY_LEFT:
+				case ALLEGRO_KEY_RIGHT:
+					if (!data->tickling) {
+						if (data->keys.key != ev->keyboard.keycode) {
+							data->keys.key = ev->keyboard.keycode;
+							data->keys.delay = INT_MIN;
+						}
+					}
+					break;
+				case ALLEGRO_KEY_UP:
+					if (!data->tickling) {
+						if (!data->moveup && !data->movedown) {
+							SelectSpritesheet(game, data->monster, "jump");
+						}
+						data->moveup = true;
+						data->movedown = false;
+					}
+					break;
+				case ALLEGRO_KEY_DOWN:
+					if (!data->tickling) {
+						if (!data->moveup && !data->movedown) {
+							SelectSpritesheet(game, data->monster, "jump");
+						}
+						data->moveup = false;
+						data->movedown = true;
+					}
+					break;
+				case ALLEGRO_KEY_SPACE:
+					if (data->paused) {
+						al_start_timer(data->timer);
+						data->paused = false;
+					} else {
+						Fire(game, data);
+					}
+					break;
+				case ALLEGRO_KEY_LSHIFT:
+				case ALLEGRO_KEY_RSHIFT:
+					data->keys.shift = true;
+					break;
+				case ALLEGRO_KEY_ENTER:
+					break;
+				default:
+					data->keys.key = 0;
+					break;
+			}
+		} else if (ev->type == ALLEGRO_EVENT_KEY_UP) {
+			switch (ev->keyboard.keycode) {
+				case ALLEGRO_KEY_LSHIFT:
+				case ALLEGRO_KEY_RSHIFT:
+					data->keys.shift = false;
+					break;
+				default:
+					if (ev->keyboard.keycode == data->keys.key) {
+						data->keys.key = 0;
+					}
+					break;
 			}
 		}
-	}
 
-	if (game->level.speed > 0) {
-		game->level.cl_pos += game->level.speed*game->level.speed_modifier * 0.2;
-		game->level.bg_pos += game->level.speed*game->level.speed_modifier * 0.6;
-		game->level.st_pos += game->level.speed*game->level.speed_modifier * 1;
-		game->level.fg_pos += game->level.speed*game->level.speed_modifier * 1.75;
-		if (game->level.bg_pos >= 1) game->level.bg_pos=game->level.bg_pos-1;
-		if (game->level.st_pos >= 1) game->level.st_pos=game->level.st_pos-1;
-		if (game->level.fg_pos >= 1) game->level.fg_pos=game->level.fg_pos-1;
-	}
-	game->level.cl_pos += 0.00005;
-	if (game->level.cl_pos >= 1) game->level.cl_pos=game->level.cl_pos-1;
-
-	TM_Process();
-}
-
-void Level_Resume(struct Game *game) {
-	al_set_sample_instance_position(game->level.music, game->level.music_pos);
-	al_set_sample_instance_playing(game->level.music, true);
-	LEVELS(Resume, game);
-	TM_Resume();
-}
-
-void Level_Pause(struct Game *game) {
-	game->level.music_pos = al_get_sample_instance_position(game->level.music);
-	al_set_sample_instance_playing(game->level.music, false);
-	LEVELS(Pause, game);
-	TM_Pause();
-}
-
-void Level_Draw(struct Game *game) {
-	al_draw_bitmap(game->level.clouds, (-game->level.cl_pos)*al_get_bitmap_width(game->level.clouds), 0, 0);
-	al_draw_bitmap(game->level.clouds, (1+(-game->level.cl_pos))*al_get_bitmap_width(game->level.clouds), 0, 0);
-	al_draw_bitmap(game->level.background, (-game->level.bg_pos)*al_get_bitmap_width(game->level.background), 0, 0);
-	al_draw_bitmap(game->level.background, (1+(-game->level.bg_pos))*al_get_bitmap_width(game->level.background), 0, 0);
-	al_draw_bitmap(game->level.stage, (-game->level.st_pos)*al_get_bitmap_width(game->level.stage), 0 ,0);
-	al_draw_bitmap(game->level.stage, (1+(-game->level.st_pos))*al_get_bitmap_width(game->level.stage), 0 ,0);
-
-	LEVELS(Draw, game);
-
-	if (!game->level.foreground) return;
-
-	al_draw_bitmap(game->level.foreground, (-game->level.fg_pos)*al_get_bitmap_width(game->level.foreground), 0 ,0);
-	al_draw_bitmap(game->level.foreground, (1+(-game->level.fg_pos))*al_get_bitmap_width(game->level.foreground), 0 ,0);
-
-	al_set_target_bitmap(game->level.meter_bmp);
-	al_clear_to_color(al_map_rgba(0,0,0,0));
-	al_draw_filled_rounded_rectangle(al_get_bitmap_width(game->level.meter_bmp)*0.1, al_get_bitmap_height(game->level.meter_bmp)*0.34, al_get_bitmap_width(game->level.meter_bmp)*0.993, al_get_bitmap_height(game->level.meter_bmp)*0.66, 6,6, al_map_rgb(232,234,239));
-	al_draw_horizontal_gradient_rect(al_get_bitmap_width(game->level.meter_bmp)-game->viewportHeight*1.6*0.215, (al_get_bitmap_height(game->level.meter_bmp)-game->viewportHeight*0.025)/2, game->viewportHeight*1.6*0.215*0.975, game->viewportHeight*0.025, al_map_rgb(150,159,182), al_map_rgb(130,139,162));
-	al_draw_filled_rectangle(al_get_bitmap_width(game->level.meter_bmp)-game->viewportHeight*1.6*0.215, (al_get_bitmap_height(game->level.meter_bmp)-game->viewportHeight*0.025)/2, al_get_bitmap_width(game->level.meter_bmp)-game->viewportHeight*1.6*0.215+(game->viewportHeight*1.6*0.215*0.975)*game->level.hp, (al_get_bitmap_height(game->level.meter_bmp)-game->viewportHeight*0.025)/2+game->viewportHeight*0.025, al_map_rgb(214,172,55));
-	al_draw_bitmap(game->level.meter_image, 0, 0, 0);
-	al_set_target_bitmap(al_get_backbuffer(game->display));
-
-	al_draw_tinted_bitmap(game->level.meter_bmp, al_map_rgba(game->level.meter_alpha,game->level.meter_alpha,game->level.meter_alpha,game->level.meter_alpha), game->viewportWidth-al_get_bitmap_width(game->level.meter_bmp)*1.1, game->viewportHeight*0.975-al_get_bitmap_height(game->level.meter_bmp), 0);
-
-	TM_Draw();
-}
-
-
-void Level_Load(struct Game *game) {
-	game->level.failed=false;
-	game->level.hp=1;
-	game->level.cl_pos=0;
-	game->level.bg_pos=0;
-	game->level.fg_pos=0.2;
-	game->level.st_pos=0.1;
-	game->level.speed = 0;
-	game->level.speed_modifier = 1;
-	game->level.derpy_x = -0.2;
-	game->level.derpy_y = 0.6;
-	game->level.derpy_angle = 0;
-	game->level.sheet_speed = 2.4;
-	game->level.sheet_tmp = 0;
-	game->level.handle_input = false;
-	game->level.meter_alpha=0;
-	game->level.debug_show_sprite_frames=false;
-	al_clear_to_color(al_map_rgb(0,0,0));
-	TM_Init(game);
-	LEVELS(Load, game);
-}
-
-int Level_Keydown(struct Game *game, ALLEGRO_EVENT *ev) {
-	if ((game->debug) && (ev->keyboard.keycode==ALLEGRO_KEY_F2)) {
-		game->level.hp -= 0.1;
-		if (game->level.hp <= 0) game->level.hp=0.001;
-	} else if ((game->debug) && (ev->keyboard.keycode==ALLEGRO_KEY_F3)) {
-		game->level.hp += 0.1;
-		if (game->level.hp > 1) game->level.hp=1;
-	} else if ((game->debug) && (ev->keyboard.keycode==ALLEGRO_KEY_F4)) {
-		game->level.debug_show_sprite_frames = !game->level.debug_show_sprite_frames;
-	}
-	LEVELS(Keydown, game, ev);
-	if (ev->keyboard.keycode==ALLEGRO_KEY_ESCAPE) {
-		game->gamestate = GAMESTATE_PAUSE;
-		game->loadstate = GAMESTATE_LEVEL;
-		PauseGameState(game);
-		Pause_Load(game);
-	}
-	return 0;
-}
-
-void Level_ProcessEvent(struct Game *game, ALLEGRO_EVENT *ev) {
-	LEVELS(ProcessEvent, game, ev);
-	TM_HandleEvent(ev);
-}
-
-void Level_Preload(struct Game *game, void (*progress)(struct Game*, float)) {
-	PrintConsole(game, "Initializing level %d...", game->level.input.current_level);
-
-	game->level.current_level = game->level.input.current_level;
-	game->level.derpy_sheets = NULL;
-	game->level.derpy = NULL;
-	game->level.unloading = false;
-	Pause_Preload(game);
-	RegisterDerpySpritesheet(game, "stand"); // default
-
-	game->level.sample = al_load_sample( GetDataFilePath(GetLevelFilename(game, "levels/?/music.flac")) );
-
-	LEVELS(Preload, game);
-
-	Level_PreloadBitmaps(game, progress);
-
-	game->level.music = al_create_sample_instance(game->level.sample);
-	al_attach_sample_instance_to_mixer(game->level.music, game->audio.music);
-	al_set_sample_instance_playmode(game->level.music, ALLEGRO_PLAYMODE_LOOP);
-
-	if (!game->level.sample){
-		fprintf(stderr, "Audio clip sample not loaded!\n" );
-		exit(-1);
-	}
 
 }
 
-void Level_Unload(struct Game *game) {
-	if (game->level.unloading) return;
-	game->level.unloading = true;
-	Pause_Unload_Real(game);
-	FadeGameState(game, false);
-	al_destroy_sample_instance(game->level.music);
-	al_destroy_sample(game->level.sample);
-	Level_UnloadBitmaps(game);
-	LEVELS(Unload, game);
-	TM_Destroy();
+void Gamestate_Pause(struct Game *game, struct LevelResources* data) {
+	data->paused = true;
+	TM_Pause(data->timeline);
 }
-
-
-void Level_UnloadBitmaps(struct Game *game) {
-	al_destroy_bitmap(game->level.derpy);
-	struct Spritesheet *tmp = game->level.derpy_sheets;
-	while (tmp) {
-		al_destroy_bitmap(tmp->bitmap);
-		tmp = tmp->next;
-	}
-	LEVELS(UnloadBitmaps, game);
-	al_destroy_bitmap(game->level.foreground);
-	al_destroy_bitmap(game->level.background);
-	al_destroy_bitmap(game->level.clouds);
-	al_destroy_bitmap(game->level.stage);
-	al_destroy_bitmap(game->level.meter_bmp);
-	al_destroy_bitmap(game->level.meter_image);
-	al_destroy_bitmap(game->level.welcome);
-	game->level.foreground = NULL;
+void Gamestate_Resume(struct Game *game, struct LevelResources* data) {
+	data->paused = false;
+	TM_Resume(data->timeline);
 }
-
-int Level_PreloadSteps(struct Game *game) {
-	switch (game->level.current_level) {
-		case 1:
-			return Level1_PreloadSteps(); break;
-		case 2:
-			return Level2_PreloadSteps(); break;
-		case 3:
-			return Level3_PreloadSteps(); break;
-		case 4:
-			return Level4_PreloadSteps(); break;
-		case 5:
-			return Level5_PreloadSteps(); break;
-		case 6:
-			return Level6_PreloadSteps(); break;
-	}
-	return 0;
-}
-
-void Level_PreloadBitmaps(struct Game *game, void (*progress)(struct Game*, float)) {
-	int x = 0;
-
-	struct Spritesheet *tmp = game->level.derpy_sheets;
-	while (tmp) {
-		x++;
-		tmp = tmp->next;
-	}
-
-	PROGRESS_INIT(8+x+Level_PreloadSteps(game));
-
-	tmp = game->level.derpy_sheets;
-	while (tmp) {
-		char filename[255] = { };
-		sprintf(filename, "levels/derpy/%s.png", tmp->name);
-		tmp->bitmap = LoadScaledBitmap(filename, (int)(game->viewportHeight*0.25*tmp->aspect*tmp->scale)*tmp->cols, (int)(game->viewportHeight*0.25*tmp->scale)*tmp->rows);
-		PROGRESS;
-		tmp = tmp->next;
-	}
-	PROGRESS;
-	if (!game->level.derpy) SelectDerpySpritesheet(game, "stand");
-
-	game->level.derpy = al_create_bitmap(al_get_bitmap_width(*(game->level.derpy_sheet))/game->level.sheet_cols, al_get_bitmap_height(*(game->level.derpy_sheet))/game->level.sheet_rows);
-	
-	game->level.clouds = LoadScaledBitmap(GetLevelFilename(game, "levels/?/clouds.png"), game->viewportHeight*4.73307291666666666667, game->viewportHeight);
-	PROGRESS;
-	game->level.foreground = LoadScaledBitmap(GetLevelFilename(game, "levels/?/foreground.png"), game->viewportHeight*4.73307291666666666667, game->viewportHeight);
-	PROGRESS;
-	game->level.background = LoadScaledBitmap(GetLevelFilename(game, "levels/?/background.png"), game->viewportHeight*4.73307291666666666667, game->viewportHeight);
-	PROGRESS;
-	game->level.stage = LoadScaledBitmap(GetLevelFilename(game, "levels/?/stage.png"), game->viewportHeight*4.73307291666666666667, game->viewportHeight);
-	PROGRESS;
-	game->level.meter_image = LoadScaledBitmap("levels/meter.png", game->viewportHeight*1.6*0.075, game->viewportHeight*1.6*0.075*0.96470588235294117647);
-	PROGRESS;
-	game->level.meter_bmp = al_create_bitmap(game->viewportHeight*1.6*0.2+al_get_bitmap_width(game->level.meter_image), al_get_bitmap_height(game->level.meter_image));
-	PROGRESS;
-	game->level.welcome = al_create_bitmap(game->viewportWidth, game->viewportHeight/2);
-	PROGRESS;
-
-	void ChildProgress(struct Game* game, float p) {
-		if (progress) (*progress)(game, load_p+=1/load_a);
-	}
-	LEVELS(PreloadBitmaps, game, &ChildProgress);
-}
-*/
+void Gamestate_Reload(struct Game *game, struct LevelResources* data) {}

@@ -28,7 +28,6 @@ struct LevelResources {
 		ALLEGRO_BITMAP *bg; /*!< Bitmap with lower portion of menu landscape. */
 		ALLEGRO_BITMAP *buildings;
 		ALLEGRO_BITMAP *hid;
-		ALLEGRO_BITMAP *hid2;
 		ALLEGRO_BITMAP *meter;
 		ALLEGRO_BITMAP *busted;
 
@@ -44,7 +43,7 @@ struct LevelResources {
 		int soloready, soloanim, soloflash;
 		bool soloactive;
 
-		bool tickling, moveup, movedown, haskid, lost, paused;
+		bool tickling, moveup, movedown, haskid, lost;
 
 		struct Kid {
 				struct Character *character;
@@ -81,6 +80,5 @@ struct LevelResources {
 				int lastdelay;
 		} keys;
 
-		int savedScore, savedTime;
 		int score, time;
 };

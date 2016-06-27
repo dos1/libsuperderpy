@@ -26,7 +26,7 @@
 #include "../timeline.h"
 #include "dosowisko.h"
 
-int Gamestate_ProgressCount = 3;
+int Gamestate_ProgressCount = 5;
 
 static char* text = "# dosowisko.net";
 

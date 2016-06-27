@@ -78,7 +78,7 @@ int main(int argc, char **argv){
 	srand(time(NULL));
 
 	al_set_org_name("Super Derpy");
-	al_set_app_name("Radio Edit");
+	al_set_app_name("Tickle Monster");
 
 	if(!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
@@ -158,8 +158,8 @@ int main(int argc, char **argv){
 
 	PrintConsole(&game, "Viewport %dx%d", game.viewport.width, game.viewport.height);
 
-	ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/radioedit.png"));
-	al_set_window_title(game.display, "Radio Edit");
+	ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/ticklemonster.png"));
+	al_set_window_title(game.display, "Tickle Monster vs Suits");
 	al_set_display_icon(game.display, icon);
 	al_destroy_bitmap(icon);
 
@@ -233,7 +233,7 @@ int main(int argc, char **argv){
 	free(gamestate);
 
 	char libname[1024] = {};
-	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENTION, "radioedit");
+	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENTION, "ticklemonster");
 	void *handle = dlopen(libname, RTLD_NOW);
 	if (!handle) {
 		FatalError(&game, true, "Error while initializing loading screen %s", dlerror());
@@ -293,11 +293,11 @@ int main(int argc, char **argv){
 					al_stop_timer(game._priv.timer);
 					// TODO: take proper game name
 					char libname[1024];
-					snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENTION, "radioedit", tmp->name);
+					snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENTION, "ticklemonster", tmp->name);
 					tmp->handle = dlopen(libname,RTLD_NOW);
 					if (!tmp->handle) {
 						//PrintConsole(&game, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
-						FatalError(&game, true, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
+						FatalError(&game, false, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
 
 						tmp->pending_load = false;
 						tmp->pending_start = false;
@@ -423,7 +423,7 @@ int main(int argc, char **argv){
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game.config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
 				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 				char filename[255] = { };
-				snprintf(filename, 255, "RadioEdit_%ld_%ld.png", time(NULL), clock());
+				snprintf(filename, 255, "TickleMonster_%ld_%ld.png", time(NULL), clock());
 				al_set_path_filename(path, filename);
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game.display));
 				PrintConsole(&game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
