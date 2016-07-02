@@ -35,15 +35,12 @@ struct Gamestate* AddNewGamestate(struct Game *game) {
 		tmp = tmp->next;
 	}
 	tmp->name = NULL;
-	tmp->fade = false;
-	tmp->fade_counter = 0;
 	tmp->handle = NULL;
 	tmp->loaded = false;
 	tmp->paused = false;
 	tmp->started = false;
 	tmp->pending_load = false;
 	tmp->pending_start = false;
-	tmp->after = NULL;
 	tmp->next = NULL;
 	return tmp;
 }
@@ -70,8 +67,6 @@ void LoadGamestate(struct Game *game, const char* name) {
 	} else {
 		gs = AddNewGamestate(game);
 		gs->name = strdup(name);
-		gs->fade = true;
-		gs->fade_counter = 0;
 		gs->pending_load = true;
 		gs->showLoading = true;
 	}

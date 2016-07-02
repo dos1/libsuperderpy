@@ -19,10 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TIMELINE_H
-#define TIMELINE_H
+#ifndef LIBSUPERDERPY_TIMELINE_H
+#define LIBSUPERDERPY_TIMELINE_H
 
-#include "main.h"
+#include "libsuperderpy.h"
 
 #define TM_WrapArg(type, result, val) type* result = malloc(sizeof(type)); *result = val;
 

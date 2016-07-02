@@ -36,6 +36,7 @@ char* strdup(const char *str) {
 
 void DrawConsole(struct Game *game) {
 	if (game->_priv.showconsole) {
+		al_set_target_backbuffer(game->display);
 		ALLEGRO_TRANSFORM trans;
 		al_identity_transform(&trans);
 		int clipX, clipY, clipWidth, clipHeight;
@@ -51,9 +52,9 @@ void DrawConsole(struct Game *game) {
 		}
 		char sfps[6] = { };
 		snprintf(sfps, 6, "%.0f", game->_priv.fps_count.fps);
-		al_use_transform(&game->projection);
+		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth, clipY, ALLEGRO_ALIGN_RIGHT, sfps);
 
-		DrawTextWithShadow(game->_priv.font, al_map_rgb(255,255,255), game->viewport.width*0.99, 0, ALLEGRO_ALIGN_RIGHT, sfps);
+		al_use_transform(&game->projection);
 
 	}
 	game->_priv.fps_count.frames_done++;
@@ -69,14 +70,12 @@ void Console_Load(struct Game *game) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), al_get_display_height(game->display)*0.025,0 );
 	}
 	game->_priv.console = al_create_bitmap((al_get_display_width(game->display) / 320) * 320, al_get_font_line_height(game->_priv.font_console)*5);
-	game->_priv.font = al_load_ttf_font(GetDataFilePath(game, "fonts/MonkeyIsland.ttf"), 0 ,0 );
 	al_set_target_bitmap(game->_priv.console);
 	al_clear_to_color(al_map_rgba(0,0,0,80));
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 }
 
 void Console_Unload(struct Game *game) {
-	al_destroy_font(game->_priv.font);
 	al_destroy_font(game->_priv.font_console);
 	al_destroy_bitmap(game->_priv.console);
 }
@@ -320,20 +319,10 @@ char* GetDataFilePath(struct Game *game, char* filename) {
 		}
 	}
 
-	{
-		char origfn[255] = "libsuperderpy/data/";
-		strcat(origfn, filename);
-
-		if (al_filename_exists(origfn)) {
-			return strdup(origfn);
-		}
-	}
-
 	TestPath(filename, "data/", &result);
 	TestPath(filename, "../share/" LIBSUPERDERPY_GAMENAME "/data/", &result);
 
 	TestPath(filename, "../data/", &result);
-	TestPath(filename, "libsuperderpy/data/", &result);
 #ifdef ALLEGRO_MACOSX
 	TestPath(filename, "../Resources/data/", &result);
 	TestPath(filename, "../Resources/gamestates/", &result);

@@ -6,5 +6,4 @@ include("cmake/include.cmake")
 include("cmake/SetPaths.cmake")
 
 add_subdirectory(src)
-add_subdirectory(data)
 

@@ -37,7 +37,7 @@
 #endif
 #include "utils.h"
 #include "config.h"
-#include "main.h"
+#include "libsuperderpy.h"
 
 extern int main(int, char**);
 

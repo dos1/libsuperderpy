@@ -19,7 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "main.h"
+#ifndef LIBSUPERDERPY_CONFIG_H
+#define LIBSUPERDERPY_CONFIG_H
+
+#include "libsuperderpy.h"
 
 /*! \brief Reads config from file into memory. */
 void InitConfig(struct Game *game);
@@ -31,3 +34,5 @@ const char* GetConfigOptionDefault(struct Game *game, char* section, char* name,
 void SetConfigOption(struct Game *game, char* section, char* name, char* value);
 /*! \brief Writes config from memory to file. */
 void DeinitConfig(struct Game *game);
+
+#endif

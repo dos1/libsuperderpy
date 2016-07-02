@@ -18,8 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#ifndef GAMESTATE_H
-#define GAMESTATE_H
+#ifndef LIBSUPERDERPY_GAMESTATE_H
+#define LIBSUPERDERPY_GAMESTATE_H
 
 #include "allegro5/allegro.h"
 
@@ -32,9 +32,6 @@ struct Gamestate {
 		bool started, pending_start;
 		bool showLoading;
 		bool paused;
-		bool fade; // TODO: or maybe should it be in API?
-		unsigned char fade_counter;
-		char** after; // TODO: and this one too?
 		struct Gamestate* next;
 		void* data;
 		struct {

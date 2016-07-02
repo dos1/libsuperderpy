@@ -20,14 +20,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef LIBSUPERDERPY_MAIN_H
+#define LIBSUPERDERPY_MAIN_H
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include "gamestate.h"
+#include "config.h"
+#include "timeline.h"
+#include "utils.h"
 
 struct Gamestate;
 
@@ -35,11 +38,11 @@ struct Gamestate;
 struct Game {
 		ALLEGRO_DISPLAY *display; /*!< Main Allegro display. */
 
-		ALLEGRO_TRANSFORM projection;
+		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
 		struct {
-				int width; /*!< Actual available width of viewport. */
-				int height; /*!< Actual available height of viewport. */
+				int width; /*!< Actual available width of the drawing canvas. */
+				int height; /*!< Actual available height of the drawing canvas. */
 		} viewport;
 
 		struct {
@@ -48,7 +51,6 @@ struct Game {
 				int voice; /*!< Voice volume. */
 				bool fullscreen; /*!< Fullscreen toggle. */
 				bool debug; /*!< Toggles debug mode. */
-				int fps; /*!< FPS limit */
 				int width; /*!< Width of window as being set in configuration. */
 				int height; /*!< Height of window as being set in configuration. */
 		} config;
@@ -62,33 +64,30 @@ struct Game {
 		} audio; /*!< Audio resources. */
 
 		struct {
-				//struct Gamestate *gamestate; /*!< Current gamestate. */
 				struct Gamestate *gamestates; /*!< List of known gamestates. */
-				ALLEGRO_FONT *font; /*!< Main font used in game. */
 				ALLEGRO_FONT *font_console; /*!< Font used in game console. */
 				ALLEGRO_FONT *font_bsod; /*!< Font used in Blue Screens of Derp. */
 				ALLEGRO_BITMAP *console; /*!< Bitmap with game console. */
 				ALLEGRO_EVENT_QUEUE *event_queue; /*!< Main event queue. */
-				ALLEGRO_TIMER *timer; /*!< Main LPS timer. */
+				ALLEGRO_TIMER *timer; /*!< Main LPS (logic) timer. */
 				bool showconsole; /*!< If true, game console is rendered on screen. */
 
 				struct {
 						double old_time, fps;
 						int frames_done;
-				} fps_count;
+				} fps_count; /*!< Used for counting the effective FPS. */
 
-				ALLEGRO_CONFIG *config;
+				ALLEGRO_CONFIG *config; /*!< Configuration file interface. */
 
 				struct {
 						void (*Draw)(struct Game *game, void* data, float p);
-
 						void* (*Load)(struct Game *game);
 						void (*Start)(struct Game *game, void* data);
 						void (*Stop)(struct Game *game, void* data);
 						void (*Unload)(struct Game *game, void* data);
 
 						void* data;
-				} loading;
+				} loading; /*!< Interface for accessing loading screen functions. */
 
 		} _priv; /*!< Private resources. Do not use in gamestates! */
 
@@ -97,6 +96,6 @@ struct Game {
 
 };
 
-int libsuperderpy(int argc, char **argv);
+int libsuperderpy(int argc, char **argv); /*!< Engine's main loop. */
 
 #endif

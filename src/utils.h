@@ -18,9 +18,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
+#ifndef LIBSUPERDERPY_UTILS_H
+#define LIBSUPERDERPY_UTILS_H
+
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
-#include "main.h"
+#include "libsuperderpy.h"
 
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
@@ -115,3 +119,5 @@ void UnloadSpritesheets(struct Game *game, struct Character *character);
 void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier);
 void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle);
 void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle);
+
+#endif
