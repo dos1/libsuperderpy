@@ -31,9 +31,15 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_ttf.h>
+#ifdef ALLEGRO_MACOSX
+#include <mach-o/dyld.h>
+#include <sys/param.h>
+#endif
 #include "utils.h"
 #include "config.h"
 #include "main.h"
+
+extern int main(int, char**);
 
 void DrawGamestates(struct Game *game) {
 	al_set_target_backbuffer(game->display);
@@ -95,13 +101,23 @@ void derp(int sig) {
 }
 
 // TODO: let's break it up and move the binary out of libsuperderpy!
-int main(int argc, char **argv){
+int libsuperderpy(int argc, char **argv){
 	signal(SIGSEGV, derp);
 
 	srand(time(NULL));
 
 	al_set_org_name("dosowisko.net");
 	al_set_app_name(LIBSUPERDERPY_GAMENAME);
+
+#ifdef ALLEGRO_MACOSX
+	char exe_path[MAXPATHLEN];
+	char link_path[MAXPATHLEN];
+
+	uint32_t size = sizeof(exe_path);
+	_NSGetExecutablePath(exe_path, &size);
+	realpath(exe_path, link_path);
+	chdir(link_path);
+#endif
 
 	if(!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
@@ -119,7 +135,7 @@ int main(int argc, char **argv){
 	game._priv.font_bsod = NULL;
 	game._priv.console = NULL;
 
-	game.config.fullscreen = atoi(GetConfigOptionDefault(&game, "SuperDerpy", "fullscreen", "0"));
+	game.config.fullscreen = atoi(GetConfigOptionDefault(&game, "SuperDerpy", "fullscreen", "1"));
 	game.config.music = atoi(GetConfigOptionDefault(&game, "SuperDerpy", "music", "10"));
 	game.config.voice = atoi(GetConfigOptionDefault(&game, "SuperDerpy", "voice", "10"));
 	game.config.fx = atoi(GetConfigOptionDefault(&game, "SuperDerpy", "fx", "10"));
@@ -132,7 +148,7 @@ int main(int argc, char **argv){
 	if(!al_init_image_addon()) {
 		fprintf(stderr, "failed to initialize image addon!\n");
 		/*al_show_native_message_box(display, "Error", "Error", "Failed to initialize al_init_image_addon!",
-															 NULL, ALLEGRO_MESSAGEBOX_ERROR);*/
+																														 NULL, ALLEGRO_MESSAGEBOX_ERROR);*/
 		return -1;
 	}
 
@@ -156,11 +172,11 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-    if(!al_install_mouse()) {
-        fprintf(stderr, "failed to initialize the mouse!\n");
-        return -1;
-    }
-	
+	if(!al_install_mouse()) {
+		fprintf(stderr, "failed to initialize the mouse!\n");
+		return -1;
+	}
+
 	al_init_font_addon();
 
 	if(!al_init_ttf_addon()){
@@ -186,13 +202,13 @@ int main(int argc, char **argv){
 
 	PrintConsole(&game, "Viewport %dx%d", game.viewport.width, game.viewport.height);
 
-    ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/" LIBSUPERDERPY_GAMENAME ".png"));
+	ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(&game, "icons/" LIBSUPERDERPY_GAMENAME ".png"));
 	al_set_window_title(game.display, LIBSUPERDERPY_GAMENAME_PRETTY);
 	al_set_display_icon(game.display, icon);
 	al_destroy_bitmap(icon);
 
-    if (game.config.fullscreen) al_hide_mouse_cursor(game.display);
-    al_inhibit_screensaver(true);
+	if (game.config.fullscreen) al_hide_mouse_cursor(game.display);
+	al_inhibit_screensaver(true);
 
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR);
 
@@ -219,8 +235,8 @@ int main(int argc, char **argv){
 	al_set_mixer_gain(game.audio.voice, game.config.voice/10.0);
 
 	al_register_event_source(game._priv.event_queue, al_get_display_event_source(game.display));
-    al_register_event_source(game._priv.event_queue, al_get_mouse_event_source());
-    al_register_event_source(game._priv.event_queue, al_get_keyboard_event_source());
+	al_register_event_source(game._priv.event_queue, al_get_mouse_event_source());
+	al_register_event_source(game._priv.event_queue, al_get_keyboard_event_source());
 
 	game._priv.showconsole = game.config.debug;
 
@@ -240,7 +256,7 @@ int main(int argc, char **argv){
 	game.shuttingdown = false;
 	game.restart = false;
 
-    char* gamestate = strdup(LIBSUPERDERPY_INITIAL_GAMESTATE); // FIXME: don't hardcore gamestate
+	char* gamestate = strdup(LIBSUPERDERPY_INITIAL_GAMESTATE); // FIXME: don't hardcore gamestate
 
 	int c;
 	while ((c = getopt (argc, argv, "l:s:")) != -1)
@@ -257,19 +273,19 @@ int main(int argc, char **argv){
 		}
 
 	LoadGamestate(&game, gamestate);
-    game._priv.gamestates->showLoading = false; // we have only one gamestate right now
-    StartGamestate(&game, gamestate);
+	game._priv.gamestates->showLoading = false; // we have only one gamestate right now
+	StartGamestate(&game, gamestate);
 	free(gamestate);
 
 	char libname[1024] = {};
-    snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME);
+	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME);
 	void *handle = dlopen(libname, RTLD_NOW);
 	if (!handle) {
 		FatalError(&game, true, "Error while initializing loading screen %s", dlerror());
 		exit(1);
 	} else {
 
-		#define GS_LOADINGERROR FatalError(&game, true, "Error on resolving loading symbol: %s", dlerror()); exit(1);
+#define GS_LOADINGERROR FatalError(&game, true, "Error on resolving loading symbol: %s", dlerror()); exit(1);
 
 		if (!(game._priv.loading.Draw = dlsym(handle, "Draw"))) { GS_LOADINGERROR; }
 		if (!(game._priv.loading.Load = dlsym(handle, "Load"))) { GS_LOADINGERROR; }
@@ -324,7 +340,7 @@ int main(int argc, char **argv){
 					al_stop_timer(game._priv.timer);
 					// TODO: take proper game name
 					char libname[1024];
-                    snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME, tmp->name);
+					snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, LIBSUPERDERPY_GAMENAME, tmp->name);
 					tmp->handle = dlopen(libname,RTLD_NOW);
 					if (!tmp->handle) {
 						//PrintConsole(&game, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
@@ -371,7 +387,7 @@ int main(int argc, char **argv){
 						// initially draw loading screen with empty bar
 						DrawGamestates(&game);
 						if (tmp->showLoading) {
-                            (*game._priv.loading.Draw)(&game, game._priv.loading.data, loaded/(float)toLoad);
+							(*game._priv.loading.Draw)(&game, game._priv.loading.data, loaded/(float)toLoad);
 						}
 						DrawConsole(&game);
 						if (al_get_time() - t >= 1/60.0) {
@@ -468,9 +484,9 @@ int main(int argc, char **argv){
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game.display));
 				PrintConsole(&game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 				al_destroy_path(path);
-            } else {
-                EventGamestates(&game, &ev);
-            }
+			} else {
+				EventGamestates(&game, &ev);
+			}
 		}
 	}
 	game.shuttingdown = true;

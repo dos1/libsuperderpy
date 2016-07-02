@@ -2,42 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(libsuperderpy C)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c11")
-if(APPLE)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fnested-functions")
-  if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-    set(CMAKE_INSTALL_PREFIX "/Applications")
-    set(BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
-  endif(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-endif(APPLE)
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
+include("cmake/include.cmake")
 include("cmake/SetPaths.cmake")
-
-if(MINGW)
-    # Guess MINGDIR from the value of CMAKE_C_COMPILER if it's not set.
-    if("$ENV{MINGDIR}" STREQUAL "")
-        string(REGEX REPLACE "/bin/[^/]*$" "" MINGDIR "${CMAKE_C_COMPILER}")
-        message(STATUS "Guessed MinGW directory: ${MINGDIR}")
-    else("$ENV{MINGDIR}" STREQUAL "")
-        file(TO_CMAKE_PATH "$ENV{MINGDIR}" MINGDIR)
-        message(STATUS "Using MINGDIR: ${MINGDIR}")
-    endif("$ENV{MINGDIR}" STREQUAL "")
-
-    # Search in MINGDIR for headers and libraries.
-    set(CMAKE_PREFIX_PATH "${MINGDIR}")
-
-    set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -mwindows")
-
-endif(MINGW)
 
 add_subdirectory(src)
 add_subdirectory(data)
-add_subdirectory(lib)
-
-# uninstall target
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
-add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
-INCLUDE(InstallRequiredSystemLibraries)
 

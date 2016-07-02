@@ -64,7 +64,7 @@ void Console_Load(struct Game *game) {
 	game->_priv.console = NULL;
 	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),al_get_display_height(game->display)*0.025,0 );
 	if (al_get_display_height(game->display)*0.025 >= 16) {
-        game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"),16 * ((al_get_display_height(game->display) > 1080) ? 2 : 1) ,0 );
+		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"),16 * ((al_get_display_height(game->display) > 1080) ? 2 : 1) ,0 );
 	} else {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), al_get_display_height(game->display)*0.025,0 );
 	}
@@ -116,19 +116,19 @@ void SetupViewport(struct Game *game) {
 
 void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
-		{.x = x, .y = y, .z = 0, .color = top},
-		{.x = x + w, .y = y, .z = 0, .color = top},
-		{.x = x, .y = y + h, .z = 0, .color = bottom},
-		{.x = x + w, .y = y + h, .z = 0, .color = bottom}};
+	  {.x = x, .y = y, .z = 0, .color = top},
+	  {.x = x + w, .y = y, .z = 0, .color = top},
+	  {.x = x, .y = y + h, .z = 0, .color = bottom},
+	  {.x = x + w, .y = y + h, .z = 0, .color = bottom}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
 void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR left, ALLEGRO_COLOR right) {
 	ALLEGRO_VERTEX v[] = {
-		{.x = x, .y = y, .z = 0, .color = left},
-		{.x = x + w, .y = y, .z = 0, .color = right},
-		{.x = x, .y = y + h, .z = 0, .color = left},
-		{.x = x + w, .y = y + h, .z = 0, .color = right}};
+	  {.x = x, .y = y, .z = 0, .color = left},
+	  {.x = x + w, .y = y, .z = 0, .color = right},
+	  {.x = x, .y = y + h, .z = 0, .color = left},
+	  {.x = x + w, .y = y + h, .z = 0, .color = right}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
@@ -140,9 +140,9 @@ void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float 
 /* linear filtering code written by SiegeLord */
 ALLEGRO_COLOR interpolate(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
-											 c1.g + frac * (c2.g - c1.g),
-											 c1.b + frac * (c2.b - c1.b),
-											 c1.a + frac * (c2.a - c1.a));
+	                     c1.g + frac * (c2.g - c1.g),
+	                     c1.b + frac * (c2.b - c1.b),
+	                     c1.a + frac * (c2.a - c1.a));
 }
 
 /*! \brief Scales bitmap using software linear filtering method to current target. */
@@ -239,7 +239,7 @@ void FatalError(struct Game *game, bool fatal, char* format, ...) {
 		al_set_target_backbuffer(game->display);
 		al_clear_to_color(al_map_rgb(0,0,170));
 
-        char *header = LIBSUPERDERPY_GAMENAME_PRETTY;
+		char *header = LIBSUPERDERPY_GAMENAME_PRETTY;
 
 		al_draw_filled_rectangle(al_get_display_width(game->display)/2 - al_get_text_width(game->_priv.font_bsod, header)/2 - 4, (int)(al_get_display_height(game->display) * 0.32), 4 + al_get_display_width(game->display)/2 + al_get_text_width(game->_priv.font_bsod, header)/2, (int)(al_get_display_height(game->display) * 0.32) + al_get_font_line_height(game->_priv.font_bsod), al_map_rgb(170,170,170));
 
@@ -321,14 +321,14 @@ char* GetDataFilePath(struct Game *game, char* filename) {
 	}
 
 	{
-	    	char origfn[255] = "libsuperderpy/data/";
+		char origfn[255] = "libsuperderpy/data/";
 		strcat(origfn, filename);
 
 		if (al_filename_exists(origfn)) {
 			return strdup(origfn);
 		}
 	}
-	
+
 	TestPath(filename, "data/", &result);
 	TestPath(filename, "../share/" LIBSUPERDERPY_GAMENAME "/data/", &result);
 
@@ -514,14 +514,14 @@ void AnimateCharacter(struct Game *game, struct Character *character, float spee
 			character->pos_tmp = 0;
 			character->pos++;
 		}
-        if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
-            character->pos=0;
-            if (character->spritesheet->kill) {
+		if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
+			character->pos=0;
+			if (character->spritesheet->kill) {
 				character->dead = true;
 			} else if (character->successor) {
-                SelectSpritesheet(game, character, character->successor);
+				SelectSpritesheet(game, character, character->successor);
 			}
-        }
+		}
 	}
 }
 
@@ -541,7 +541,7 @@ void SetCharacterPosition(struct Game *game, struct Character *character, int x,
 
 void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
 	if (character->dead) return;
-    int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
-    int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);
-    al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, character->x + al_get_bitmap_width(character->bitmap)/2, character->y + al_get_bitmap_height(character->bitmap)/2, 1, 1, character->angle, flags);
+	int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
+	int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);
+	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, character->x + al_get_bitmap_width(character->bitmap)/2, character->y + al_get_bitmap_height(character->bitmap)/2, 1, 1, character->angle, flags);
 }

@@ -24,25 +24,11 @@
 
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
+#elseif ALLEGRO_MACOSX
+#define LIBRARY_EXTENTION ".dylib"
 #else
 #define LIBRARY_EXTENSION ".so"
 #endif
-
-
-// hacks for "pixelness"
-#define al_draw_bitmap(a,b,c,d) al_draw_bitmap(a,(int)(b), (int)(c), d)
-#define al_draw_scaled_bitmap(a,b,c,d,e,f,g,h,i,j) al_draw_scaled_bitmap(a,b,c,d,e,(int)(f), (int)(g), (int)(h), (int)(i), j)
-//#define al_draw_tinted_scaled_bitmap(a,tint,b,c,d,e,f,g,h,i,j) al_draw_tinted_scaled_bitmap(a,tint,(int)(b),(int)(c),(int)(d),(int)(e),(int)(f), (int)(g), (int)(h), (int)(i), j)
-#define al_draw_rotated_bitmap(a,b,c,d,e,f,g) al_draw_rotated_bitmap(a,(int)(b),(int)(c),(int)(d),(int)(e), f, g)
-#define al_draw_bitmap_region(a, b, c, d, e, f, g, h) al_draw_bitmap_region(a,(int)(b),(int)(c),(int)(d),(int)(e),(int)(f), (int)(g), h)
-#define al_draw_tinted_bitmap_region(a, tint, b, c, d, e, f, g, h) al_draw_tinted_bitmap_region(a,tint,(int)(b),(int)(c),(int)(d),(int)(e),(int)(f), (int)(g), h)
-#define al_draw_tinted_rotated_bitmap(a,tint,b,c,d,e,f,g) al_draw_tinted_rotated_bitmap(a,tint,(int)(b),(int)(c),(int)(d),(int)(e), f, g)
-//#define al_draw_filled_rectangle
-//#define al_draw_prim()
-#define al_load_ttf_font(a,b,c) al_load_ttf_font(a, (int)(b / 8)*8 == 0 ? 8 : (int)(b / 8)*8, c)
-#define al_draw_text(a,b,c,d,e,f) al_draw_text(a, b, (int)(c), (int)(d), e, f)
-
-char* strdup(const char *str);
 
 void SetupViewport(struct Game *game);
 void Console_Unload(struct Game *game);
@@ -129,8 +115,3 @@ void UnloadSpritesheets(struct Game *game, struct Character *character);
 void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier);
 void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle);
 void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle);
-
-// FIXME: game specific
-bool GetAbstractIsItBonusLevelTimeNowFactoryProvider(struct Game *game);
-void AdvanceLevel(struct Game *game, bool won);
-void ShowLevelStatistics(struct Game *game);

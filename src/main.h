@@ -38,19 +38,19 @@ struct Game {
 		ALLEGRO_TRANSFORM projection;
 
 		struct {
-			int width; /*!< Actual available width of viewport. */
-			int height; /*!< Actual available height of viewport. */
+				int width; /*!< Actual available width of viewport. */
+				int height; /*!< Actual available height of viewport. */
 		} viewport;
 
 		struct {
-			int fx; /*!< Effects volume. */
-			int music; /*!< Music volume. */
-			int voice; /*!< Voice volume. */
-			bool fullscreen; /*!< Fullscreen toggle. */
-			bool debug; /*!< Toggles debug mode. */
-			int fps; /*!< FPS limit */
-			int width; /*!< Width of window as being set in configuration. */
-			int height; /*!< Height of window as being set in configuration. */
+				int fx; /*!< Effects volume. */
+				int music; /*!< Music volume. */
+				int voice; /*!< Voice volume. */
+				bool fullscreen; /*!< Fullscreen toggle. */
+				bool debug; /*!< Toggles debug mode. */
+				int fps; /*!< FPS limit */
+				int width; /*!< Width of window as being set in configuration. */
+				int height; /*!< Height of window as being set in configuration. */
 		} config;
 
 		struct {
@@ -95,25 +95,8 @@ struct Game {
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
 
-        struct {
-            struct {
-                ALLEGRO_SAMPLE *bg, *fg, *drums;
-            } sample;
-            struct {
-                ALLEGRO_SAMPLE_INSTANCE *bg, *fg, *drums;
-            } instance;
-        } muzyczka;
-
-        struct {
-            int score;
-            int lives;
-            float modificator;
-            struct Character *heart;
-						char* next;
-						int strike;
-						bool pause;
-        } mediator;
-
 };
+
+int libsuperderpy(int argc, char **argv);
 
 #endif
