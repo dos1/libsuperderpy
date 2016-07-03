@@ -23,6 +23,21 @@
 #include <allegro5/allegro_font.h>
 #include "libsuperderpy.h"
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+#  define SYMBOL_INTERNAL
+#  define SYMBOL_EXPORT     __declspec(dllexport)
+#  define SYMBOL_IMPORT     __declspec(dllimport)
+#else
+#  if defined(__GNUC__) && (__GNUC__ >= 4)
+#    define SYMBOL_INTERNAL __attribute__ ((visibility ("hidden")))
+#    define SYMBOL_EXPORT   __attribute__ ((visibility ("default")))
+#  else
+#    define SYMBOL_INTERNAL
+#    define SYMBOL_EXPORT
+#  endif
+#  define SYMBOL_IMPORT     extern
+#endif
+
 void DrawGamestates(struct Game *game);
 void LogicGamestates(struct Game *game);
 void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);

@@ -24,8 +24,9 @@
 #include "stdio.h"
 #include "string.h"
 #include "utils.h"
+#include "internal.h"
 
-void SelectSpritesheet(struct Game *game, struct Character *character, char *name) {
+SYMBOL_EXPORT void SelectSpritesheet(struct Game *game, struct Character *character, char *name) {
 	struct Spritesheet *tmp = character->spritesheets;
 	PrintConsole(game, "Selecting spritesheet for %s: %s", character->name, name);
 	if (!tmp) {
@@ -59,12 +60,12 @@ void SelectSpritesheet(struct Game *game, struct Character *character, char *nam
 	return;
 }
 
-void ChangeSpritesheet(struct Game *game, struct Character *character, char* name) {
+SYMBOL_EXPORT void ChangeSpritesheet(struct Game *game, struct Character *character, char* name) {
 	if (character->successor) free(character->successor);
 	character->successor = strdup(name);
 }
 
-void LoadSpritesheets(struct Game *game, struct Character *character) {
+SYMBOL_EXPORT void LoadSpritesheets(struct Game *game, struct Character *character) {
 	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
 	struct Spritesheet *tmp = character->spritesheets;
 	while (tmp) {
@@ -79,7 +80,7 @@ void LoadSpritesheets(struct Game *game, struct Character *character) {
 	}
 }
 
-void UnloadSpritesheets(struct Game *game, struct Character *character) {
+SYMBOL_EXPORT void UnloadSpritesheets(struct Game *game, struct Character *character) {
 	PrintConsole(game, "Unloading spritesheets for character %s...", character->name);
 	struct Spritesheet *tmp = character->spritesheets;
 	while (tmp) {
@@ -89,7 +90,7 @@ void UnloadSpritesheets(struct Game *game, struct Character *character) {
 	}
 }
 
-void RegisterSpritesheet(struct Game *game, struct Character *character, char* name) {
+SYMBOL_EXPORT void RegisterSpritesheet(struct Game *game, struct Character *character, char* name) {
 	struct Spritesheet *s = character->spritesheets;
 	while (s) {
 		if (!strcmp(s->name, name)) {
@@ -123,7 +124,7 @@ void RegisterSpritesheet(struct Game *game, struct Character *character, char* n
 	al_destroy_config(config);
 }
 
-struct Character* CreateCharacter(struct Game *game, char* name) {
+SYMBOL_EXPORT struct Character* CreateCharacter(struct Game *game, char* name) {
 	PrintConsole(game, "Creating character %s...", name);
 	struct Character *character = malloc(sizeof(struct Character));
 	character->name = strdup(name);
@@ -142,7 +143,7 @@ struct Character* CreateCharacter(struct Game *game, char* name) {
 	return character;
 }
 
-void DestroyCharacter(struct Game *game, struct Character *character) {
+SYMBOL_EXPORT void DestroyCharacter(struct Game *game, struct Character *character) {
 	PrintConsole(game, "Destroying character %s...", character->name);
 	if (!character->shared) {
 		struct Spritesheet *tmp, *s = character->spritesheets;
@@ -163,7 +164,7 @@ void DestroyCharacter(struct Game *game, struct Character *character) {
 	free(character);
 }
 
-void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier) {
+SYMBOL_EXPORT void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier) {
 	if (character->dead) return;
 	if (speed_modifier) {
 		character->pos_tmp++;
@@ -182,21 +183,21 @@ void AnimateCharacter(struct Game *game, struct Character *character, float spee
 	}
 }
 
-void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle) {
+SYMBOL_EXPORT void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle) {
 	if (character->dead) return;
 	character->x += x;
 	character->y += y;
 	character->angle += angle;
 }
 
-void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle) {
+SYMBOL_EXPORT void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle) {
 	if (character->dead) return;
 	character->x = x;
 	character->y = y;
 	character->angle = angle;
 }
 
-void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
+SYMBOL_EXPORT void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
 	if (character->dead) return;
 	int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
 	int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);

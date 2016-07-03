@@ -26,9 +26,9 @@
 #include "string.h"
 #include "math.h"
 #include "utils.h"
+#include "internal.h"
 
-
-void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
+SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
 	  {.x = x, .y = y, .z = 0, .color = top},
 	  {.x = x + w, .y = y, .z = 0, .color = top},
@@ -37,7 +37,7 @@ void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR 
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
-void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR left, ALLEGRO_COLOR right) {
+SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR left, ALLEGRO_COLOR right) {
 	ALLEGRO_VERTEX v[] = {
 	  {.x = x, .y = y, .z = 0, .color = left},
 	  {.x = x + w, .y = y, .z = 0, .color = right},
@@ -46,13 +46,13 @@ void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLO
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
-void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text) {
+SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text) {
 	al_draw_text(font, al_map_rgba(0,0,0,128), (int)x+1, (int)y+1, flags, text);
 	al_draw_text(font, color, (int)x, (int)y, flags, text);
 }
 
 /* linear filtering code written by SiegeLord */
-ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
+SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
 	                     c1.g + frac * (c2.g - c1.g),
 	                     c1.b + frac * (c2.b - c1.b),
@@ -60,7 +60,7 @@ ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 }
 
 /*! \brief Scales bitmap using software linear filtering method to current target. */
-void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
+SYMBOL_EXPORT void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 	if ((al_get_bitmap_width(source)==width) && (al_get_bitmap_height(source)==height)) {
 		al_draw_bitmap(source, 0, 0, 0);
 		return;
@@ -92,7 +92,7 @@ void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 	al_unlock_bitmap(source);
 }
 
-ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height) {
+SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height) {
 	bool memoryscale = !atoi(GetConfigOptionDefault(game, "SuperDerpy", "GPU_scaling", "1"));
 	ALLEGRO_BITMAP *source, *target = al_create_bitmap(width, height);
 	al_set_target_bitmap(target);
@@ -117,7 +117,7 @@ ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, i
 
 }
 
-void FatalError(struct Game *game, bool fatal, char* format, ...) {
+SYMBOL_EXPORT void FatalError(struct Game *game, bool fatal, char* format, ...) {
 	char text[1024] = {};
 	if (!game->_priv.console) {
 		va_list vl;
@@ -197,7 +197,7 @@ void FatalError(struct Game *game, bool fatal, char* format, ...) {
 	al_use_transform(&game->projection);
 }
 
-__attribute__((visibility("hidden"))) void TestPath(char* filename, char* subpath, char** result) {
+SYMBOL_INTERNAL void TestPath(char* filename, char* subpath, char** result) {
 	if (*result) return; //already found
 	ALLEGRO_PATH *tail = al_create_path(filename);
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
@@ -213,14 +213,14 @@ __attribute__((visibility("hidden"))) void TestPath(char* filename, char* subpat
 	al_destroy_path(path);
 }
 
-char* GetGameName(struct Game *game, char* format) {
+SYMBOL_EXPORT char* GetGameName(struct Game *game, char* format) {
 	// FIXME: that's not how you program in C!
 	char *result = malloc(sizeof(char)*255);
 	snprintf(result, 255, format, game->name);
 	return result;
 }
 
-char* GetDataFilePath(struct Game *game, char* filename) {
+SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 
 	//TODO: support for current game
 
@@ -257,7 +257,7 @@ char* GetDataFilePath(struct Game *game, char* filename) {
 	return result;
 }
 
-void PrintConsole(struct Game *game, char* format, ...) {
+SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char text[1024] = {};

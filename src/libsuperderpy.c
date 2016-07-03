@@ -37,7 +37,7 @@
 #include "internal.h"
 #include "libsuperderpy.h"
 
-struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
+SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
 
 	struct Game *game = malloc(sizeof(struct Game));
 
@@ -182,7 +182,7 @@ struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
 	return game;
 }
 
-int libsuperderpy_run(struct Game *game) {
+SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
@@ -412,7 +412,7 @@ int libsuperderpy_run(struct Game *game) {
 	return 0;
 }
 
-void libsuperderpy_destroy(struct Game *game) {
+SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	game->shuttingdown = true;
 
 	// in case of restart

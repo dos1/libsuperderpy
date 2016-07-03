@@ -20,8 +20,9 @@
  */
 #include <allegro5/allegro.h>
 #include "config.h"
+#include "internal.h"
 
-void InitConfig(struct Game *game) {
+SYMBOL_EXPORT void InitConfig(struct Game *game) {
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
 	ALLEGRO_PATH *data = al_create_path("SuperDerpy.ini");
 	al_join_paths(path, data);
@@ -31,20 +32,20 @@ void InitConfig(struct Game *game) {
 	al_destroy_path(data);
 }
 
-void SetConfigOption(struct Game *game, char* section, char* name, char* value) {
+SYMBOL_EXPORT void SetConfigOption(struct Game *game, char* section, char* name, char* value) {
 	al_set_config_value(game->_priv.config, section, name, value);
 }
 
-const char* GetConfigOption(struct Game *game, char* section, char* name) {
+SYMBOL_EXPORT const char* GetConfigOption(struct Game *game, char* section, char* name) {
 	return al_get_config_value(game->_priv.config, section, name);
 }
 
-const char* GetConfigOptionDefault(struct Game *game, char* section, char* name, const char* def) {
+SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game *game, char* section, char* name, const char* def) {
 	const char* ret = GetConfigOption(game, section, name);
 	if (!ret) return def; else return ret;
 }
 
-void DeinitConfig(struct Game *game) {
+SYMBOL_EXPORT void DeinitConfig(struct Game *game) {
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
 	ALLEGRO_PATH *data = al_create_path("SuperDerpy.ini");
 	al_make_directory(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));

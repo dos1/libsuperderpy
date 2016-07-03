@@ -21,8 +21,9 @@
 #include <stdio.h>
 #include <allegro5/allegro_ttf.h>
 #include "libsuperderpy.h"
+#include "internal.h"
 
-__attribute__((visibility("hidden"))) void DrawGamestates(struct Game *game) {
+SYMBOL_INTERNAL void DrawGamestates(struct Game *game) {
 	al_set_target_backbuffer(game->display);
 	al_clear_to_color(al_map_rgb(0,0,0));
 	struct Gamestate *tmp = game->_priv.gamestates;
@@ -34,7 +35,7 @@ __attribute__((visibility("hidden"))) void DrawGamestates(struct Game *game) {
 	}
 }
 
-__attribute__((visibility("hidden"))) void LogicGamestates(struct Game *game) {
+SYMBOL_INTERNAL void LogicGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -44,7 +45,7 @@ __attribute__((visibility("hidden"))) void LogicGamestates(struct Game *game) {
 	}
 }
 
-__attribute__((visibility("hidden"))) void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
+SYMBOL_INTERNAL void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -54,7 +55,7 @@ __attribute__((visibility("hidden"))) void EventGamestates(struct Game *game, AL
 	}
 }
 
-__attribute__((visibility("hidden"))) void PauseGamestates(struct Game *game) {
+SYMBOL_INTERNAL void PauseGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -65,7 +66,7 @@ __attribute__((visibility("hidden"))) void PauseGamestates(struct Game *game) {
 }
 
 
-__attribute__((visibility("hidden"))) void ResumeGamestates(struct Game *game) {
+SYMBOL_INTERNAL void ResumeGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -75,7 +76,7 @@ __attribute__((visibility("hidden"))) void ResumeGamestates(struct Game *game) {
 	}
 }
 
-__attribute__((visibility("hidden"))) void DrawConsole(struct Game *game) {
+SYMBOL_INTERNAL void DrawConsole(struct Game *game) {
 	if (game->_priv.showconsole) {
 		al_set_target_backbuffer(game->display);
 		ALLEGRO_TRANSFORM trans;
@@ -101,7 +102,7 @@ __attribute__((visibility("hidden"))) void DrawConsole(struct Game *game) {
 	game->_priv.fps_count.frames_done++;
 }
 
-__attribute__((visibility("hidden"))) void Console_Load(struct Game *game) {
+SYMBOL_INTERNAL void Console_Load(struct Game *game) {
 	game->_priv.font_console = NULL;
 	game->_priv.console = NULL;
 	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),al_get_display_height(game->display)*0.025,0 );
@@ -116,13 +117,13 @@ __attribute__((visibility("hidden"))) void Console_Load(struct Game *game) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 }
 
-__attribute__((visibility("hidden"))) void Console_Unload(struct Game *game) {
+SYMBOL_INTERNAL void Console_Unload(struct Game *game) {
 	al_destroy_font(game->_priv.font_console);
 	al_destroy_bitmap(game->_priv.console);
 }
 
 
-void SetupViewport(struct Game *game) {
+SYMBOL_EXPORT void SetupViewport(struct Game *game) {
 	game->viewport.width = 320;
 	game->viewport.height = 180;
 
@@ -154,7 +155,7 @@ void SetupViewport(struct Game *game) {
 	Console_Load(game);
 }
 
-__attribute__((visibility("hidden"))) void GamestateProgress(struct Game *game) {
+SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
 	game->_priv.cur_gamestate.p++;
 	DrawGamestates(game);
