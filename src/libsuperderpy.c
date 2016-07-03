@@ -28,6 +28,7 @@
 #include <locale.h>
 #include <signal.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_ttf.h>
@@ -38,8 +39,6 @@
 #include "utils.h"
 #include "config.h"
 #include "libsuperderpy.h"
-
-extern int main(int, char**);
 
 void DrawGamestates(struct Game *game) {
 	al_set_target_backbuffer(game->display);
@@ -96,7 +95,7 @@ void ResumeGamestates(struct Game *game) {
 
 
 void derp(int sig) {
-	int __attribute__((unused)) n = write(STDERR_FILENO, "Segmentation fault\nI just don't know what went wrong!\n", 54);
+	ssize_t __attribute__((unused)) n = write(STDERR_FILENO, "Segmentation fault\nI just don't know what went wrong!\n", 54);
 	abort();
 }
 
@@ -528,11 +527,7 @@ int libsuperderpy(int argc, char **argv){
 	al_shutdown_ttf_addon();
 	al_shutdown_font_addon();
 	if (game.restart) {
-#ifdef ALLEGRO_MACOSX
-		return _al_mangled_main(argc, argv);
-#else
-		return main(argc, argv);
-#endif
+		return execv(argv[0], argv); // FIXME: on OSX there's chdir called which might break it
 	}
 	return 0;
 }
