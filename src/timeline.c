@@ -116,7 +116,7 @@ void TM_Process(struct Timeline* timeline) {
 	}
 }
 
-void PauseTimers(struct Timeline* timeline, bool pause) {
+__attribute__((visibility("hidden"))) void PauseTimers(struct Timeline* timeline, bool pause) {
 	if (timeline->queue) {
 		if (timeline->queue->timer) {
 			if (pause) {
@@ -262,7 +262,7 @@ struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, bool (*func)
 }
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
-bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
+__attribute__((visibility("hidden"))) bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
 	if (state != TM_ACTIONSTATE_RUNNING) return false;
 	int* delay = (int*) action->arguments->next->value;
 	char* name = (char*) action->arguments->next->next->value;

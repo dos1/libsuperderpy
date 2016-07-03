@@ -93,13 +93,20 @@ struct Game {
 						void* data;
 				} loading; /*!< Interface for accessing loading screen functions. */
 
+				int argc;
+				char** argv;
+
+				struct {
+						int p;
+						struct Gamestate *tmp;
+						double t;
+						int loaded, toLoad;
+				} cur_gamestate;
+
 		} _priv; /*!< Private resources. Do not use in gamestates! */
 
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
-
-		int argc;
-		char** argv;
 
 		const char* name;
 

@@ -38,7 +38,7 @@
 #include "config.h"
 #include "libsuperderpy.h"
 
-void DrawGamestates(struct Game *game) {
+__attribute__((visibility("hidden"))) void DrawGamestates(struct Game *game) {
 	al_set_target_backbuffer(game->display);
 	al_clear_to_color(al_map_rgb(0,0,0));
 	struct Gamestate *tmp = game->_priv.gamestates;
@@ -50,7 +50,7 @@ void DrawGamestates(struct Game *game) {
 	}
 }
 
-void LogicGamestates(struct Game *game) {
+__attribute__((visibility("hidden"))) void LogicGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -60,7 +60,7 @@ void LogicGamestates(struct Game *game) {
 	}
 }
 
-void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
+__attribute__((visibility("hidden"))) void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -70,7 +70,7 @@ void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	}
 }
 
-void PauseGamestates(struct Game *game) {
+__attribute__((visibility("hidden"))) void PauseGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -81,7 +81,7 @@ void PauseGamestates(struct Game *game) {
 }
 
 
-void ResumeGamestates(struct Game *game) {
+__attribute__((visibility("hidden"))) void ResumeGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -89,6 +89,20 @@ void ResumeGamestates(struct Game *game) {
 		}
 		tmp = tmp->next;
 	}
+}
+
+__attribute__((visibility("hidden"))) void gamestate_progress(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
+	game->_priv.cur_gamestate.p++;
+	DrawGamestates(game);
+	float progress = ((game->_priv.cur_gamestate.p / (*(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1))/(float)game->_priv.cur_gamestate.toLoad)+(game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
+	if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), game->_priv.cur_gamestate.p, *(tmp->api.Gamestate_ProgressCount));
+	if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
+	DrawConsole(game);
+	if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
+		al_flip_display();
+	}
+	game->_priv.cur_gamestate.t = al_get_time();
 }
 
 struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
@@ -225,8 +239,8 @@ struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
 
 	setlocale(LC_NUMERIC, "C");
 
-	game->argc = argc;
-	game->argv = argv;
+	game->_priv.argc = argc;
+	game->_priv.argv = argv;
 
 	game->data = NULL;
 
@@ -287,7 +301,8 @@ int libsuperderpy_run(struct Game *game) {
 		if (redraw && al_is_event_queue_empty(game->_priv.event_queue)) {
 
 			struct Gamestate *tmp = game->_priv.gamestates;
-			int toLoad = 0, loaded = 0;
+			game->_priv.cur_gamestate.toLoad = 0;
+			game->_priv.cur_gamestate.loaded = 0;
 
 			// FIXME: move to function
 			// TODO: support dependences
@@ -299,7 +314,7 @@ int libsuperderpy_run(struct Game *game) {
 					tmp->pending_start = false;
 				}
 
-				if ((tmp->pending_load) && (!tmp->loaded)) toLoad++;
+				if ((tmp->pending_load) && (!tmp->loaded)) game->_priv.cur_gamestate.toLoad++;
 				tmp=tmp->next;
 			}
 
@@ -307,7 +322,7 @@ int libsuperderpy_run(struct Game *game) {
 			// FIXME: move to function
 			// TODO: support dependences
 
-			double t = -1;
+			game->_priv.cur_gamestate.t = -1;
 
 			while (tmp) {
 				if ((tmp->pending_load) && (tmp->loaded)) {
@@ -351,35 +366,23 @@ int libsuperderpy_run(struct Game *game) {
 
 						if (!(tmp->api.Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
 
-						int p = 0;
+						game->_priv.cur_gamestate.p = 0;
 
-						void progress(struct Game *game) {
-							p++;
-							DrawGamestates(game);
-							float progress = ((p / (*(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1))/(float)toLoad)+(loaded/(float)toLoad);
-							if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), p, *(tmp->api.Gamestate_ProgressCount));
-							if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
-							DrawConsole(game);
-							if (al_get_time() - t >= 1/60.0) {
-								al_flip_display();
-							}
-							t = al_get_time();
-						}
-
-						t = al_get_time();
+						game->_priv.cur_gamestate.t = al_get_time();
 
 						// initially draw loading screen with empty bar
 						DrawGamestates(game);
 						if (tmp->showLoading) {
-							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, loaded/(float)toLoad);
+							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
 						}
 						DrawConsole(game);
-						if (al_get_time() - t >= 1/60.0) {
+						if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
 							al_flip_display();
 						}
-						t = al_get_time();
-						tmp->data = (*tmp->api.Gamestate_Load)(game, &progress); // feel free to replace "progress" with empty function if you want to compile with clang
-						loaded++;
+						game->_priv.cur_gamestate.t = al_get_time();
+						game->_priv.cur_gamestate.tmp = tmp;
+						tmp->data = (*tmp->api.Gamestate_Load)(game, &gamestate_progress);
+						game->_priv.cur_gamestate.loaded++;
 
 						tmp->loaded = true;
 						tmp->pending_load = false;
@@ -516,7 +519,7 @@ void libsuperderpy_destroy(struct Game *game) {
 	al_uninstall_system();
 	al_shutdown_ttf_addon();
 	al_shutdown_font_addon();
-	char** argv = game->argv;
+	char** argv = game->_priv.argv;
 	free(game);
 	if (game->restart) {
 		execv(argv[0], argv); // FIXME: on OSX there's chdir called which might break it

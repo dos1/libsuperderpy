@@ -27,13 +27,6 @@
 #include "math.h"
 #include "utils.h"
 
-char* strdup(const char *str) {
-	int n = strlen(str) + 1;
-	char *dup = malloc(n);
-	if (dup) { strcpy(dup, str); }
-	return dup;
-}
-
 void DrawConsole(struct Game *game) {
 	if (game->_priv.showconsole) {
 		al_set_target_backbuffer(game->display);
@@ -137,7 +130,7 @@ void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float 
 }
 
 /* linear filtering code written by SiegeLord */
-ALLEGRO_COLOR interpolate(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
+ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
 	                     c1.g + frac * (c2.g - c1.g),
 	                     c1.b + frac * (c2.b - c1.b),
@@ -166,9 +159,9 @@ void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 			ALLEGRO_COLOR c = al_get_pixel(source, pixx_f, pixy_f + 1);
 			ALLEGRO_COLOR d = al_get_pixel(source, pixx_f + 1, pixy_f + 1);
 
-			ALLEGRO_COLOR ab = interpolate(a, b, pixx - pixx_f);
-			ALLEGRO_COLOR cd = interpolate(c, d, pixx - pixx_f);
-			ALLEGRO_COLOR result = interpolate(ab, cd, pixy - pixy_f);
+			ALLEGRO_COLOR ab = InterpolateColor(a, b, pixx - pixx_f);
+			ALLEGRO_COLOR cd = InterpolateColor(c, d, pixx - pixx_f);
+			ALLEGRO_COLOR result = InterpolateColor(ab, cd, pixy - pixy_f);
 
 			al_put_pixel(x, y, result);
 		}
@@ -282,7 +275,7 @@ void FatalError(struct Game *game, bool fatal, char* format, ...) {
 	al_use_transform(&game->projection);
 }
 
-void TestPath(char* filename, char* subpath, char** result) {
+__attribute__((visibility("hidden"))) void TestPath(char* filename, char* subpath, char** result) {
 	if (*result) return; //already found
 	ALLEGRO_PATH *tail = al_create_path(filename);
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
