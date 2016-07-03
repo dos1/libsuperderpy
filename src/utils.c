@@ -238,13 +238,13 @@ void FatalError(struct Game *game, bool fatal, char* format, ...) {
 		al_set_target_backbuffer(game->display);
 		al_clear_to_color(al_map_rgb(0,0,170));
 
-		char *header = LIBSUPERDERPY_GAMENAME_PRETTY;
+		const char *header = game->name;
 
 		al_draw_filled_rectangle(al_get_display_width(game->display)/2 - al_get_text_width(game->_priv.font_bsod, header)/2 - 4, (int)(al_get_display_height(game->display) * 0.32), 4 + al_get_display_width(game->display)/2 + al_get_text_width(game->_priv.font_bsod, header)/2, (int)(al_get_display_height(game->display) * 0.32) + al_get_font_line_height(game->_priv.font_bsod), al_map_rgb(170,170,170));
 
 		al_draw_text(game->_priv.font_bsod, al_map_rgb(0, 0, 170), al_get_display_width(game->display)/2, (int)(al_get_display_height(game->display) * 0.32), ALLEGRO_ALIGN_CENTRE, header);
 
-		char *header2 = "A fatal exception 0xD3RP has occured at 0028:M00F11NZ in GST SD(01) +";
+		const char *header2 = "A fatal exception 0xD3RP has occured at 0028:M00F11NZ in GST SD(01) +";
 
 		al_draw_text(game->_priv.font_bsod, al_map_rgb(255,255,255), al_get_display_width(game->display)/2, (int)(al_get_display_height(game->display) * 0.32+2*al_get_font_line_height(game->_priv.font_bsod)*1.25), ALLEGRO_ALIGN_CENTRE, header2);
 		al_draw_textf(game->_priv.font_bsod, al_map_rgb(255,255,255), al_get_display_width(game->display)/2 - al_get_text_width(game->_priv.font_bsod, header2)/2, (int)(al_get_display_height(game->display) * 0.32+3*al_get_font_line_height(game->_priv.font_bsod)*1.25), ALLEGRO_ALIGN_LEFT, "%p and system just doesn't know what went wrong.", game);
@@ -298,6 +298,13 @@ void TestPath(char* filename, char* subpath, char** result) {
 	al_destroy_path(path);
 }
 
+char* GetGameName(struct Game *game, char* format) {
+	// FIXME: that's not how you program in C!
+	char *result = malloc(sizeof(char)*255);
+	snprintf(result, 255, format, game->name);
+	return result;
+}
+
 char* GetDataFilePath(struct Game *game, char* filename) {
 
 	//TODO: support for current game
@@ -320,7 +327,7 @@ char* GetDataFilePath(struct Game *game, char* filename) {
 	}
 
 	TestPath(filename, "data/", &result);
-	TestPath(filename, "../share/" LIBSUPERDERPY_GAMENAME "/data/", &result);
+	TestPath(filename, GetGameName(game, "../share/%s/data/"), &result);
 
 	TestPath(filename, "../data/", &result);
 #ifdef ALLEGRO_MACOSX

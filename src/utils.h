@@ -58,7 +58,7 @@ ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, i
 /*! \brief Finds path for data file. */
 char* GetDataFilePath(struct Game *game, char* filename);
 
-char* GetLibFilePath(struct Game *game, char* filename);
+char* GetGameName(struct Game *game, char* format);
 
 /*! \brief Print some message on game console.
  *

@@ -32,6 +32,10 @@
 #include "timeline.h"
 #include "utils.h"
 
+#ifndef LIBSUPERDERPY_DATA_TYPE
+#define LIBSUPERDERPY_DATA_TYPE void
+#endif
+
 struct Gamestate;
 
 /*! \brief Main struct of the game. */
@@ -94,8 +98,17 @@ struct Game {
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
 
+		int argc;
+		char** argv;
+
+		const char* name;
+
+		LIBSUPERDERPY_DATA_TYPE *data;
+
 };
 
-int libsuperderpy(int argc, char **argv); /*!< Engine's main loop. */
+struct Game* libsuperderpy_init(int argc, char **argv, const char* name);
+int libsuperderpy_run(struct Game* game);
+void libsuperderpy_destroy(struct Game* game);
 
 #endif
