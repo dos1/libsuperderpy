@@ -34,76 +34,8 @@
 #include <mach-o/dyld.h>
 #include <sys/param.h>
 #endif
-#include "utils.h"
-#include "config.h"
+#include "internal.h"
 #include "libsuperderpy.h"
-
-__attribute__((visibility("hidden"))) void DrawGamestates(struct Game *game) {
-	al_set_target_backbuffer(game->display);
-	al_clear_to_color(al_map_rgb(0,0,0));
-	struct Gamestate *tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started)) {
-			(*tmp->api.Gamestate_Draw)(game, tmp->data);
-		}
-		tmp = tmp->next;
-	}
-}
-
-__attribute__((visibility("hidden"))) void LogicGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
-			(*tmp->api.Gamestate_Logic)(game, tmp->data);
-		}
-		tmp = tmp->next;
-	}
-}
-
-__attribute__((visibility("hidden"))) void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
-	struct Gamestate *tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
-			(*tmp->api.Gamestate_ProcessEvent)(game, tmp->data, ev);
-		}
-		tmp = tmp->next;
-	}
-}
-
-__attribute__((visibility("hidden"))) void PauseGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started)) {
-			(*tmp->api.Gamestate_Pause)(game, tmp->data);
-		}
-		tmp = tmp->next;
-	}
-}
-
-
-__attribute__((visibility("hidden"))) void ResumeGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started)) {
-			(*tmp->api.Gamestate_Resume)(game, tmp->data);
-		}
-		tmp = tmp->next;
-	}
-}
-
-__attribute__((visibility("hidden"))) void gamestate_progress(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
-	game->_priv.cur_gamestate.p++;
-	DrawGamestates(game);
-	float progress = ((game->_priv.cur_gamestate.p / (*(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1))/(float)game->_priv.cur_gamestate.toLoad)+(game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
-	if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), game->_priv.cur_gamestate.p, *(tmp->api.Gamestate_ProgressCount));
-	if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
-	DrawConsole(game);
-	if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
-		al_flip_display();
-	}
-	game->_priv.cur_gamestate.t = al_get_time();
-}
 
 struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
 
@@ -381,7 +313,7 @@ int libsuperderpy_run(struct Game *game) {
 						}
 						game->_priv.cur_gamestate.t = al_get_time();
 						game->_priv.cur_gamestate.tmp = tmp;
-						tmp->data = (*tmp->api.Gamestate_Load)(game, &gamestate_progress);
+						tmp->data = (*tmp->api.Gamestate_Load)(game, &GamestateProgress);
 						game->_priv.cur_gamestate.loaded++;
 
 						tmp->loaded = true;

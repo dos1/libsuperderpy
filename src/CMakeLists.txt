@@ -4,6 +4,8 @@ SET(SRC_LIST
     timeline.c
     gamestate.c
     libsuperderpy.c
+    character.c
+    internal.c
     )
 
 add_library("libsuperderpy" SHARED ${SRC_LIST})

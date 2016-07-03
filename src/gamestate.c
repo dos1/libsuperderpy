@@ -22,7 +22,7 @@
 #include "utils.h"
 #include "gamestate.h"
 
-struct Gamestate* AddNewGamestate(struct Game *game) {
+__attribute__((visibility("hidden"))) struct Gamestate* AddNewGamestate(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	if (!tmp) {
 		game->_priv.gamestates = malloc(sizeof(struct Gamestate));
@@ -45,7 +45,7 @@ struct Gamestate* AddNewGamestate(struct Game *game) {
 	return tmp;
 }
 
-struct Gamestate* FindGamestate(struct Game *game, const char* name) {
+__attribute__((visibility("hidden"))) struct Gamestate* FindGamestate(struct Game *game, const char* name) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (!strcmp(name, tmp->name)) {
