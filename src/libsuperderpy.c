@@ -27,6 +27,7 @@
 #include <locale.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_ttf.h>
@@ -45,12 +46,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 #ifdef ALLEGRO_MACOSX
 	char exe_path[MAXPATHLEN];
-	char link_path[MAXPATHLEN];
-
 	uint32_t size = sizeof(exe_path);
 	_NSGetExecutablePath(exe_path, &size);
-	realpath(exe_path, link_path);
-	chdir(link_path);
+	chdir(dirname(exe_path));
 #endif
 
 
@@ -211,7 +209,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENSION, game->name);
 	void *handle = dlopen(libname, RTLD_NOW);
 	if (!handle) {
-		FatalError(game, true, "Error while initializing loading screen %s", dlerror());
+		FatalError(game, true, "Error while initializing loading screen: %s", dlerror());
 		return 2;
 	} else {
 

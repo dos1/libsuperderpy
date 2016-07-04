@@ -28,8 +28,8 @@
 
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
-#elif ALLEGRO_MACOSX
-#define LIBRARY_EXTENTION ".dylib"
+#elif defined(ALLEGRO_MACOSX)
+#define LIBRARY_EXTENSION ".dylib"
 #else
 #define LIBRARY_EXTENSION ".so"
 #endif

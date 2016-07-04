@@ -5,9 +5,14 @@ add_definitions(-D_XOPEN_SOURCE=600)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
 if(APPLE)
     if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-	set(CMAKE_INSTALL_PREFIX "/Applications")
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}")
 	set(BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
+	set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}.app/Contents/MacOS/")
     endif(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
+
+    set(MACOSX_BUNDLE_ICON_FILE ${LIBSUPERDERPY_GAMENAME})
+    set(MACOSX_BUNDLE_BUNDLE_NAME ${LIBSUPERDERPY_GAMENAME_PRETTY})
+
 endif(APPLE)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/libsuperderpy/cmake ${PROJECT_SOURCE_DIR}/cmake)
@@ -47,7 +52,7 @@ endif(APPLE)
 
 MACRO(register_gamestate name)
 
-    add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" MODULE "${name}.c")
+    add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" SHARED "${name}.c")
 
     set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
@@ -63,7 +68,9 @@ ENDMACRO()
 
 MACRO(libsuperderpy_copy EXECUTABLE)
 
-    add_custom_command(TARGET "${EXECUTABLE}" PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libsuperderpy/src/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX}" $<TARGET_FILE_DIR:${EXECUTABLE}>)
+    if (NOT APPLE)
+	add_custom_command(TARGET "${EXECUTABLE}" PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libsuperderpy/src/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX}" $<TARGET_FILE_DIR:${EXECUTABLE}>)
+    endif (NOT APPLE)
 
 ENDMACRO()
 
