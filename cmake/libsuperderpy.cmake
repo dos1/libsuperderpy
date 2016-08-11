@@ -3,6 +3,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 add_definitions(-D_XOPEN_SOURCE=600)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
+
 if(APPLE)
     if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}")
@@ -14,8 +15,6 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_NAME ${LIBSUPERDERPY_GAMENAME_PRETTY})
 
 endif(APPLE)
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/libsuperderpy/cmake ${PROJECT_SOURCE_DIR}/cmake)
 
 include_directories("libsuperderpy/src")
 
@@ -52,7 +51,7 @@ endif(APPLE)
 
 MACRO(register_gamestate name)
 
-    add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" SHARED "${name}.c")
+    add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" SHARED "${name}")
 
     set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
