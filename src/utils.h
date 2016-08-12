@@ -63,37 +63,4 @@ void PrintConsole(struct Game *game, char* format, ...);
 
 void FatalError(struct Game *game, bool exit, char* format, ...);
 
-/*! \brief Structure representing one spritesheet for character animation. */
-struct Spritesheet {
-		char* name; /*!< Name of the spritesheet (used in file paths). */
-		ALLEGRO_BITMAP* bitmap; /*!< Spritesheet bitmap. */
-		int rows; /*!< Number of rows in the spritesheet. */
-		int cols; /*!< Number of columns in the spritesheet. */
-		int blanks; /*!< Number of blank frames at the end of the spritesheet. */
-		int width;
-		int height;
-		int delay;
-		bool kill;
-		float scale; /*!< Scale modifier of the frame. */
-		char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
-		struct Spritesheet* next; /*!< Next spritesheet in the queue. */
-};
-
-/*! \brief Structure representing one visible character. */
-struct Character {
-		char* name; /*!< Name of the character (used in file paths). */
-		struct Spritesheet *spritesheet; /*!< Current spritesheet used by character. */
-		struct Spritesheet *spritesheets; /*!< List of all spritesheets registered to character. */
-		char* successor;
-		ALLEGRO_BITMAP* bitmap;
-		int pos; /*!< Current spritesheet position. */
-		int pos_tmp; /*!< A counter used to slow down spritesheet animation. */
-		float x; /*!< Horizontal position of character. */
-		float y; /*!< Vertical position of character. */
-		float angle; /*!< Characters display angle (radians). */
-		void* data; /*!< Additional, custom character data (HP etc.). */
-		bool shared;
-		bool dead;
-};
-
 #endif

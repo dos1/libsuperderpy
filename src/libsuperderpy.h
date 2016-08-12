@@ -31,6 +31,7 @@
 #include "config.h"
 #include "timeline.h"
 #include "utils.h"
+#include "character.h"
 
 #ifndef LIBSUPERDERPY_DATA_TYPE
 #define LIBSUPERDERPY_DATA_TYPE void
