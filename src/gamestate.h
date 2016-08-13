@@ -58,6 +58,7 @@ void StartGamestate(struct Game *game, const char* name);
 void StopGamestate(struct Game *game, const char* name);
 void PauseGamestate(struct Game *game, const char* name);
 void ResumeGamestate(struct Game *game, const char* name);
+void UnloadAllGamestates(struct Game *game);
 void SwitchGamestate(struct Game *game, const char* current, const char* n);
 
 #endif
