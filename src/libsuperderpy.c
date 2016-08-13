@@ -231,6 +231,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 		if (redraw && al_is_event_queue_empty(game->_priv.event_queue)) {
 
 			struct Gamestate *tmp = game->_priv.gamestates;
+
 			game->_priv.cur_gamestate.toLoad = 0;
 			game->_priv.cur_gamestate.loaded = 0;
 
@@ -298,9 +299,6 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 						game->_priv.cur_gamestate.p = 0;
 
-						game->_priv.cur_gamestate.t = al_get_time();
-
-						// initially draw loading screen with empty bar
 						DrawGamestates(game);
 						if (tmp->showLoading) {
 							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
@@ -308,8 +306,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 						DrawConsole(game);
 						if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
 							al_flip_display();
+							game->_priv.cur_gamestate.t = al_get_time();
 						}
-						game->_priv.cur_gamestate.t = al_get_time();
 						game->_priv.cur_gamestate.tmp = tmp;
 						tmp->data = (*tmp->api.Gamestate_Load)(game, &GamestateProgress);
 						game->_priv.cur_gamestate.loaded++;

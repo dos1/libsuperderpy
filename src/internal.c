@@ -159,12 +159,13 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
 	game->_priv.cur_gamestate.p++;
 	DrawGamestates(game);
-	float progress = ((game->_priv.cur_gamestate.p / (*(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1))/(float)game->_priv.cur_gamestate.toLoad)+(game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
+	float progressCount = *(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1;
+	float progress = ((game->_priv.cur_gamestate.p / progressCount) / (float)game->_priv.cur_gamestate.toLoad) + (game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
 	if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), game->_priv.cur_gamestate.p, *(tmp->api.Gamestate_ProgressCount));
 	if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
 	DrawConsole(game);
 	if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
 		al_flip_display();
+		game->_priv.cur_gamestate.t = al_get_time();
 	}
-	game->_priv.cur_gamestate.t = al_get_time();
 }
