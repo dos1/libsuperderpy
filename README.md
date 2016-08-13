@@ -9,6 +9,8 @@ Used by such games as:
 - Tickle Monster vs. Suits
 - Mediator
 - Back to the Browser Wars
+- KARCZOCH
+- Computer Is (Not) Fine
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
