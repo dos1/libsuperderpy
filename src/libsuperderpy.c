@@ -238,14 +238,14 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			// FIXME: move to function
 			// TODO: support dependences
 			while (tmp) {
-				if ((tmp->pending_start) && (tmp->started)) {
+				if (tmp->pending_stop) {
 					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
 					(*tmp->api.Gamestate_Stop)(game, tmp->data);
 					tmp->started = false;
-					tmp->pending_start = false;
+					tmp->pending_stop = false;
 				}
 
-				if ((tmp->pending_load) && (!tmp->loaded)) game->_priv.cur_gamestate.toLoad++;
+				if (tmp->pending_load) game->_priv.cur_gamestate.toLoad++;
 				tmp=tmp->next;
 			}
 
@@ -256,16 +256,17 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			game->_priv.cur_gamestate.t = -1;
 
 			while (tmp) {
-				if ((tmp->pending_load) && (tmp->loaded)) {
+				if (tmp->pending_unload) {
 					PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
 					tmp->loaded = false;
-					tmp->pending_load = false;
+					tmp->pending_unload = false;
 					(*tmp->api.Gamestate_Unload)(game, tmp->data);
 					dlclose(tmp->handle);
 					tmp->handle = NULL;
 					al_start_timer(game->_priv.timer);
-				} else if ((tmp->pending_load) && (!tmp->loaded)) {
+				}
+				if (tmp->pending_load) {
 					PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
 					// TODO: take proper game name
@@ -326,7 +327,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 			while (tmp) {
 
-				if ((tmp->pending_start) && (!tmp->started) && (tmp->loaded)) {
+				if ((tmp->pending_start)  && (tmp->loaded)) {
 					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
 					(*tmp->api.Gamestate_Start)(game, tmp->data);

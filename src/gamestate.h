@@ -28,8 +28,8 @@ struct Game;
 struct Gamestate {
 		char* name;
 		void* handle;
-		bool loaded, pending_load;
-		bool started, pending_start;
+		bool loaded, pending_load, pending_unload;
+		bool started, pending_start, pending_stop;
 		bool showLoading;
 		bool paused;
 		struct Gamestate* next;

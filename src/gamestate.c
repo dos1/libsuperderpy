@@ -42,6 +42,8 @@ SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game) {
 	tmp->started = false;
 	tmp->pending_load = false;
 	tmp->pending_start = false;
+	tmp->pending_stop = false;
+	tmp->pending_unload = false;
 	tmp->next = NULL;
 	return tmp;
 }
@@ -60,7 +62,7 @@ SYMBOL_INTERNAL struct Gamestate* FindGamestate(struct Game *game, const char* n
 SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {
 	struct Gamestate *gs = FindGamestate(game, name);
 	if (gs) {
-		if (gs->loaded) {
+		if (gs->loaded && !gs->pending_unload) {
 			PrintConsole(game, "Gamestate \"%s\" already loaded.", name);
 			return;
 		}
@@ -77,12 +79,17 @@ SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {
 SYMBOL_EXPORT void UnloadGamestate(struct Game *game, const char* name) {
 	struct Gamestate *gs = FindGamestate(game, name);
 	if (gs) {
+		if (gs->pending_load) {
+			gs->pending_load = false;
+			PrintConsole(game, "Canceling loading of gamestate \"%s\".", name);
+			return;
+		}
 		if (!gs->loaded) {
 			PrintConsole(game, "Gamestate \"%s\" already unloaded.", name);
 			return;
 		}
-		if (gs->started) gs->pending_start=true;
-		gs->pending_load = true;
+		if (gs->started) gs->pending_stop=true;
+		gs->pending_unload = true;
 		PrintConsole(game, "Gamestate \"%s\" marked to be UNLOADED.", name);
 	} else {
 		PrintConsole(game, "Tried to unload nonexisitent gamestate \"%s\"", name);
@@ -92,7 +99,7 @@ SYMBOL_EXPORT void UnloadGamestate(struct Game *game, const char* name) {
 SYMBOL_EXPORT void StartGamestate(struct Game *game, const char* name) {
 	struct Gamestate *gs = FindGamestate(game, name);
 	if (gs) {
-		if (gs->started) {
+		if (gs->started && !gs->pending_stop) {
 			PrintConsole(game, "Gamestate \"%s\" already started.", name);
 			return;
 		}
@@ -106,11 +113,16 @@ SYMBOL_EXPORT void StartGamestate(struct Game *game, const char* name) {
 SYMBOL_EXPORT void StopGamestate(struct Game *game, const char* name) {
 	struct Gamestate *gs = FindGamestate(game, name);
 	if (gs) {
+		if (gs->pending_start) {
+			gs->pending_start = false;
+			PrintConsole(game, "Canceling starting of gamestate \"%s\".", name);
+			return;
+		}
 		if (!gs->started) {
 			PrintConsole(game, "Gamestate \"%s\" already stopped.", name);
 			return;
 		}
-		gs->pending_start = true;
+		gs->pending_stop = true;
 		PrintConsole(game, "Gamestate \"%s\" marked to be STOPPED.", name);
 	} else {
 		PrintConsole(game, "Tried to stop nonexisitent gamestate \"%s\"", name);
