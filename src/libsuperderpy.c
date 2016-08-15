@@ -66,6 +66,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.font_bsod = NULL;
 	game->_priv.console = NULL;
 
+	game->_priv.garbage = NULL;
+
 	game->config.fullscreen = atoi(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"));
 	game->config.music = atoi(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"));
 	game->config.voice = atoi(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"));
@@ -404,6 +406,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				EventGamestates(game, &ev);
 			}
 		}
+		ClearGarbage(game);
 	}
 
 	return 0;

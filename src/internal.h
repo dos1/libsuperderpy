@@ -48,5 +48,7 @@ void Console_Load(struct Game *game);
 void Console_Unload(struct Game *game);
 void SetupViewport(struct Game *game);
 void GamestateProgress(struct Game *game);
+void* AddGarbage(struct Game *game, void* data);
+void ClearGarbage(struct Game *game);
 
 #endif

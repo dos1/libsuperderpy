@@ -217,7 +217,7 @@ SYMBOL_EXPORT char* GetGameName(struct Game *game, char* format) {
 	// FIXME: that's not how you program in C!
 	char *result = malloc(sizeof(char)*255);
 	snprintf(result, 255, format, game->name);
-	return result;
+	return AddGarbage(game, result);
 }
 
 SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
@@ -229,7 +229,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	char *result = 0;
 
 	if (al_filename_exists(filename)) {
-		return strdup(filename);
+		return AddGarbage(game, strdup(filename));
 	}
 
 	{
@@ -237,7 +237,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 		strcat(origfn, filename);
 
 		if (al_filename_exists(origfn)) {
-			return strdup(origfn);
+			return AddGarbage(game, strdup(origfn));
 		}
 	}
 
@@ -254,7 +254,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 		FatalError(game, true, "Could not find data file: %s!", filename);
 		exit(1);
 	}
-	return result;
+	return AddGarbage(game, result);
 }
 
 SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {

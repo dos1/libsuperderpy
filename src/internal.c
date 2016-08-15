@@ -169,3 +169,24 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 		game->_priv.cur_gamestate.t = al_get_time();
 	}
 }
+
+SYMBOL_INTERNAL void* AddGarbage(struct Game *game, void* data) {
+	if (!game->_priv.garbage) {
+		game->_priv.garbage = malloc(sizeof(struct libsuperderpy_list));
+		game->_priv.garbage->data = data;
+		game->_priv.garbage->next = NULL;
+	} else {
+		struct libsuperderpy_list *garbage = malloc(sizeof(struct libsuperderpy_list));
+		garbage->next = game->_priv.garbage;
+		garbage->data = data;
+		game->_priv.garbage = garbage;
+	}
+	return data;
+}
+
+SYMBOL_INTERNAL void ClearGarbage(struct Game *game) {
+	while (game->_priv.garbage) {
+		free(game->_priv.garbage->data);
+		game->_priv.garbage = game->_priv.garbage->next;
+	}
+}

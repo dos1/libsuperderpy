@@ -39,6 +39,11 @@
 
 struct Gamestate;
 
+struct libsuperderpy_list {
+		void *data;
+		struct libsuperderpy_list *next;
+};
+
 /*! \brief Main struct of the game. */
 struct Game {
 		ALLEGRO_DISPLAY *display; /*!< Main Allegro display. */
@@ -103,6 +108,8 @@ struct Game {
 						double t;
 						int loaded, toLoad;
 				} cur_gamestate;
+
+				struct libsuperderpy_list *garbage;
 
 		} _priv; /*!< Private resources. Do not use in gamestates! */
 
