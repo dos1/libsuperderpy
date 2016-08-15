@@ -122,39 +122,6 @@ SYMBOL_INTERNAL void Console_Unload(struct Game *game) {
 	al_destroy_bitmap(game->_priv.console);
 }
 
-
-SYMBOL_EXPORT void SetupViewport(struct Game *game) {
-	game->viewport.width = 320;
-	game->viewport.height = 180;
-
-	al_clear_to_color(al_map_rgb(0,0,0));
-
-	int resolution = al_get_display_width(game->display) / 320;
-	if (al_get_display_height(game->display) / 180 < resolution) resolution = al_get_display_height(game->display) / 180;
-	if (resolution < 1) resolution = 1;
-
-	if (atoi(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"))) {
-		int clipWidth = 320 * resolution, clipHeight = 180 * resolution;
-		int clipX = (al_get_display_width(game->display) - clipWidth) / 2, clipY = (al_get_display_height(game->display) - clipHeight) / 2;
-		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
-
-		al_build_transform(&game->projection, clipX, clipY, resolution, resolution, 0.0f);
-		al_use_transform(&game->projection);
-
-	} else if ((atoi(GetConfigOptionDefault(game, "SuperDerpy", "rotate", "1"))) && (game->viewport.height > game->viewport.width)) {
-		al_identity_transform(&game->projection);
-		al_rotate_transform(&game->projection, 0.5*ALLEGRO_PI);
-		al_translate_transform(&game->projection, game->viewport.width, 0);
-		al_scale_transform(&game->projection, resolution, resolution);
-		al_use_transform(&game->projection);
-		int temp = game->viewport.height;
-		game->viewport.height = game->viewport.width;
-		game->viewport.width = temp;
-	}
-	if (game->_priv.console) Console_Unload(game);
-	Console_Load(game);
-}
-
 SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
 	game->_priv.cur_gamestate.p++;

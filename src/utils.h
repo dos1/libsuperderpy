@@ -63,4 +63,6 @@ void PrintConsole(struct Game *game, char* format, ...);
 
 void FatalError(struct Game *game, bool exit, char* format, ...);
 
+void SetupViewport(struct Game *game);
+
 #endif
