@@ -75,6 +75,7 @@ struct Game {
 
 		struct {
 				struct Gamestate *gamestates; /*!< List of known gamestates. */
+				bool gamestate_scheduled; /*!< Whether there's some gamestate lifecycle management work to do. */
 				ALLEGRO_FONT *font_console; /*!< Font used in game console. */
 				ALLEGRO_FONT *font_bsod; /*!< Font used in Blue Screens of Derp. */
 				ALLEGRO_BITMAP *console; /*!< Bitmap with game console. */
@@ -107,7 +108,9 @@ struct Game {
 						struct Gamestate *tmp;
 						double t;
 						int loaded, toLoad;
-				} cur_gamestate;
+				} tmp_gamestate;
+
+				struct Gamestate *current_gamestate;
 
 				struct libsuperderpy_list *garbage;
 

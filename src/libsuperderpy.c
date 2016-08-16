@@ -148,6 +148,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR);
 
 	game->_priv.gamestates = NULL;
+	game->_priv.gamestate_scheduled = false;
 
 	game->_priv.event_queue = al_create_event_queue();
 	if(!game->_priv.event_queue) {
@@ -230,24 +231,26 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 	while(1) {
 		ALLEGRO_EVENT ev;
-		if (redraw && al_is_event_queue_empty(game->_priv.event_queue)) {
+		if ((redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled)) {
 
+			game->_priv.gamestate_scheduled = false;
 			struct Gamestate *tmp = game->_priv.gamestates;
 
-			game->_priv.cur_gamestate.toLoad = 0;
-			game->_priv.cur_gamestate.loaded = 0;
+			game->_priv.tmp_gamestate.toLoad = 0;
+			game->_priv.tmp_gamestate.loaded = 0;
 
 			// FIXME: move to function
 			// TODO: support dependences
 			while (tmp) {
 				if (tmp->pending_stop) {
 					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
+					game->_priv.current_gamestate = tmp;
 					(*tmp->api.Gamestate_Stop)(game, tmp->data);
 					tmp->started = false;
 					tmp->pending_stop = false;
 				}
 
-				if (tmp->pending_load) game->_priv.cur_gamestate.toLoad++;
+				if (tmp->pending_load) game->_priv.tmp_gamestate.toLoad++;
 				tmp=tmp->next;
 			}
 
@@ -255,7 +258,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			// FIXME: move to function
 			// TODO: support dependences
 
-			game->_priv.cur_gamestate.t = -1;
+			game->_priv.tmp_gamestate.t = -1;
 
 			while (tmp) {
 				if (tmp->pending_unload) {
@@ -263,6 +266,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					al_stop_timer(game->_priv.timer);
 					tmp->loaded = false;
 					tmp->pending_unload = false;
+					game->_priv.current_gamestate = tmp;
 					(*tmp->api.Gamestate_Unload)(game, tmp->data);
 					dlclose(tmp->handle);
 					tmp->handle = NULL;
@@ -300,20 +304,21 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 						if (!(tmp->api.Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
 
-						game->_priv.cur_gamestate.p = 0;
+						game->_priv.tmp_gamestate.p = 0;
 
 						DrawGamestates(game);
 						if (tmp->showLoading) {
-							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
+							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, game->_priv.tmp_gamestate.loaded/(float)game->_priv.tmp_gamestate.toLoad);
 						}
 						DrawConsole(game);
-						if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
+						if (al_get_time() - game->_priv.tmp_gamestate.t >= 1/60.0) {
 							al_flip_display();
-							game->_priv.cur_gamestate.t = al_get_time();
+							game->_priv.tmp_gamestate.t = al_get_time();
 						}
-						game->_priv.cur_gamestate.tmp = tmp;
+						game->_priv.tmp_gamestate.tmp = tmp;
+						game->_priv.current_gamestate = tmp;
 						tmp->data = (*tmp->api.Gamestate_Load)(game, &GamestateProgress);
-						game->_priv.cur_gamestate.loaded++;
+						game->_priv.tmp_gamestate.loaded++;
 
 						tmp->loaded = true;
 						tmp->pending_load = false;
@@ -331,6 +336,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				if ((tmp->pending_start)  && (tmp->loaded)) {
 					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
+					game->_priv.current_gamestate = tmp;
 					(*tmp->api.Gamestate_Start)(game, tmp->data);
 					al_start_timer(game->_priv.timer);
 					tmp->started = true;
@@ -421,11 +427,13 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	while (tmp) {
 		if (tmp->started) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Stop)(game, tmp->data);
 			tmp->started = false;
 		}
 		if (tmp->loaded) {
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Unload)(game, tmp->data);
 			dlclose(tmp->handle);
 			tmp->loaded = false;

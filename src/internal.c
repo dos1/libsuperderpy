@@ -29,6 +29,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Draw)(game, tmp->data);
 		}
 		tmp = tmp->next;
@@ -39,6 +40,7 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Logic)(game, tmp->data);
 		}
 		tmp = tmp->next;
@@ -49,6 +51,7 @@ SYMBOL_INTERNAL void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_ProcessEvent)(game, tmp->data, ev);
 		}
 		tmp = tmp->next;
@@ -59,6 +62,7 @@ SYMBOL_INTERNAL void PauseGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Pause)(game, tmp->data);
 		}
 		tmp = tmp->next;
@@ -70,6 +74,7 @@ SYMBOL_INTERNAL void ResumeGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
+			game->_priv.current_gamestate = tmp;
 			(*tmp->api.Gamestate_Resume)(game, tmp->data);
 		}
 		tmp = tmp->next;
@@ -123,17 +128,17 @@ SYMBOL_INTERNAL void Console_Unload(struct Game *game) {
 }
 
 SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.cur_gamestate.tmp;
-	game->_priv.cur_gamestate.p++;
+	struct Gamestate *tmp = game->_priv.tmp_gamestate.tmp;
+	game->_priv.tmp_gamestate.p++;
 	DrawGamestates(game);
 	float progressCount = *(tmp->api.Gamestate_ProgressCount) ? (float)*(tmp->api.Gamestate_ProgressCount) : 1;
-	float progress = ((game->_priv.cur_gamestate.p / progressCount) / (float)game->_priv.cur_gamestate.toLoad) + (game->_priv.cur_gamestate.loaded/(float)game->_priv.cur_gamestate.toLoad);
-	if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), game->_priv.cur_gamestate.p, *(tmp->api.Gamestate_ProgressCount));
+	float progress = ((game->_priv.tmp_gamestate.p / progressCount) / (float)game->_priv.tmp_gamestate.toLoad) + (game->_priv.tmp_gamestate.loaded/(float)game->_priv.tmp_gamestate.toLoad);
+	if (game->config.debug) PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress*100), game->_priv.tmp_gamestate.p, *(tmp->api.Gamestate_ProgressCount));
 	if (tmp->showLoading) (*game->_priv.loading.Draw)(game, game->_priv.loading.data, progress);
 	DrawConsole(game);
-	if (al_get_time() - game->_priv.cur_gamestate.t >= 1/60.0) {
+	if (al_get_time() - game->_priv.tmp_gamestate.t >= 1/60.0) {
 		al_flip_display();
-		game->_priv.cur_gamestate.t = al_get_time();
+		game->_priv.tmp_gamestate.t = al_get_time();
 	}
 }
 
