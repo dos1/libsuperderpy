@@ -50,6 +50,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline) {
 				struct TM_Action *tmp = timeline->queue;
 				timeline->queue = timeline->queue->next;
 				(*tmp->function)(timeline->game, tmp, TM_ACTIONSTATE_DESTROY);
+				TM_DestroyArgs(tmp->arguments);
 				free(tmp->name);
 				free(tmp);
 			}
@@ -101,6 +102,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline) {
 			tmp = pom;
 			pom = pom->next;
 		} else {
+			TM_DestroyArgs(pom->arguments);
 			free(pom->name);
 			free(pom);
 			tmp2 = tmp;
@@ -264,19 +266,30 @@ SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
 SYMBOL_INTERNAL bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
-	if (state != TM_ACTIONSTATE_RUNNING) return false;
-	int* delay = (int*) action->arguments->next->value;
-	char* name = (char*) action->arguments->next->next->value;
-	struct Timeline *timeline = (struct Timeline*) action->arguments->next->next->next->value;
-	TM_AddBackgroundAction(timeline, action->arguments->value, action->arguments->next->next->next->next, *delay, name);
-	free(name);
+	int* delay = (int*) TM_GetArg(action->arguments, 1);
+	char* name = (char*) TM_GetArg(action->arguments, 2);
+	struct Timeline *timeline = (struct Timeline*) TM_GetArg(action->arguments, 3);
+	struct TM_Arguments *arguments = (struct TM_Arguments*) TM_GetArg(action->arguments, 4);
+	bool *used = (bool*) TM_GetArg(action->arguments, 5);
+	if (state == TM_ACTIONSTATE_START) {
+		TM_AddBackgroundAction(timeline, TM_GetArg(action->arguments, 0), arguments, *delay, name);
+		*used = true;
+	}
+	if (state == TM_ACTIONSTATE_DESTROY) {
+		free(name);
+		free(delay);
+		if (!(*used)) {
+			TM_DestroyArgs(arguments);
+		}
+		free(used);
+	}
 	return true;
 }
 
 SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name) {
 	TM_WrapArg(int, del, delay);
-	struct TM_Arguments* arguments = TM_AddToArgs(NULL, 4, (void*) func, del, strdup(name), (void*) timeline);
-	arguments->next->next->next->next = args;
+	TM_WrapArg(bool, used, false);
+	struct TM_Arguments* arguments = TM_AddToArgs(NULL, 6, (void*) func, del, strdup(name), (void*) timeline, args, used);
 	return TM_AddAction(timeline, *runinbackground, arguments, "TM_BackgroundAction");
 }
 
@@ -294,63 +307,37 @@ SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {
 
 SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: cleaning queue", timeline->name);
-	struct TM_Action *tmp, *tmp2, *pom = timeline->queue;
-	tmp = NULL;
+	struct TM_Action *tmp, *pom = timeline->queue;
 	while (pom!=NULL) {
-		if (pom->active) {
-			if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
-			if (pom->timer) {
-				al_stop_timer(pom->timer);
-				al_destroy_timer(pom->timer);
-			}
-		} else {
-			TM_DestroyArgs(pom->arguments);
-			pom->arguments = NULL;
+		if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
+		if (pom->timer) {
+			al_stop_timer(pom->timer);
+			al_destroy_timer(pom->timer);
 		}
-		if ((!tmp) || (tmp->next==pom)) {
-			tmp = pom;
-			pom = pom->next;
-		} else {
-			free(pom->name);
-			free(pom);
-			tmp2 = tmp;
-			if (!tmp) pom=timeline->queue->next;
-			else pom=tmp->next;
-			tmp = tmp2;
-		}
+		TM_DestroyArgs(pom->arguments);
+		tmp = pom->next;
+		free(pom->name);
+		free(pom);
+		pom = tmp;
 	}
-	// TODO: it shouldn't be needed, but is. Debug!
 	timeline->queue = NULL;
 }
 
 SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: cleaning background queue", timeline->name);
-	struct TM_Action *tmp, *tmp2, *pom = timeline->background;
-	tmp = NULL;
+	struct TM_Action *tmp, *pom = timeline->background;
 	while (pom!=NULL) {
-		if (pom->active) {
-			if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
-			if (pom->timer) {
-				al_stop_timer(pom->timer);
+		if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
+		if (pom->timer) {
+			  al_stop_timer(pom->timer);
 				al_destroy_timer(pom->timer);
-			}
-		} else {
-			TM_DestroyArgs(pom->arguments);
-			pom->arguments = NULL;
 		}
-		if ((!tmp) || (tmp->next==pom)) {
-			tmp = pom;
-			pom = pom->next;
-		} else {
-			free(pom->name);
-			free(pom);
-			tmp2 = tmp;
-			if (!tmp) pom=timeline->background->next;
-			else pom=tmp->next;
-			tmp = tmp2;
-		}
+		TM_DestroyArgs(pom->arguments);
+		tmp = pom->next;
+		free(pom->name);
+		free(pom);
+		pom = tmp;
 	}
-	// TODO: it shouldn't be needed, but is. Debug!
 	timeline->background = NULL;
 }
 
@@ -387,6 +374,13 @@ SYMBOL_EXPORT struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int n
 	}
 	va_end(ap);
 	return args;
+}
+
+SYMBOL_EXPORT void* TM_GetArg(struct TM_Arguments *args, int num) {
+	for (int i=0; i<num; i++) {
+		args = args->next;
+	}
+	return args->value;
 }
 
 SYMBOL_EXPORT void TM_DestroyArgs(struct TM_Arguments* args) {

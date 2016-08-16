@@ -137,23 +137,55 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 	}
 }
 
-SYMBOL_INTERNAL void* AddGarbage(struct Game *game, void* data) {
-	if (!game->_priv.garbage) {
-		game->_priv.garbage = malloc(sizeof(struct libsuperderpy_list));
-		game->_priv.garbage->data = data;
-		game->_priv.garbage->next = NULL;
+SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list *list, void* data) {
+	if (!list) {
+		list = malloc(sizeof(struct libsuperderpy_list));
+		list->data = data;
+		list->next = NULL;
 	} else {
-		struct libsuperderpy_list *garbage = malloc(sizeof(struct libsuperderpy_list));
-		garbage->next = game->_priv.garbage;
-		garbage->data = data;
-		game->_priv.garbage = garbage;
+		struct libsuperderpy_list *elem = malloc(sizeof(struct libsuperderpy_list));
+		elem->next = list;
+		elem->data = data;
+		list = elem;
 	}
+	return list;
+}
+
+SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list **list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data) {
+	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start = *list;
+	void* d = NULL;
+	while (tmp) {
+		if (identity(tmp, data)) {
+			if (prev) {
+				prev->next = tmp->next;
+				d = tmp->data;
+				free(tmp);
+				return d;
+			} else {
+				start = tmp->next;
+				d = tmp->data;
+				free(tmp);
+				*list = start;
+				return d;
+			}
+		}
+		prev = tmp;
+		tmp = tmp->next;
+	}
+	return NULL;
+}
+
+SYMBOL_INTERNAL void* AddGarbage(struct Game *game, void* data) {
+	game->_priv.garbage = AddToList(game->_priv.garbage, data);
 	return data;
 }
 
 SYMBOL_INTERNAL void ClearGarbage(struct Game *game) {
+	struct libsuperderpy_list *tmp;
 	while (game->_priv.garbage) {
 		free(game->_priv.garbage->data);
-		game->_priv.garbage = game->_priv.garbage->next;
+		tmp = game->_priv.garbage->next;
+		free(game->_priv.garbage);
+		game->_priv.garbage = tmp;
 	}
 }

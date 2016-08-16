@@ -23,7 +23,7 @@
 #include "gamestate.h"
 #include "internal.h"
 
-SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game) {
+SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	if (!tmp) {
 		game->_priv.gamestates = malloc(sizeof(struct Gamestate));
@@ -35,7 +35,7 @@ SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game) {
 		tmp->next = malloc(sizeof(struct Gamestate));
 		tmp = tmp->next;
 	}
-	tmp->name = NULL;
+	tmp->name = strdup(name);
 	tmp->handle = NULL;
 	tmp->loaded = false;
 	tmp->paused = false;
@@ -68,8 +68,7 @@ SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {
 		}
 		gs->pending_load = true;
 	} else {
-		gs = AddNewGamestate(game);
-		gs->name = strdup(name);
+		gs = AddNewGamestate(game, name);
 		gs->pending_load = true;
 		gs->showLoading = true;
 	}

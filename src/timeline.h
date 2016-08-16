@@ -92,6 +92,8 @@ void TM_CleanBackgroundQueue(struct Timeline*);
 void TM_Destroy(struct Timeline*);
 /*! \brief Add data to TM_Arguments queue. */
 struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...);
+/*! \brief Get nth argument from TM_Arguments queue (counted from 0). */
+void* TM_GetArg(struct TM_Arguments *args, int num);
 /*! \brief Destroy TM_Arguments queue. */
 void TM_DestroyArgs(struct TM_Arguments* args);
 

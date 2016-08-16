@@ -78,6 +78,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.height = atoi(GetConfigOptionDefault(game, "SuperDerpy", "height", "720"));
 	if (game->config.height<180) game->config.height=180;
 
+	game->_priv.showconsole = game->config.debug;
+
 	if(!al_init_image_addon()) {
 		fprintf(stderr, "failed to initialize image addon!\n");
 		/*al_show_native_message_box(display, "Error", "Error", "Failed to initialize al_init_image_addon!",
@@ -166,8 +168,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mixer_gain(game->audio.fx, game->config.fx/10.0);
 	al_set_mixer_gain(game->audio.music, game->config.music/10.0);
 	al_set_mixer_gain(game->audio.voice, game->config.voice/10.0);
-
-	game->_priv.showconsole = game->config.debug;
 
 	setlocale(LC_NUMERIC, "C");
 
@@ -328,7 +328,6 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			tmp=game->_priv.gamestates;
 
 			while (tmp) {
-
 				if ((tmp->pending_start)  && (tmp->loaded)) {
 					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
@@ -415,8 +414,10 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	game->shuttingdown = true;
 
+	ClearGarbage(game);
+
 	// in case of restart
-	struct Gamestate *tmp = game->_priv.gamestates;
+	struct Gamestate *tmp = game->_priv.gamestates, *pom;
 	while (tmp) {
 		if (tmp->started) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
@@ -429,14 +430,20 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 			dlclose(tmp->handle);
 			tmp->loaded = false;
 		}
-		tmp=tmp->next;
+		free(tmp->name);
+		pom = tmp->next;
+		free(tmp);
+		tmp=pom;
 	}
 
 	al_clear_to_color(al_map_rgb(0,0,0));
 	PrintConsole(game, "Shutting down...");
 	DrawConsole(game);
 	al_flip_display();
-	al_rest(0.1);
+	while (game->_priv.garbage) {
+		free(game->_priv.garbage->data);
+		game->_priv.garbage = game->_priv.garbage->next;
+	}
 	(*game->_priv.loading.Unload)(game, game->_priv.loading.data);
 	al_destroy_timer(game->_priv.timer);
 	Console_Unload(game);
@@ -452,8 +459,9 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	al_shutdown_ttf_addon();
 	al_shutdown_font_addon();
 	char** argv = game->_priv.argv;
+	bool restart = game->restart;
 	free(game);
-	if (game->restart) {
+	if (restart) {
 		execv(argv[0], argv); // FIXME: on OSX there's chdir called which might break it
 	}
 }
