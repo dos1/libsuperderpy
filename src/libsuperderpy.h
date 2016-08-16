@@ -79,6 +79,7 @@ struct Game {
 				ALLEGRO_FONT *font_console; /*!< Font used in game console. */
 				ALLEGRO_FONT *font_bsod; /*!< Font used in Blue Screens of Derp. */
 				ALLEGRO_BITMAP *console; /*!< Bitmap with game console. */
+				ALLEGRO_BITMAP *console_tmp; /*!< Bitmap used for drawing game console. */
 				ALLEGRO_EVENT_QUEUE *event_queue; /*!< Main event queue. */
 				ALLEGRO_TIMER *timer; /*!< Main LPS (logic) timer. */
 				bool showconsole; /*!< If true, game console is rendered on screen. */

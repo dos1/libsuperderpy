@@ -266,16 +266,14 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	if (game->config.debug) { printf("%s\n", text); fflush(stdout); }
 	if (!game->_priv.console) return;
 	if ((!game->config.debug) && (!game->_priv.showconsole)) return;
-	ALLEGRO_BITMAP *con = al_create_bitmap(al_get_bitmap_width(game->_priv.console), al_get_bitmap_height(game->_priv.console));
-	al_set_target_bitmap(con);
+	al_set_target_bitmap(game->_priv.console_tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,80));
 	al_draw_bitmap_region(game->_priv.console, 0, (int)(al_get_bitmap_height(game->_priv.console)*0.2), al_get_bitmap_width(game->_priv.console), (int)(al_get_bitmap_height(game->_priv.console)*0.8), 0, 0, 0);
 	al_draw_text(game->_priv.font_console, al_map_rgb(255,255,255), (int)(game->viewport.width*0.005), (int)(al_get_bitmap_height(game->_priv.console)*0.81), ALLEGRO_ALIGN_LEFT, text);
 	al_set_target_bitmap(game->_priv.console);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
-	al_draw_bitmap(con, 0, 0, 0);
+	al_draw_bitmap(game->_priv.console_tmp, 0, 0, 0);
 	al_set_target_bitmap(al_get_backbuffer(game->display));
-	al_destroy_bitmap(con);
 }
 
 SYMBOL_EXPORT void SetupViewport(struct Game *game) {

@@ -65,6 +65,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->_priv.font_bsod = NULL;
 	game->_priv.console = NULL;
+	game->_priv.console_tmp = NULL;
 
 	game->_priv.garbage = NULL;
 

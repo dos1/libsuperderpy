@@ -108,8 +108,6 @@ SYMBOL_INTERNAL void DrawConsole(struct Game *game) {
 }
 
 SYMBOL_INTERNAL void Console_Load(struct Game *game) {
-	game->_priv.font_console = NULL;
-	game->_priv.console = NULL;
 	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"),al_get_display_height(game->display)*0.025,0 );
 	if (al_get_display_height(game->display)*0.025 >= 16) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"),16 * ((al_get_display_height(game->display) > 1080) ? 2 : 1) ,0 );
@@ -117,6 +115,7 @@ SYMBOL_INTERNAL void Console_Load(struct Game *game) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), al_get_display_height(game->display)*0.025,0 );
 	}
 	game->_priv.console = al_create_bitmap((al_get_display_width(game->display) / 320) * 320, al_get_font_line_height(game->_priv.font_console)*5);
+	game->_priv.console_tmp = al_create_bitmap((al_get_display_width(game->display) / 320) * 320, al_get_font_line_height(game->_priv.font_console)*5);
 	al_set_target_bitmap(game->_priv.console);
 	al_clear_to_color(al_map_rgba(0,0,0,80));
 	al_set_target_bitmap(al_get_backbuffer(game->display));
@@ -125,6 +124,7 @@ SYMBOL_INTERNAL void Console_Load(struct Game *game) {
 SYMBOL_INTERNAL void Console_Unload(struct Game *game) {
 	al_destroy_font(game->_priv.font_console);
 	al_destroy_bitmap(game->_priv.console);
+	al_destroy_bitmap(game->_priv.console_tmp);
 }
 
 SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
