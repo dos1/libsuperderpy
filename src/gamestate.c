@@ -197,6 +197,16 @@ SYMBOL_EXPORT void SwitchGamestate(struct Game *game, const char* current, const
 	StartGamestate(game, n);
 }
 
+SYMBOL_EXPORT void ChangeGamestate(struct Game *game, const char* current, const char* n) {
+	StopGamestate(game, current);
+	LoadGamestate(game, n);
+	StartGamestate(game, n);
+}
+
 SYMBOL_EXPORT void SwitchCurrentGamestate(struct Game *game, const char* n) {
 	SwitchGamestate(game, game->_priv.current_gamestate->name, n);
+}
+
+SYMBOL_EXPORT void ChangeCurrentGamestate(struct Game *game, const char* n) {
+	ChangeGamestate(game, game->_priv.current_gamestate->name, n);
 }
