@@ -45,6 +45,7 @@ SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game, const char*
 	tmp->pending_stop = false;
 	tmp->pending_unload = false;
 	tmp->next = NULL;
+	tmp->api = NULL;
 	return tmp;
 }
 
@@ -57,6 +58,19 @@ SYMBOL_INTERNAL struct Gamestate* FindGamestate(struct Game *game, const char* n
 		tmp = tmp->next;
 	}
 	return NULL;
+}
+
+SYMBOL_EXPORT void RegisterGamestate(struct Game *game, const char* name, struct Gamestate_API *api) {
+	struct Gamestate *gs = FindGamestate(game, name);
+	if (!gs) {
+		gs = AddNewGamestate(game, name);
+	}
+	if (gs->api) {
+		PrintConsole(game, "Trying to register already registered gamestate \"%s\"!", name);
+		return;
+	}
+	gs->api = api;
+	PrintConsole(game, "Gamestate \"%s\" registered.", name);
 }
 
 SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {

@@ -25,6 +25,23 @@
 
 struct Game;
 
+struct Gamestate_API {
+		void (*Gamestate_Draw)(struct Game *game, void* data);
+		void (*Gamestate_Logic)(struct Game *game, void* data);
+
+		void* (*Gamestate_Load)(struct Game *game, void (*progress)(struct Game *game));
+		void (*Gamestate_Start)(struct Game *game, void* data);
+		void (*Gamestate_Pause)(struct Game *game, void* data);
+		void (*Gamestate_Resume)(struct Game *game, void* data);
+		void (*Gamestate_Stop)(struct Game *game, void* data);
+		void (*Gamestate_Unload)(struct Game *game, void* data);
+
+		void (*Gamestate_ProcessEvent)(struct Game *game, void* data, ALLEGRO_EVENT *ev);
+		void (*Gamestate_Reload)(struct Game *game, void* data);
+
+		int *Gamestate_ProgressCount;
+};
+
 struct Gamestate {
 		char* name;
 		void* handle;
@@ -32,28 +49,14 @@ struct Gamestate {
 		bool started, pending_start, pending_stop;
 		bool showLoading;
 		bool paused;
-		struct Gamestate* next;
+		struct Gamestate *next;
 		void* data;
-		struct {
-				void (*Gamestate_Draw)(struct Game *game, void* data);
-				void (*Gamestate_Logic)(struct Game *game, void* data);
-
-				void* (*Gamestate_Load)(struct Game *game, void (*progress)(struct Game *game));
-				void (*Gamestate_Start)(struct Game *game, void* data);
-				void (*Gamestate_Pause)(struct Game *game, void* data);
-				void (*Gamestate_Resume)(struct Game *game, void* data);
-				void (*Gamestate_Stop)(struct Game *game, void* data);
-				void (*Gamestate_Unload)(struct Game *game, void* data);
-
-				void (*Gamestate_ProcessEvent)(struct Game *game, void* data, ALLEGRO_EVENT *ev);
-				void (*Gamestate_Reload)(struct Game *game, void* data);
-
-				int *Gamestate_ProgressCount;
-		} api;
+		struct Gamestate_API *api;
 };
 
 void LoadGamestate(struct Game *game, const char* name);
 void UnloadGamestate(struct Game *game, const char* name);
+void RegisterGamestate(struct Game *game, const char* name, struct Gamestate_API *api);
 void StartGamestate(struct Game *game, const char* name);
 void StopGamestate(struct Game *game, const char* name);
 void PauseGamestate(struct Game *game, const char* name);

@@ -246,7 +246,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				if (tmp->pending_stop) {
 					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
 					game->_priv.current_gamestate = tmp;
-					(*tmp->api.Gamestate_Stop)(game, tmp->data);
+					(*tmp->api->Gamestate_Stop)(game, tmp->data);
 					tmp->started = false;
 					tmp->pending_stop = false;
 				}
@@ -268,43 +268,46 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					tmp->loaded = false;
 					tmp->pending_unload = false;
 					game->_priv.current_gamestate = tmp;
-					(*tmp->api.Gamestate_Unload)(game, tmp->data);
-					dlclose(tmp->handle);
-					tmp->handle = NULL;
+					(*tmp->api->Gamestate_Unload)(game, tmp->data);
 					al_start_timer(game->_priv.timer);
 				}
 				if (tmp->pending_load) {
-					PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
-					// TODO: take proper game name
-					char libname[1024];
-					snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->name, tmp->name);
-					tmp->handle = dlopen(libname,RTLD_NOW);
-					if (!tmp->handle) {
-						//PrintConsole(&game, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
-						FatalError(game, false, "Error while loading gamestate \"%s\": %s", tmp->name, dlerror());
 
-						tmp->pending_load = false;
-						tmp->pending_start = false;
-					} else {
+					if (!tmp->api) {
+						PrintConsole(game, "Opening gamestate \"%s\"...", tmp->name);
+						char libname[1024];
+						snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->name, tmp->name);
+						tmp->handle = dlopen(libname,RTLD_NOW);
+						if (!tmp->handle) {
+							FatalError(game, false, "Error while opening gamestate \"%s\": %s", tmp->name, dlerror());
+
+							tmp->pending_load = false;
+							tmp->pending_start = false;
+						} else {
+
+							tmp->api = malloc(sizeof(struct Gamestate_API));
 
 #define GS_ERROR FatalError(game, false, "Error on resolving gamestate symbol: %s", dlerror()); tmp->pending_load = false; tmp->pending_start = false; tmp=tmp->next; continue;
 
-						if (!(tmp->api.Gamestate_Draw = dlsym(tmp->handle, "Gamestate_Draw"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Logic = dlsym(tmp->handle, "Gamestate_Logic"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Draw = dlsym(tmp->handle, "Gamestate_Draw"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Logic = dlsym(tmp->handle, "Gamestate_Logic"))) { GS_ERROR; }
 
-						if (!(tmp->api.Gamestate_Load = dlsym(tmp->handle, "Gamestate_Load"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Start = dlsym(tmp->handle, "Gamestate_Start"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Pause = dlsym(tmp->handle, "Gamestate_Pause"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Resume = dlsym(tmp->handle, "Gamestate_Resume"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Stop = dlsym(tmp->handle, "Gamestate_Stop"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Unload = dlsym(tmp->handle, "Gamestate_Unload"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Load = dlsym(tmp->handle, "Gamestate_Load"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Start = dlsym(tmp->handle, "Gamestate_Start"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Pause = dlsym(tmp->handle, "Gamestate_Pause"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Resume = dlsym(tmp->handle, "Gamestate_Resume"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Stop = dlsym(tmp->handle, "Gamestate_Stop"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Unload = dlsym(tmp->handle, "Gamestate_Unload"))) { GS_ERROR; }
 
-						if (!(tmp->api.Gamestate_ProcessEvent = dlsym(tmp->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
-						if (!(tmp->api.Gamestate_Reload = dlsym(tmp->handle, "Gamestate_Reload"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_ProcessEvent = dlsym(tmp->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
+							if (!(tmp->api->Gamestate_Reload = dlsym(tmp->handle, "Gamestate_Reload"))) { GS_ERROR; }
 
-						if (!(tmp->api.Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
-
+							if (!(tmp->api->Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
+						}
+					}
+					if (tmp->api) {
+						PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
 						game->_priv.tmp_gamestate.p = 0;
 
 						DrawGamestates(game);
@@ -318,7 +321,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 						}
 						game->_priv.tmp_gamestate.tmp = tmp;
 						game->_priv.current_gamestate = tmp;
-						tmp->data = (*tmp->api.Gamestate_Load)(game, &GamestateProgress);
+						tmp->data = (*tmp->api->Gamestate_Load)(game, &GamestateProgress);
 						game->_priv.tmp_gamestate.loaded++;
 
 						tmp->loaded = true;
@@ -338,7 +341,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
 					game->_priv.current_gamestate = tmp;
-					(*tmp->api.Gamestate_Start)(game, tmp->data);
+					(*tmp->api->Gamestate_Start)(game, tmp->data);
 					al_start_timer(game->_priv.timer);
 					tmp->started = true;
 					tmp->pending_start = false;
@@ -429,17 +432,23 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 		if (tmp->started) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api.Gamestate_Stop)(game, tmp->data);
+			(*tmp->api->Gamestate_Stop)(game, tmp->data);
 			tmp->started = false;
 		}
 		if (tmp->loaded) {
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api.Gamestate_Unload)(game, tmp->data);
-			dlclose(tmp->handle);
+			(*tmp->api->Gamestate_Unload)(game, tmp->data);
 			tmp->loaded = false;
 		}
+		if (tmp->handle) {
+			PrintConsole(game, "Closing gamestate \"%s\"...", tmp->name);
+			dlclose(tmp->handle);
+		}
 		free(tmp->name);
+		if (tmp->api) {
+			free(tmp->api);
+		}
 		pom = tmp->next;
 		free(tmp);
 		tmp=pom;
