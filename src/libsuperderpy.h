@@ -120,6 +120,8 @@ struct Game {
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
 
+		bool show_loading_on_launch;
+
 		const char* name;
 
 		LIBSUPERDERPY_DATA_TYPE *data;

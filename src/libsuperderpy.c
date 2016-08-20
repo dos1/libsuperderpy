@@ -181,6 +181,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->shuttingdown = false;
 	game->restart = false;
 
+	game->show_loading_on_launch = false;
+
 	return game;
 }
 
@@ -203,9 +205,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
-		// don't show loading screen on init
-		// TODO: make it configurable
-		tmp->showLoading = false;
+		// don't show loading screen on init if requested
+		tmp->showLoading = game->show_loading_on_launch;
 		tmp = tmp->next;
 	}
 
