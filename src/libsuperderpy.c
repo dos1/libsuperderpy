@@ -28,9 +28,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <libgen.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_acodec.h>
-#include <allegro5/allegro_ttf.h>
 #ifdef ALLEGRO_MACOSX
 #include <mach-o/dyld.h>
 #include <sys/param.h>
@@ -270,7 +267,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					tmp->pending_unload = false;
 					game->_priv.current_gamestate = tmp;
 					(*tmp->api->Gamestate_Unload)(game, tmp->data);
-					al_start_timer(game->_priv.timer);
+					al_resume_timer(game->_priv.timer);
 				}
 				if (tmp->pending_load) {
 					al_stop_timer(game->_priv.timer);
@@ -328,7 +325,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 						tmp->loaded = true;
 						tmp->pending_load = false;
 					}
-					al_start_timer(game->_priv.timer);
+					al_resume_timer(game->_priv.timer);
 				}
 
 				tmp=tmp->next;
@@ -343,7 +340,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					al_stop_timer(game->_priv.timer);
 					game->_priv.current_gamestate = tmp;
 					(*tmp->api->Gamestate_Start)(game, tmp->data);
-					al_start_timer(game->_priv.timer);
+					al_resume_timer(game->_priv.timer);
 					tmp->started = true;
 					tmp->pending_start = false;
 				}

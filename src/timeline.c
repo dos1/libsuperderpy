@@ -124,7 +124,7 @@ SYMBOL_INTERNAL void PauseTimers(struct Timeline* timeline, bool pause) {
 		if (timeline->queue->timer) {
 			if (pause) {
 				al_stop_timer(timeline->queue->timer);
-			} else if (!timeline->queue->active) al_start_timer(timeline->queue->timer);
+			} else if (!timeline->queue->active) al_resume_timer(timeline->queue->timer);
 		}
 	}
 	struct TM_Action* tmp = timeline->background;
@@ -132,7 +132,7 @@ SYMBOL_INTERNAL void PauseTimers(struct Timeline* timeline, bool pause) {
 		if (tmp->timer) {
 			if (pause) {
 				al_stop_timer(tmp->timer);
-			} else if (!tmp->active) al_start_timer(tmp->timer);
+			} else if (!tmp->active) al_resume_timer(tmp->timer);
 		}
 		tmp = tmp->next;
 	}
