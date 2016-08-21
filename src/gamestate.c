@@ -190,6 +190,26 @@ SYMBOL_EXPORT void UnloadAllGamestates(struct Game *game) {
 	}
 }
 
+SYMBOL_EXPORT void PauseAllGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->started || !tmp->paused) {
+			PauseGamestate(game, tmp->name);
+		}
+		tmp = tmp->next;
+	}
+}
+
+SYMBOL_EXPORT void ResumeAllGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->paused) {
+			ResumeGamestate(game, tmp->name);
+		}
+		tmp = tmp->next;
+	}
+}
+
 SYMBOL_EXPORT void SwitchGamestate(struct Game *game, const char* current, const char* n) {
 	StopGamestate(game, current);
 	UnloadGamestate(game, current);
@@ -209,4 +229,16 @@ SYMBOL_EXPORT void SwitchCurrentGamestate(struct Game *game, const char* n) {
 
 SYMBOL_EXPORT void ChangeCurrentGamestate(struct Game *game, const char* n) {
 	ChangeGamestate(game, game->_priv.current_gamestate->name, n);
+}
+
+SYMBOL_EXPORT void StopCurrentGamestate(struct Game *game) {
+	StopGamestate(game, game->_priv.current_gamestate->name);
+}
+
+SYMBOL_EXPORT void PauseCurrentGamestate(struct Game *game) {
+	PauseGamestate(game, game->_priv.current_gamestate->name);
+}
+
+SYMBOL_EXPORT void UnloadCurrentGamestate(struct Game *game) {
+	UnloadGamestate(game, game->_priv.current_gamestate->name);
 }

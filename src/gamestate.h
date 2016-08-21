@@ -61,10 +61,15 @@ void StartGamestate(struct Game *game, const char* name);
 void StopGamestate(struct Game *game, const char* name);
 void PauseGamestate(struct Game *game, const char* name);
 void ResumeGamestate(struct Game *game, const char* name);
+void PauseAllGamestates(struct Game *game);
+void ResumeAllGamestates(struct Game *game);
 void UnloadAllGamestates(struct Game *game);
 void SwitchGamestate(struct Game *game, const char* current, const char* n);
 void SwitchCurrentGamestate(struct Game *game, const char* n);
 void ChangeGamestate(struct Game *game, const char* current, const char* n);
 void ChangeCurrentGamestate(struct Game *game, const char* n);
+void StopCurrentGamestate(struct Game *game);
+void PauseCurrentGamestate(struct Game *game);
+void UnloadCurrentGamestate(struct Game *game);
 
 #endif
