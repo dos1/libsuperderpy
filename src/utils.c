@@ -276,18 +276,30 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 }
 
-SYMBOL_EXPORT void SetupViewport(struct Game *game) {
-	game->viewport.width = 320;
-	game->viewport.height = 180;
+SYMBOL_EXPORT void SetupViewport(struct Game *game, struct libsuperderpy_viewport config) {
+
+	game->viewport = config;
+
+	if ((game->viewport.width == 0) || (game->viewport.height == 0)) {
+		game->viewport.height = al_get_display_height(game->display);
+		game->viewport.width = game->viewport.aspect * game->viewport.height;
+		if (game->viewport.width > al_get_display_width(game->display)) {
+			game->viewport.width = al_get_display_width(game->display);
+			game->viewport.height = game->viewport.aspect / game->viewport.width;
+		}
+	}
 
 	al_clear_to_color(al_map_rgb(0,0,0));
 
-	int resolution = al_get_display_width(game->display) / 320;
-	if (al_get_display_height(game->display) / 180 < resolution) resolution = al_get_display_height(game->display) / 180;
+	float resolution = al_get_display_width(game->display) / (float)game->viewport.width;
+	if (al_get_display_height(game->display) / game->viewport.height < resolution) resolution = al_get_display_height(game->display) / (float)game->viewport.height;
+	if (!game->viewport.allow_non_integer) {
+		resolution = floor(resolution);
+	}
 	if (resolution < 1) resolution = 1;
 
 	if (atoi(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"))) {
-		int clipWidth = 320 * resolution, clipHeight = 180 * resolution;
+		int clipWidth = game->viewport.width * resolution, clipHeight = game->viewport.height * resolution;
 		int clipX = (al_get_display_width(game->display) - clipWidth) / 2, clipY = (al_get_display_height(game->display) - clipHeight) / 2;
 		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
 

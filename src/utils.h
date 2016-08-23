@@ -34,6 +34,8 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 
+struct libsuperderpy_viewport;
+
 /*! \brief Draws rectangle filled with vertical gradient. */
 void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom);
 /*! \brief Draws rectangle filled with horizontal gradient. */
@@ -63,6 +65,6 @@ void PrintConsole(struct Game *game, char* format, ...);
 
 void FatalError(struct Game *game, bool exit, char* format, ...);
 
-void SetupViewport(struct Game *game);
+void SetupViewport(struct Game *game, struct libsuperderpy_viewport config);
 
 #endif

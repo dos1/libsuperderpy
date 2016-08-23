@@ -47,16 +47,20 @@ struct libsuperderpy_list {
 		struct libsuperderpy_list *next;
 };
 
+struct libsuperderpy_viewport {
+	int width; /*!< Actual available width of the drawing canvas. */
+	int height; /*!< Actual available height of the drawing canvas. */
+	float aspect;
+	bool allow_non_integer;
+};
+
 /*! \brief Main struct of the game. */
 struct Game {
 		ALLEGRO_DISPLAY *display; /*!< Main Allegro display. */
 
 		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
-		struct {
-				int width; /*!< Actual available width of the drawing canvas. */
-				int height; /*!< Actual available height of the drawing canvas. */
-		} viewport;
+		struct libsuperderpy_viewport viewport, viewport_config;
 
 		struct {
 				int fx; /*!< Effects volume. */
@@ -131,7 +135,7 @@ struct Game {
 
 };
 
-struct Game* libsuperderpy_init(int argc, char **argv, const char* name);
+struct Game* libsuperderpy_init(int argc, char **argv, const char* name, struct libsuperderpy_viewport viewport);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 

@@ -35,11 +35,12 @@
 #include "internal.h"
 #include "libsuperderpy.h"
 
-SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name) {
+SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct libsuperderpy_viewport viewport) {
 
 	struct Game *game = malloc(sizeof(struct Game));
 
 	game->name = name;
+	game->viewport_config = viewport;
 
 #ifdef ALLEGRO_MACOSX
 	char exe_path[MAXPATHLEN];
@@ -125,18 +126,18 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_window_position(20, 40); // workaround nasty Windows bug with window being created off-screen
 #endif
 
+	al_set_new_window_title(game->name);
 	game->display = al_create_display(game->config.width, game->config.height);
 	if(!game->display) {
 		fprintf(stderr, "failed to create display!\n");
 		return NULL;
 	}
 
-	SetupViewport(game);
+	SetupViewport(game, viewport);
 
 	PrintConsole(game, "Viewport %dx%d", game->viewport.width, game->viewport.height);
 
 	ALLEGRO_BITMAP *icon = al_load_bitmap(GetDataFilePath(game, GetGameName(game, "icons/%s.png")));
-	al_set_window_title(game->display, game->name);
 	al_set_display_icon(game->display, icon);
 	al_destroy_bitmap(icon);
 
@@ -371,7 +372,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				break;
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_FOUND) {
-				SetupViewport(game);
+				SetupViewport(game, game->viewport_config);
 			}
 #ifdef ALLEGRO_MACOSX
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == 104)) { //TODO: report to upstream
