@@ -28,12 +28,13 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <libgen.h>
+#include "internal.h"
+#include "libsuperderpy.h"
+#include "3rdparty/valgrind.h"
 #ifdef ALLEGRO_MACOSX
 #include <mach-o/dyld.h>
 #include <sys/param.h>
 #endif
-#include "internal.h"
-#include "libsuperderpy.h"
 
 SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct libsuperderpy_viewport viewport) {
 
@@ -440,7 +441,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 			(*tmp->api->Gamestate_Unload)(game, tmp->data);
 			tmp->loaded = false;
 		}
-		if (tmp->handle) {
+		if (tmp->handle && !RUNNING_ON_VALGRIND) {
 			PrintConsole(game, "Closing gamestate \"%s\"...", tmp->name);
 			dlclose(tmp->handle);
 		}
