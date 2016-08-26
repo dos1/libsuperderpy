@@ -59,11 +59,11 @@ struct Character {
 		bool dead;
 };
 
-
 void SelectSpritesheet(struct Game *game, struct Character *character, char* name);
 void ChangeSpritesheet(struct Game *game, struct Character *character, char* name);
 void RegisterSpritesheet(struct Game *game, struct Character *character, char* name);
 
+void DrawCharacterF(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags);
 void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags);
 
 struct Character* CreateCharacter(struct Game *game, char* name);
@@ -74,6 +74,12 @@ void UnloadSpritesheets(struct Game *game, struct Character *character);
 
 void AnimateCharacter(struct Game *game, struct Character *character, float speed_modifier);
 void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle);
-void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle);
+void MoveCharacterF(struct Game *game, struct Character *character, float x, float y, float angle);
+void SetCharacterPosition(struct Game *game, struct Character *character, float x, float y, float angle);
+void SetCharacterPositionF(struct Game *game, struct Character *character, float x, float y, float angle);
+
+int GetCharacterX(struct Game *game, struct Character *character);
+int GetCharacterY(struct Game *game, struct Character *character);
+float GetCharacterAngle(struct Game *game, struct Character *character);
 
 #endif

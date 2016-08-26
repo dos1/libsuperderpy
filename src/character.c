@@ -184,22 +184,50 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game *game, struct Character *charact
 }
 
 SYMBOL_EXPORT void MoveCharacter(struct Game *game, struct Character *character, float x, float y, float angle) {
+	MoveCharacterF(game, character, x / (float)game->viewport.width, y / (float)game->viewport.height, angle);
+}
+
+SYMBOL_EXPORT void MoveCharacterF(struct Game *game, struct Character *character, float x, float y, float angle) {
 	if (character->dead) return;
 	character->x += x;
 	character->y += y;
 	character->angle += angle;
 }
 
-SYMBOL_EXPORT void SetCharacterPosition(struct Game *game, struct Character *character, int x, int y, float angle) {
+SYMBOL_EXPORT void SetCharacterPositionF(struct Game *game, struct Character *character, float x, float y, float angle) {
 	if (character->dead) return;
 	character->x = x;
 	character->y = y;
 	character->angle = angle;
 }
 
+SYMBOL_EXPORT void SetCharacterPosition(struct Game *game, struct Character *character, float x, float y, float angle) {
+	SetCharacterPositionF(game, character, x / (float)game->viewport.width, y / (float)game->viewport.height, angle);
+}
+
+
+SYMBOL_EXPORT void DrawCharacterF(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
+	if (character->dead) return;
+	int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
+	int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);
+	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, character->x*game->viewport.width + al_get_bitmap_width(character->bitmap)/2, character->y*game->viewport.height + al_get_bitmap_height(character->bitmap)/2, 1, 1, character->angle, flags);
+}
+
 SYMBOL_EXPORT void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tint, int flags) {
 	if (character->dead) return;
 	int spritesheetX = al_get_bitmap_width(character->bitmap)*(character->pos%character->spritesheet->cols);
 	int spritesheetY = al_get_bitmap_height(character->bitmap)*(character->pos/character->spritesheet->cols);
-	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, character->x + al_get_bitmap_width(character->bitmap)/2, character->y + al_get_bitmap_height(character->bitmap)/2, 1, 1, character->angle, flags);
+	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap)/2, al_get_bitmap_height(character->bitmap)/2, (int)(character->x*game->viewport.width + al_get_bitmap_width(character->bitmap)/2), (int)(character->y*game->viewport.height + al_get_bitmap_height(character->bitmap)/2), 1, 1, character->angle, flags);
+}
+
+SYMBOL_EXPORT int GetCharacterX(struct Game *game, struct Character *character) {
+	return character->x * game->viewport.width;
+}
+
+SYMBOL_EXPORT int GetCharacterY(struct Game *game, struct Character *character) {
+	return character->y * game->viewport.height;
+}
+
+SYMBOL_EXPORT float GetCharacterAngle(struct Game *game, struct Character *character) {
+	return character->angle;
 }
