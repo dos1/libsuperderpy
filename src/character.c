@@ -231,3 +231,10 @@ SYMBOL_EXPORT int GetCharacterY(struct Game *game, struct Character *character) 
 SYMBOL_EXPORT float GetCharacterAngle(struct Game *game, struct Character *character) {
 	return character->angle;
 }
+
+SYMBOL_EXPORT bool IsOnCharacter(struct Game *game, struct Character *character, int x, int y) {
+	int x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
+	int x2 = x1 + al_get_bitmap_width(character->bitmap), y2 = y1 + al_get_bitmap_height(character->bitmap);
+
+	return ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
+}

@@ -82,4 +82,6 @@ int GetCharacterX(struct Game *game, struct Character *character);
 int GetCharacterY(struct Game *game, struct Character *character);
 float GetCharacterAngle(struct Game *game, struct Character *character);
 
+bool IsOnCharacter(struct Game *game, struct Character *character, int x, int y);
+
 #endif
