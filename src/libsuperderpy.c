@@ -150,6 +150,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.gamestates = NULL;
 	game->_priv.gamestate_scheduled = false;
 
+	al_init_user_event_source(&(game->event_source));
+
 	game->_priv.event_queue = al_create_event_queue();
 	if(!game->_priv.event_queue) {
 		FatalError(game, true, "Failed to create event queue.");
@@ -190,6 +192,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
+	al_register_event_source(game->_priv.event_queue, &(game->event_source));
 
 	al_clear_to_color(al_map_rgb(0,0,0));
 	game->_priv.timer = al_create_timer(ALLEGRO_BPS_TO_SECS(60)); // logic timer
@@ -466,6 +469,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	al_destroy_timer(game->_priv.timer);
 	Console_Unload(game);
 	al_destroy_display(game->display);
+	al_destroy_user_event_source(&(game->event_source));
 	al_destroy_event_queue(game->_priv.event_queue);
 	al_destroy_mixer(game->audio.fx);
 	al_destroy_mixer(game->audio.music);

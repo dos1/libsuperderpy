@@ -131,6 +131,8 @@ struct Game {
 
 		const char* name;
 
+		ALLEGRO_EVENT_SOURCE event_source;
+
 		LIBSUPERDERPY_DATA_TYPE *data;
 
 };
