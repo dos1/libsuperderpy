@@ -92,7 +92,7 @@ SYMBOL_INTERNAL void Console_Load(struct Game *game) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), al_get_display_height(game->display)*0.025,0 );
 	}
 	int width = (al_get_display_width(game->display) / game->viewport.width) * game->viewport.width;
-	if (game->viewport.allow_non_integer) {
+	if (!game->viewport.integer_scaling) {
 		width = (al_get_display_width(game->display) / (float)game->viewport.width) * game->viewport.width;
 	}
 	game->_priv.console = al_create_bitmap(width, al_get_font_line_height(game->_priv.font_console)*5);

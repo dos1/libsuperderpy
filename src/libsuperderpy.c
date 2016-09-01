@@ -119,8 +119,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	if (game->config.fullscreen) al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_OPENGL);
-	else al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | ALLEGRO_WINDOWED | ALLEGRO_OPENGL);
+	if (game->config.fullscreen) al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_OPENGL );
+	else al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
 	al_set_new_display_option(ALLEGRO_OPENGL, atoi(GetConfigOptionDefault(game, "SuperDerpy", "opengl", "1")), ALLEGRO_SUGGEST);
 #ifdef ALLEGRO_WINDOWS
@@ -376,6 +376,10 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				break;
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_FOUND) {
+				SetupViewport(game, game->viewport_config);
+			}
+			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
 			}
 #ifdef ALLEGRO_MACOSX

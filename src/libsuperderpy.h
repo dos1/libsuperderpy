@@ -51,7 +51,7 @@ struct libsuperderpy_viewport {
 	int width; /*!< Actual available width of the drawing canvas. */
 	int height; /*!< Actual available height of the drawing canvas. */
 	float aspect;
-	bool allow_non_integer;
+	bool integer_scaling;
 };
 
 /*! \brief Main struct of the game. */
