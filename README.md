@@ -11,6 +11,7 @@ Used by such games as:
 - [Back to the Browser Wars](https://github.com/dos1/bttbw)
 - [KARCZOCH](https://github.com/dos1/karczoch)
 - [Computer Is (Not) Fine](https://github.com/dos1/cinf)
+- [Dr. Sauce](https://github.com/dos1/DrSauce)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
