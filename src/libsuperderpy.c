@@ -344,10 +344,10 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
 					al_stop_timer(game->_priv.timer);
 					game->_priv.current_gamestate = tmp;
-					(*tmp->api->Gamestate_Start)(game, tmp->data);
-					al_resume_timer(game->_priv.timer);
 					tmp->started = true;
 					tmp->pending_start = false;
+					(*tmp->api->Gamestate_Start)(game, tmp->data);
+					al_resume_timer(game->_priv.timer);
 				}
 
 				if ((tmp->started) || (tmp->pending_start) || (tmp->pending_load)) gameActive = true;
