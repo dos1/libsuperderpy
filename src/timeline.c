@@ -341,6 +341,21 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	timeline->background = NULL;
 }
 
+SYMBOL_EXPORT void TM_SkipDelay(struct Timeline* timeline) {
+	if (timeline->queue && timeline->queue->timer) {
+		al_stop_timer(timeline->queue->timer);
+		al_set_timer_speed(timeline->queue->timer, 0.01);
+		al_start_timer(timeline->queue->timer);
+	}
+}
+
+SYMBOL_EXPORT bool TM_IsEmpty(struct Timeline* timeline) {
+	return !timeline->queue;
+}
+SYMBOL_EXPORT bool TM_IsBackgroundEmpty(struct Timeline* timeline) {
+	return !timeline->background;
+}
+
 SYMBOL_EXPORT void TM_Destroy(struct Timeline* timeline) {
 	TM_CleanQueue(timeline);
 	TM_CleanBackgroundQueue(timeline);

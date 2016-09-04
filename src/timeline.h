@@ -96,5 +96,11 @@ struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...);
 void* TM_GetArg(struct TM_Arguments *args, int num);
 /*! \brief Destroy TM_Arguments queue. */
 void TM_DestroyArgs(struct TM_Arguments* args);
+/*! \brief Skip delay if it's currently the first action in the queue */
+void TM_SkipDelay(struct Timeline*);
+/*! \brief Checks if the main queue is empty */
+bool TM_IsEmpty(struct Timeline* timeline);
+/*! \brief Checks if the background queue is empty */
+bool TM_IsBackgroundEmpty(struct Timeline* timeline);
 
 #endif
