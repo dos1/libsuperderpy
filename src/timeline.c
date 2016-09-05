@@ -36,37 +36,46 @@ SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* g, char* name) {
 
 SYMBOL_EXPORT void TM_Process(struct Timeline* timeline) {
 	/* process first element from queue
-		 if returns true, delete it */
-	if (timeline->queue) {
-		if (*timeline->queue->function) {
-			if (!timeline->queue->active) {
-				PrintConsole(timeline->game, "Timeline Manager[%s]: queue: run action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
-				(*timeline->queue->function)(timeline->game, timeline->queue, TM_ACTIONSTATE_START);
-			}
-			timeline->queue->active = true;
-			if ((*timeline->queue->function)(timeline->game, timeline->queue, TM_ACTIONSTATE_RUNNING)) {
-				PrintConsole(timeline->game, "Timeline Manager[%s]: queue: destroy action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
-				timeline->queue->active=false;
-				struct TM_Action *tmp = timeline->queue;
-				timeline->queue = timeline->queue->next;
-				(*tmp->function)(timeline->game, tmp, TM_ACTIONSTATE_DESTROY);
-				TM_DestroyArgs(tmp->arguments);
-				free(tmp->name);
-				free(tmp);
-			}
-		} else {
-			/* delay handling */
-			if (timeline->queue->active) {
-				struct TM_Action *tmp = timeline->queue;
-				timeline->queue = timeline->queue->next;
-				free(tmp->name);
-				free(tmp);
+		 if returns true, delete it
+		 and repeat for the next one */
+	bool next = true;
+	while (next) {
+		if (timeline->queue) {
+			if (*timeline->queue->function) {
+				if (!timeline->queue->active) {
+					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: run action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
+					(*timeline->queue->function)(timeline->game, timeline->queue, TM_ACTIONSTATE_START);
+				}
+				timeline->queue->active = true;
+				if ((*timeline->queue->function)(timeline->game, timeline->queue, TM_ACTIONSTATE_RUNNING)) {
+					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: destroy action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
+					timeline->queue->active=false;
+					struct TM_Action *tmp = timeline->queue;
+					timeline->queue = timeline->queue->next;
+					(*tmp->function)(timeline->game, tmp, TM_ACTIONSTATE_DESTROY);
+					TM_DestroyArgs(tmp->arguments);
+					free(tmp->name);
+					free(tmp);
+				} else {
+					next = false;
+				}
 			} else {
-				if (!al_get_timer_started(timeline->queue->timer)) {
-					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay started %d ms (%d - %s)", timeline->name, timeline->queue->delay, timeline->queue->id, timeline->queue->name);
-					al_start_timer(timeline->queue->timer);
+				/* delay handling */
+				if (timeline->queue->active) {
+					struct TM_Action *tmp = timeline->queue;
+					timeline->queue = timeline->queue->next;
+					free(tmp->name);
+					free(tmp);
+				} else {
+					if (!al_get_timer_started(timeline->queue->timer)) {
+						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay started %d ms (%d - %s)", timeline->name, timeline->queue->delay, timeline->queue->id, timeline->queue->name);
+						al_start_timer(timeline->queue->timer);
+					}
+					next = false;
 				}
 			}
+		} else {
+			next = false;
 		}
 	}
 	/* process all elements from background marked as active */
