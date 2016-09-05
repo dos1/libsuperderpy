@@ -412,7 +412,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
 				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 				char filename[255] = { };
-				snprintf(filename, 255, "%s_%ld_%ld.png", game->name, time(NULL), clock());
+				snprintf(filename, 255, "%s_%lld_%ld.png", game->name, (long long)time(NULL), clock());
 				al_set_path_filename(path, filename);
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game->display));
 				PrintConsole(game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
