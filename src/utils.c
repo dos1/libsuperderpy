@@ -295,6 +295,8 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct libsuperderpy_viewpor
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
 
 	al_clear_to_color(al_map_rgb(0,0,0));
+	al_flip_display();
+	al_clear_to_color(al_map_rgb(0,0,0));
 
 	float resolution = al_get_display_width(game->display) / (float)game->viewport.width;
 	if (al_get_display_height(game->display) / game->viewport.height < resolution) resolution = al_get_display_height(game->display) / (float)game->viewport.height;
