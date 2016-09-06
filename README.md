@@ -12,6 +12,7 @@ Used by such games as:
 - [KARCZOCH](https://github.com/dos1/karczoch)
 - [Computer Is (Not) Fine](https://github.com/dos1/cinf)
 - [Dr. Sauce](https://github.com/dos1/DrSauce)
+- [Love Case](https://github.com/dos1/lovecase)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
