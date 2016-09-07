@@ -47,11 +47,11 @@ SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h
 }
 
 SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text) {
-	al_draw_text(font, al_map_rgba(0,0,0,128), (int)x+1, (int)y+1, flags, text);
-	al_draw_text(font, color, (int)x, (int)y, flags, text);
+	al_draw_text(font, al_map_rgba(0,0,0,128), x+1, y+1, flags, text);
+	al_draw_text(font, color, x, y, flags, text);
 }
 
-SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, int x1, int y1, int width, int flags, char const* text) {
+SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text) {
 
 	char stext[1024]; // Copy of the passed text.
 	char *pch; // A pointer to each word.
@@ -97,20 +97,24 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, int x
 	for (int i = 0; i<=line; i+=1) {                    // Move through each line and draw according to the passed flags.
 		switch (flags) {
 			case ALLEGRO_ALIGN_CENTER:
-				al_draw_text(font, color, x1 + (width/2), y1 + (i * height), ALLEGRO_ALIGN_CENTER, lines[i]);
+				al_draw_text(font, color, x + (width/2), y + (i * height), ALLEGRO_ALIGN_CENTER, lines[i]);
 				break;
 			case ALLEGRO_ALIGN_RIGHT:
-				al_draw_text(font, color, x1 + width, y1 + (i * height), ALLEGRO_ALIGN_RIGHT, lines[i]);
+				al_draw_text(font, color, x + width, y + (i * height), ALLEGRO_ALIGN_RIGHT, lines[i]);
 				break;
 			case ALLEGRO_ALIGN_LEFT:
 			default:
-				al_draw_text(font, color, x1, y1 + (i * height), ALLEGRO_ALIGN_LEFT, lines[i]);
+				al_draw_text(font, color, x, y + (i * height), ALLEGRO_ALIGN_LEFT, lines[i]);
 				break;
 		}
 	}
 	return ((line+1) * height);  // Return the actual height of the text in pixels.
 }
 
+SYMBOL_EXPORT int DrawWrappedTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text) {
+	DrawWrappedText(font, al_map_rgba(0,0,0,128), x+1, y+1, width, flags, text);
+	return DrawWrappedText(font, color, x, y, width, flags, text);
+}
 
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {

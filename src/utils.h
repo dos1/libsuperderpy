@@ -47,7 +47,8 @@ void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLO
  */
 void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text);
 
-int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, int x1, int y1, int width, int flags, char const *text);
+int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
+int DrawWrappedTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
 
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height);
