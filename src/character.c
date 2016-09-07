@@ -21,10 +21,10 @@
 
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
-#include "stdio.h"
-#include "string.h"
-#include "utils.h"
+#include <stdio.h>
+#include <string.h>
 #include "internal.h"
+#include "utils.h"
 
 SYMBOL_EXPORT void SelectSpritesheet(struct Game *game, struct Character *character, char *name) {
 	struct Spritesheet *tmp = character->spritesheets;

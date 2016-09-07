@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "internal.h"
 #include "utils.h"
 #include "gamestate.h"
-#include "internal.h"
 
 SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
 	struct Gamestate *tmp = game->_priv.gamestates;

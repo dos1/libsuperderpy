@@ -34,7 +34,7 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 
-struct libsuperderpy_viewport;
+struct Viewport;
 
 /*! \brief Draws rectangle filled with vertical gradient. */
 void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom);
@@ -46,6 +46,8 @@ void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLO
  * and second time with actual given color and position.
  */
 void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text);
+
+int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, int x1, int y1, int width, int flags, char const *text);
 
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height);
@@ -65,6 +67,6 @@ void PrintConsole(struct Game *game, char* format, ...);
 
 void FatalError(struct Game *game, bool exit, char* format, ...);
 
-void SetupViewport(struct Game *game, struct libsuperderpy_viewport config);
+void SetupViewport(struct Game *game, struct Viewport config);
 
 #endif

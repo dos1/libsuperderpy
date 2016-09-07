@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 #include <allegro5/allegro.h>
+#include "internal.h"
 #include "utils.h"
 #include "timeline.h"
-#include "internal.h"
 
 SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* g, char* name) {
 	PrintConsole(g, "Timeline Manager[%s]: init", name);
@@ -238,7 +238,6 @@ SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, bool (*f
 }
 
 SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name) {
-	// FIXME: some action wasn't freed!
 	struct TM_Action *action = malloc(sizeof(struct TM_Action));
 	if (timeline->background) {
 		struct TM_Action *pom = timeline->background;
@@ -381,8 +380,6 @@ SYMBOL_EXPORT struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int n
 	struct TM_Arguments* tmp = args;
 	for(i = 0; i < num; i++) {
 		if (!tmp) {
-			//FIXME: on some occasions some arguments weren't freed. Check it out.
-			// TM_AddQueuedBackgroundAction? possibly not only.
 			tmp = malloc(sizeof(struct TM_Arguments));
 			tmp->value = va_arg(ap, void*);
 			tmp->next = NULL;

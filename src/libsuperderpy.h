@@ -30,6 +30,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_ttf.h>
+#include <sys/param.h>
 #include "gamestate.h"
 #include "config.h"
 #include "timeline.h"
@@ -42,12 +43,7 @@
 
 struct Gamestate;
 
-struct libsuperderpy_list {
-		void *data;
-		struct libsuperderpy_list *next;
-};
-
-struct libsuperderpy_viewport {
+struct Viewport {
 	int width; /*!< Actual available width of the drawing canvas. */
 	int height; /*!< Actual available height of the drawing canvas. */
 	float aspect;
@@ -60,7 +56,7 @@ struct Game {
 
 		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
-		struct libsuperderpy_viewport viewport, viewport_config;
+		struct Viewport viewport, viewport_config;
 
 		struct {
 				int fx; /*!< Effects volume. */
@@ -122,6 +118,10 @@ struct Game {
 
 				struct libsuperderpy_list *garbage;
 
+#ifdef ALLEGRO_MACOSX
+				char cwd[MAXPATHLEN];
+#endif
+
 		} _priv; /*!< Private resources. Do not use in gamestates! */
 
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
@@ -137,7 +137,7 @@ struct Game {
 
 };
 
-struct Game* libsuperderpy_init(int argc, char **argv, const char* name, struct libsuperderpy_viewport viewport);
+struct Game* libsuperderpy_init(int argc, char **argv, const char* name, struct Viewport viewport);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 

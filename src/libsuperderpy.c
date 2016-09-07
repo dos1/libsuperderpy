@@ -28,15 +28,15 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <sys/param.h>
 #include "internal.h"
 #include "libsuperderpy.h"
 #include "3rdparty/valgrind.h"
 #ifdef ALLEGRO_MACOSX
 #include <mach-o/dyld.h>
-#include <sys/param.h>
 #endif
 
-SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct libsuperderpy_viewport viewport) {
+SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport) {
 
 	struct Game *game = malloc(sizeof(struct Game));
 
@@ -44,6 +44,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->viewport_config = viewport;
 
 #ifdef ALLEGRO_MACOSX
+	getcwd(game->_priv.cwd, MAXPATHLEN);
 	char exe_path[MAXPATHLEN];
 	uint32_t size = sizeof(exe_path);
 	_NSGetExecutablePath(exe_path, &size);
@@ -233,6 +234,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	bool redraw = false;
 
 	while(1) {
+		// TODO: split mainloop to functions to make it readable
+
 		ALLEGRO_EVENT ev;
 		if ((redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled)) {
 
@@ -242,8 +245,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			game->_priv.tmp_gamestate.toLoad = 0;
 			game->_priv.tmp_gamestate.loaded = 0;
 
-			// FIXME: move to function
-			// TODO: support dependences
+			// TODO: support gamestate dependences
 			while (tmp) {
 				if (tmp->pending_stop) {
 					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
@@ -258,8 +260,6 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			}
 
 			tmp = game->_priv.gamestates;
-			// FIXME: move to function
-			// TODO: support dependences
 
 			game->_priv.tmp_gamestate.t = -1;
 
@@ -487,6 +487,9 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	bool restart = game->restart;
 	free(game);
 	if (restart) {
+#ifdef ALLEGRO_MACOSX
+		chdir(game->_priv.cwd);
+#endif
 		execv(argv[0], argv); // FIXME: on OSX there's chdir called which might break it
 	}
 }

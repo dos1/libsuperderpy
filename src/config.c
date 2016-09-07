@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 #include <allegro5/allegro.h>
-#include "config.h"
 #include "internal.h"
+#include "config.h"
 
 SYMBOL_EXPORT void InitConfig(struct Game *game) {
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);

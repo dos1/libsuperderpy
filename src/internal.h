@@ -38,6 +38,11 @@
 #  define SYMBOL_IMPORT     extern
 #endif
 
+struct libsuperderpy_list {
+		void *data;
+		struct libsuperderpy_list *next;
+};
+
 void DrawGamestates(struct Game *game);
 void LogicGamestates(struct Game *game);
 void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);

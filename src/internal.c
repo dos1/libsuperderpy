@@ -20,8 +20,8 @@
 
 #include <stdio.h>
 #include <allegro5/allegro_ttf.h>
-#include "libsuperderpy.h"
 #include "internal.h"
+#include "libsuperderpy.h"
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game *game) {
 	al_set_target_backbuffer(game->display);

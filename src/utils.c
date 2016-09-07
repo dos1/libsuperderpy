@@ -21,12 +21,12 @@
 
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
-#include "stdio.h"
-#include "config.h"
-#include "string.h"
-#include "math.h"
-#include "utils.h"
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 #include "internal.h"
+#include "config.h"
+#include "utils.h"
 
 SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
@@ -50,6 +50,67 @@ SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, f
 	al_draw_text(font, al_map_rgba(0,0,0,128), (int)x+1, (int)y+1, flags, text);
 	al_draw_text(font, color, (int)x, (int)y, flags, text);
 }
+
+SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, int x1, int y1, int width, int flags, char const* text) {
+
+	char stext[1024]; // Copy of the passed text.
+	char *pch; // A pointer to each word.
+	char word[255]; // A string containing the word (for convienence)
+	char *breakchar = "\n";
+	char lines[40][1024]; // A lovely array of strings to hold all the lines (40 max atm)
+	char temp[1024]; // Holds the string data of the current line only.
+	int line = 0; // Counts which line we are currently using.
+	int height = al_get_font_line_height(font) + 1;
+
+	// Setup our strings
+	strcpy(stext, text);
+	strcpy(temp, "");
+	for (int i = 0; i < 40; i+=1) {
+		strcpy(lines[i], "");
+	}
+	//-------------------- Code Begins
+
+	char *context;
+
+	pch = strtok_r(stext," ", &context);                               // Get the first word.
+	do {
+		strcpy(word, "");                                  // Truncate the string, to ensure there's no crazy stuff in there from memory.
+		sprintf(word,"%s ", pch);
+		strcat(temp, word);														// Append the word to the end of TempLine
+		// This code checks for the new line character.
+		if (strcmp(word, breakchar) == 0) {
+			line += 1;                                 // Move down a Line
+			strcpy(temp, "");                            // Clear the tempstring
+		} else {
+			if (al_get_text_width(font, temp) >= (width)) {  // Check if text is larger than the area.
+				strcpy(temp, word);                      // clear the templine and add the word to it.
+				line +=1;                             // Move to the next line.
+			}
+			if (line < 40) {
+				strcat(lines[line], word);                // Append the word to whatever line we are currently on.
+			}
+		}
+		pch = strtok_r (NULL, " ", &context);                           // Get the next word.
+	} while (pch != NULL);
+	// ---------------------------------- Time to draw.
+
+	for (int i = 0; i<=line; i+=1) {                    // Move through each line and draw according to the passed flags.
+		switch (flags) {
+			case ALLEGRO_ALIGN_CENTER:
+				al_draw_text(font, color, x1 + (width/2), y1 + (i * height), ALLEGRO_ALIGN_CENTER, lines[i]);
+				break;
+			case ALLEGRO_ALIGN_RIGHT:
+				al_draw_text(font, color, x1 + width, y1 + (i * height), ALLEGRO_ALIGN_RIGHT, lines[i]);
+				break;
+			case ALLEGRO_ALIGN_LEFT:
+			default:
+				al_draw_text(font, color, x1, y1 + (i * height), ALLEGRO_ALIGN_LEFT, lines[i]);
+				break;
+		}
+	}
+	return ((line+1) * height);  // Return the actual height of the text in pixels.
+}
+
 
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
@@ -214,17 +275,12 @@ SYMBOL_INTERNAL void TestPath(char* filename, char* subpath, char** result) {
 }
 
 SYMBOL_EXPORT char* GetGameName(struct Game *game, char* format) {
-	// FIXME: that's not how you program in C!
 	char *result = malloc(sizeof(char)*255);
 	snprintf(result, 255, format, game->name);
 	return AddGarbage(game, result);
 }
 
 SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
-
-	//TODO: support for current game
-
-	//FIXME: strdups result in memory leaks!
 
 	char *result = 0;
 
@@ -276,7 +332,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
 }
 
-SYMBOL_EXPORT void SetupViewport(struct Game *game, struct libsuperderpy_viewport config) {
+SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 
 	game->viewport = config;
 

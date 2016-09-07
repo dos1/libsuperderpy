@@ -21,7 +21,7 @@
 #ifndef LIBSUPERDERPY_GAMESTATE_H
 #define LIBSUPERDERPY_GAMESTATE_H
 
-#include "allegro5/allegro.h"
+#include <allegro5/allegro.h>
 
 struct Game;
 
