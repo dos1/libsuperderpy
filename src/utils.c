@@ -345,7 +345,7 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 		game->viewport.width = game->viewport.aspect * game->viewport.height;
 		if (game->viewport.width > al_get_display_width(game->display)) {
 			game->viewport.width = al_get_display_width(game->display);
-			game->viewport.height = game->viewport.aspect / game->viewport.width;
+			game->viewport.height = game->viewport.width / (float)game->viewport.aspect;
 		}
 	}
 
