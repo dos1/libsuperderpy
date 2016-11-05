@@ -13,6 +13,7 @@ Used by such games as:
 - [Computer Is (Not) Fine](https://github.com/dos1/cinf)
 - [Dr. Sauce](https://github.com/dos1/DrSauce)
 - [Love Case](https://github.com/dos1/lovecase)
+- [Dziady The Musical](https://github.com/dos1/DziadyTheMusical)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
