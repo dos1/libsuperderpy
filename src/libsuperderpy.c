@@ -22,6 +22,10 @@
  *
  * Also, ponies.
  */
+#ifdef LIBSUPERDERPY_MOUSE_EMULATION
+#define ALLEGRO_UNSTABLE
+#endif
+
 #include <stdio.h>
 #include <math.h>
 #include <locale.h>
@@ -120,6 +124,12 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
+	al_install_touch_input();
+
+#ifdef LIBSUPERDERPY_MOUSE_EMULATION
+	al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
+#endif
+
 	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL );
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
 	al_set_new_display_option(ALLEGRO_OPENGL, atoi(GetConfigOptionDefault(game, "SuperDerpy", "opengl", "1")), ALLEGRO_SUGGEST);
@@ -133,6 +143,11 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		fprintf(stderr, "failed to create display!\n");
 		return NULL;
 	}
+
+#ifdef ALLEGRO_ANDROID
+	al_android_set_apk_file_interface();
+	al_android_set_apk_fs_interface();
+#endif
 
 	SetupViewport(game, viewport);
 
@@ -192,6 +207,10 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
+	al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
+#ifdef LIBSUPERDERPY_MOUSE_EMULATION
+	al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
+#endif
 	al_register_event_source(game->_priv.event_queue, &(game->event_source));
 
 	al_clear_to_color(al_map_rgb(0,0,0));
@@ -232,12 +251,13 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	game->_priv.loading.data = (*game->_priv.loading.Load)(game);
 
 	bool redraw = false;
+	game->_priv.draw = true;
 
 	while(1) {
 		// TODO: split mainloop to functions to make it readable
 
 		ALLEGRO_EVENT ev;
-		if ((redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled)) {
+		if ((game->_priv.draw && redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled)) {
 
 			game->_priv.gamestate_scheduled = false;
 			struct Gamestate *tmp = game->_priv.gamestates;
@@ -377,9 +397,24 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_FOUND) {
 				SetupViewport(game, game->viewport_config);
 			}
+			else if(ev.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING) {
+				al_stop_timer(game->_priv.timer);
+				game->_priv.draw = false;
+				al_detach_voice(game->audio.v);
+				al_acknowledge_drawing_halt(game->display);
+			}
+			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
+				al_acknowledge_drawing_resume(game->display);
+				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+				game->_priv.draw = true;
+				al_resume_timer(game->_priv.timer);
+				SetupViewport(game, game->viewport_config);
+			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(game->display);
-				SetupViewport(game, game->viewport_config);
+				if (game->_priv.draw) {
+					SetupViewport(game, game->viewport_config);
+				}
 			}
 #ifdef ALLEGRO_MACOSX
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == 104)) { //TODO: report to upstream

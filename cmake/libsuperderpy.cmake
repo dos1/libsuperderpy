@@ -49,6 +49,8 @@ if(APPLE)
     find_package(Allegro5Main)
 endif(APPLE)
 
+include_directories(${ALLEGRO5_INCLUDE_DIR} ${ALLEGRO5_FONT_INCLUDE_DIR} ${ALLEGRO5_TTF_INCLUDE_DIR} ${ALLEGRO5_PRIMITIVES_INCLUDE_DIR} ${ALLEGRO5_AUDIO_INCLUDE_DIR} ${ALLEGRO5_ACODEC_INCLUDE_DIR} ${ALLEGRO5_IMAGE_INCLUDE_DIR})
+
 MACRO(register_gamestate name)
 
     add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" SHARED "${name}")
@@ -67,9 +69,9 @@ ENDMACRO()
 
 MACRO(libsuperderpy_copy EXECUTABLE)
 
-    if (NOT APPLE)
+    if (NOT APPLE AND NOT ANDROID)
 	add_custom_command(TARGET "${EXECUTABLE}" PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libsuperderpy/src/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX}" $<TARGET_FILE_DIR:${EXECUTABLE}>)
-    endif (NOT APPLE)
+    endif (NOT APPLE AND NOT ANDROID)
 
 ENDMACRO()
 

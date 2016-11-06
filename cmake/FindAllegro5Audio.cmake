@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_AUDIO_INCLUDE_DIR allegro5/allegro_audio.h)
 
-SET(ALLEGRO5_AUDIO_NAMES ${ALLEGRO5_AUDIO_NAMES} allegro_audio allegro_audio_static liballegro_audio liballegro_audio_static AllegroAudio-5.2)
+SET(ALLEGRO5_AUDIO_NAMES ${ALLEGRO5_AUDIO_NAMES} allegro_audio allegro_audio_static liballegro_audio liballegro_audio_static AllegroAudio-5.2 allegro_audio-debug)
 FIND_LIBRARY(ALLEGRO5_AUDIO_LIBRARY NAMES ${ALLEGRO5_AUDIO_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_AUDIO_FOUND to TRUE if

@@ -30,6 +30,9 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_ttf.h>
+#ifdef ALLEGRO_ANDROID
+#include <allegro5/allegro_android.h>
+#endif
 #include <sys/param.h>
 #include "gamestate.h"
 #include "config.h"
@@ -117,6 +120,8 @@ struct Game {
 				struct Gamestate *current_gamestate;
 
 				struct libsuperderpy_list *garbage;
+
+				bool draw;
 
 #ifdef ALLEGRO_MACOSX
 				char cwd[MAXPATHLEN];
