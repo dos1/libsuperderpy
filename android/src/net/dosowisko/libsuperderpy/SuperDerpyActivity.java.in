@@ -1,0 +1,28 @@
+package net.dosowisko.${LIBSUPERDERPY_GAMENAME};
+
+import org.liballeg.android.AllegroActivity;
+
+public class SuperDerpyActivity extends AllegroActivity {
+
+   /* Load Allegro and other shared libraries in the lib directory of the apk
+    * bundle.  You must load libraries which are required by later libraries
+    * first.
+    */
+   static {
+      System.loadLibrary("allegro");
+      System.loadLibrary("allegro_primitives");
+      System.loadLibrary("allegro_image");
+      System.loadLibrary("allegro_font");
+      System.loadLibrary("allegro_ttf");
+      System.loadLibrary("allegro_audio");
+      System.loadLibrary("allegro_acodec");
+   }
+
+   /* By default, AllegroActivity.onCreate will cause Allegro to load the
+    * shared object `libapp.so'.  You can specify another library name by
+    * overriding the constructor.
+    */
+   public SuperDerpyActivity() {
+      super("libgame.so");
+   }
+}

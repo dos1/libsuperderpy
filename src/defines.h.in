@@ -1,0 +1,10 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
+/*
+ * These values are automatically set according to their cmake variables.
+ */
+#define LIBSUPERDERPY_GAMENAME "${LIBSUPERDERPY_GAMENAME}"
+#define LIBSUPERDERPY_GAMENAME_PRETTY "${LIBSUPERDERPY_GAMENAME_PRETTY}"
+
+#endif /* DEFINES_H */

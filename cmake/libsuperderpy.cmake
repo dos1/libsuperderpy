@@ -65,6 +65,10 @@ MACRO(register_gamestate name)
 
     install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${LIB_INSTALL_DIR})
 
+    if (ANDROID)
+	add_dependencies(${LIBSUPERDERPY_GAMENAME}_apk "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}")
+    endif()
+
 ENDMACRO()
 
 MACRO(libsuperderpy_copy EXECUTABLE)
@@ -76,6 +80,88 @@ MACRO(libsuperderpy_copy EXECUTABLE)
 ENDMACRO()
 
 include(InstallRequiredSystemLibraries)
+
+if(LIBSUPERDERPY_GAMENAME)
+    configure_file("${CMAKE_SOURCE_DIR}/libsuperderpy/src/defines.h.in" "${CMAKE_SOURCE_DIR}/src/defines.h")
+endif(LIBSUPERDERPY_GAMENAME)
+
+MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
+    if(ANDROID)
+	set(EXECUTABLE game)
+	add_library(${EXECUTABLE} SHARED ${EXECUTABLE_SRC_LIST})
+
+	set(APK_PATH ${CMAKE_BINARY_DIR}/android/bin/${LIBSUPERDERPY_GAMENAME}-debug.apk)
+
+	add_custom_target(${LIBSUPERDERPY_GAMENAME}_apk ALL
+	    DEPENDS ${EXECUTABLE}
+	    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android"
+	    COMMAND ${ANT_COMMAND} debug
+	)
+
+        add_custom_target(install_apk
+	    DEPENDS ${LIBSUPERDERPY_GAMENAME}_apk
+	    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android"
+	    COMMAND adb -d install -r ${APK_PATH}
+	)
+
+        add_custom_target(run_apk
+	    DEPENDS install_apk
+	    COMMAND adb -d shell
+	            'am start -a android.intent.action.MAIN -n net.dosowisko.${LIBSUPERDERPY_GAMENAME}/.SuperDerpyActivity'
+	    )
+
+    else(ANDROID)
+	add_executable(${EXECUTABLE} WIN32 MACOSX_BUNDLE ${EXECUTABLE_SRC_LIST})
+    endif(ANDROID)
+ENDMACRO()
+
+if(ANDROID)
+    set(ANDROID_TARGET "android-15" CACHE STRING "What Android target to compile for.")
+
+    # The android tool on Windows is a batch file wrapper, which cannot be
+    # started by MSYS shell directly. We invoke it via cmd.exe instead.
+    # We don't use the full path to avoid problems with spaces,
+    # and hope that android.bat is somewhere on the PATH.
+    if(ANDROID_TOOL MATCHES "[.]bat$")
+	set(ANDROID_UPDATE_COMMAND
+	    cmd.exe /c "android.bat update project -p . -t ${ANDROID_TARGET}")
+    else()
+	set(ANDROID_UPDATE_COMMAND
+	    "${ANDROID_TOOL}" update project -p . -t ${ANDROID_TARGET})
+    endif()
+
+    file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/android")
+    file(COPY "${CMAKE_SOURCE_DIR}/libsuperderpy/android" DESTINATION "${CMAKE_BINARY_DIR}")
+
+    MACRO(configure_android_file PATH)
+        configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
+	file(REMOVE "${CMAKE_BINARY_DIR}/android/${PATH}.in")
+    ENDMACRO()
+
+    configure_android_file("AndroidManifest.xml")
+    configure_android_file("localgen.properties")
+    configure_android_file("build.xml" @ONLY)
+    configure_android_file("project.properties" @ONLY)
+    configure_android_file("res/values/strings.xml")
+    configure_android_file("jni/localgen.mk")
+    if (ALLEGRO5_LIBRARIES MATCHES "^.*-debug$")
+	configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.debug.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
+    else()
+	configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
+    endif()
+    file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in")
+    file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.debug.in")
+
+    file(RENAME "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/${LIBSUPERDERPY_GAMENAME}")
+
+    file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
+    file(COPY "${ANDROID_ALLEGRO_ROOT}/android/libs/${ARM_TARGETS}/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})
+
+    file(COPY "${CMAKE_SOURCE_DIR}/data/" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/")
+
+    execute_process(COMMAND ${ANDROID_UPDATE_COMMAND} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android")
+
+endif(ANDROID)
 
 set(LIBSUPERDERPY_CONFIG_INCLUDED 1)
 
