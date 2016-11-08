@@ -58,6 +58,28 @@ SYMBOL_INTERNAL void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	}
 }
 
+SYMBOL_INTERNAL void FreezeGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->started || !tmp->paused) {
+			PauseGamestate(game, tmp->name);
+			tmp->frozen = true;
+		}
+		tmp = tmp->next;
+	}
+}
+
+SYMBOL_INTERNAL void UnfreezeGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->frozen) {
+			ResumeGamestate(game, tmp->name);
+			tmp->frozen = false;
+		}
+		tmp = tmp->next;
+	}
+}
+
 SYMBOL_INTERNAL void DrawConsole(struct Game *game) {
 	if (game->_priv.showconsole) {
 		al_set_target_backbuffer(game->display);

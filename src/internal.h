@@ -46,6 +46,8 @@ struct libsuperderpy_list {
 void DrawGamestates(struct Game *game);
 void LogicGamestates(struct Game *game);
 void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);
+void FreezeGamestates(struct Game *game);
+void UnfreezeGamestates(struct Game *game);
 void DrawConsole(struct Game *game);
 void Console_Load(struct Game *game);
 void Console_Unload(struct Game *game);

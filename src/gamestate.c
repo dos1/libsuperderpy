@@ -39,6 +39,7 @@ SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game, const char*
 	tmp->handle = NULL;
 	tmp->loaded = false;
 	tmp->paused = false;
+	tmp->frozen = false;
 	tmp->started = false;
 	tmp->pending_load = false;
 	tmp->pending_start = false;

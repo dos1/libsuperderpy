@@ -419,7 +419,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				game->_priv.draw = false;
 				al_stop_timer(game->_priv.timer);
 				al_detach_voice(game->audio.v);
-				PauseAllGamestates(game); // TODO: store not paused gamestates
+				FreezeGamestates(game);
 				al_acknowledge_drawing_halt(game->display);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
@@ -427,7 +427,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				PrintConsole(game, "resume drawing");
 				game->_priv.draw = true;
 				SetupViewport(game, game->viewport_config);
-				ResumeAllGamestates(game); // FIXME: resumes even those that were paused earlier!
+				UnfreezeGamestates(game);
 				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 				al_resume_timer(game->_priv.timer);
 			}

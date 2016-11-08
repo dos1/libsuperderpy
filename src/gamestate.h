@@ -47,6 +47,7 @@ struct Gamestate {
 		void* handle;
 		bool loaded, pending_load, pending_unload;
 		bool started, pending_start, pending_stop;
+		bool frozen;
 		bool showLoading;
 		bool paused;
 		struct Gamestate *next;
