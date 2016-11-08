@@ -324,6 +324,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	vsnprintf(text, 1024, format, vl);
 	va_end(vl);
 	if (game->config.debug) { printf("%s\n", text); fflush(stdout); }
+	if (!game->_priv.draw) return;
 	if (!game->_priv.console) return;
 	if ((!game->config.debug) && (!game->_priv.showconsole)) return;
 	al_set_target_bitmap(game->_priv.console_tmp);
@@ -353,10 +354,6 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 	al_identity_transform(&game->projection);
 	al_use_transform(&game->projection);
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
-
-	al_clear_to_color(al_map_rgb(0,0,0));
-	al_flip_display();
-	al_clear_to_color(al_map_rgb(0,0,0));
 
 	float resolution = al_get_display_width(game->display) / (float)game->viewport.width;
 	if (al_get_display_height(game->display) / game->viewport.height < resolution) resolution = al_get_display_height(game->display) / (float)game->viewport.height;

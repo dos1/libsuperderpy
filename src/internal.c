@@ -24,8 +24,8 @@
 #include "libsuperderpy.h"
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game *game) {
+	ClearScreen(game);
 	al_set_target_backbuffer(game->display);
-	al_clear_to_color(al_map_rgb(0,0,0));
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -174,4 +174,17 @@ SYMBOL_INTERNAL void ClearGarbage(struct Game *game) {
 		free(game->_priv.garbage);
 		game->_priv.garbage = tmp;
 	}
+}
+
+SYMBOL_INTERNAL void ClearScreen(struct Game *game) {
+	ALLEGRO_TRANSFORM identity;
+	int clipX, clipY, clipWidth, clipHeight;
+	al_set_target_backbuffer(game->display);
+	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
+	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
+	al_identity_transform(&identity);
+	al_use_transform(&identity);
+	al_clear_to_color(al_map_rgb(0,0,0));
+	al_use_transform(&game->projection);
+	al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
 }
