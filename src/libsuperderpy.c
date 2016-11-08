@@ -42,7 +42,7 @@
 
 SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport) {
 
-	struct Game *game = malloc(sizeof(struct Game));
+	struct Game *game = calloc(1, sizeof(struct Game));
 
 	game->name = name;
 	game->viewport_config = viewport;
@@ -72,6 +72,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.console_tmp = NULL;
 
 	game->_priv.garbage = NULL;
+
+	game->eventHandler = NULL;
 
 	game->config.fullscreen = atoi(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"));
 	game->config.music = atoi(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"));
@@ -124,10 +126,14 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	game->_priv.touch = al_install_touch_input();
+	game->touch = false;
+
+	if (!atoi(GetConfigOptionDefault(game, "SuperDerpy", "disableTouch", "0"))) {
+		game->touch = al_install_touch_input();
+	}
 
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
-	if (game->_priv.touch) {
+	if (game->touch) {
 		al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
 	}
 #endif
@@ -209,7 +215,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
-	if (game->_priv.touch) {
+	if (game->touch) {
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
@@ -258,6 +264,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	game->_priv.draw = true;
 
 	while(1) {
+		ClearGarbage(game);
+
 		// TODO: split mainloop to functions to make it readable
 		ALLEGRO_EVENT ev;
 		if (game->_priv.draw && ((redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
@@ -390,6 +398,12 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 			al_wait_for_event(game->_priv.event_queue, &ev);
 
+			if (game->eventHandler) {
+				if ((*game->eventHandler)(game, &ev)) {
+					continue;
+				}
+			}
+
 			if ((ev.type == ALLEGRO_EVENT_TIMER) && (ev.timer.source == game->_priv.timer)) {
 				LogicGamestates(game);
 				redraw = true;
@@ -464,7 +478,6 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			}
 			EventGamestates(game, &ev);
 		}
-		ClearGarbage(game);
 	}
 
 	return 0;

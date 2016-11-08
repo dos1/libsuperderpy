@@ -122,7 +122,6 @@ struct Game {
 				struct libsuperderpy_list *garbage;
 
 				bool draw;
-				bool touch;
 
 #ifdef ALLEGRO_MACOSX
 				char cwd[MAXPATHLEN];
@@ -132,12 +131,15 @@ struct Game {
 
 		bool shuttingdown; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
+		bool touch;
 
 		bool show_loading_on_launch;
 
 		const char* name;
 
 		ALLEGRO_EVENT_SOURCE event_source;
+
+		bool (*eventHandler)(struct Game *game, ALLEGRO_EVENT *ev);
 
 		LIBSUPERDERPY_DATA_TYPE *data;
 
