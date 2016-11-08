@@ -159,6 +159,8 @@ if(ANDROID)
 
     file(COPY "${CMAKE_SOURCE_DIR}/data/" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/")
 
+    file(COPY "${CMAKE_SOURCE_DIR}/data/icons/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap/")
+
     execute_process(COMMAND ${ANDROID_UPDATE_COMMAND} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android")
 
 endif(ANDROID)
