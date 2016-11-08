@@ -155,7 +155,7 @@ if(ANDROID)
     file(RENAME "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/${LIBSUPERDERPY_GAMENAME}")
 
     file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
-    file(COPY "${ANDROID_ALLEGRO_ROOT}/android/libs/${ARM_TARGETS}/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})
+    file(COPY "${ANDROID_ALLEGRO_ROOT}/lib/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})
 
     file(COPY "${CMAKE_SOURCE_DIR}/data/" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/")
 

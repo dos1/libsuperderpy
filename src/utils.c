@@ -317,12 +317,15 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	return AddGarbage(game, result);
 }
 
+ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
+
 SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char text[1024] = {};
 	vsnprintf(text, 1024, format, vl);
 	va_end(vl);
+	ALLEGRO_DEBUG(text);
 	if (game->config.debug) { printf("%s\n", text); fflush(stdout); }
 	if (!game->_priv.draw) return;
 	if (!game->_priv.console) return;

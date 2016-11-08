@@ -1,14 +1,13 @@
-
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_VERSION 1)
 
 #set path for android toolchain -- look
 
-set(ANDROID_ALLEGRO_ROOT "$ENV{ANDROID_ALLEGRO_ROOT}" CACHE PATH "Path to Allegro 5 source directory after being compiled for Android" )
+set(ANDROID_ALLEGRO_ROOT "$ENV{ANDROID_ALLEGRO_ROOT}" CACHE PATH "Path to Allegro 5 (>=5.2.2) build directory for Android" )
 
 message( STATUS "Selected Allegro dir: ${ANDROID_ALLEGRO_ROOT}" )
-if(NOT EXISTS ${ANDROID_ALLEGRO_ROOT})
-   message( FATAL_ERROR "Invalid ANDROID_ALLEGRO_ROOT! Point it to directory with Allegro 5 source after compiling it for Android.")
+if(NOT EXISTS "${ANDROID_ALLEGRO_ROOT}")
+   message( FATAL_ERROR "Invalid ANDROID_ALLEGRO_ROOT! Point it to the build directory of Allegro 5 (>=5.2.2) for Android.")
 endif()
 
 set(ANDROID_NDK_TOOLCHAIN_ROOT "$ENV{ANDROID_NDK_TOOLCHAIN_ROOT}" CACHE PATH "Path to the Android NDK Standalone Toolchain" )

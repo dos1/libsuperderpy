@@ -130,7 +130,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
 #endif
 
-	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL );
+	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
 	al_set_new_display_option(ALLEGRO_OPENGL, atoi(GetConfigOptionDefault(game, "SuperDerpy", "opengl", "1")), ALLEGRO_SUGGEST);
 #ifdef ALLEGRO_WINDOWS
@@ -399,18 +399,21 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				SetupViewport(game, game->viewport_config);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING) {
+				PrintConsole(game, "halt drawing");
 				game->_priv.draw = false;
 				al_stop_timer(game->_priv.timer);
 				al_detach_voice(game->audio.v);
+				PauseAllGamestates(game); // TODO: store not paused gamestates
 				al_acknowledge_drawing_halt(game->display);
-				continue;
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
-				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
-				game->_priv.draw = true;
 				al_acknowledge_drawing_resume(game->display);
-				al_resume_timer(game->_priv.timer);
+				PrintConsole(game, "resume drawing");
+				game->_priv.draw = true;
 				SetupViewport(game, game->viewport_config);
+				ResumeAllGamestates(game); // FIXME: resumes even those that were paused earlier!
+				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+				al_resume_timer(game->_priv.timer);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(game->display);
@@ -456,9 +459,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game->display));
 				PrintConsole(game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 				al_destroy_path(path);
-			} else {
-				EventGamestates(game, &ev);
 			}
+			EventGamestates(game, &ev);
 		}
 		ClearGarbage(game);
 	}
