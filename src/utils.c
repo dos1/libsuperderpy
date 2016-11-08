@@ -352,37 +352,50 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 			game->viewport.height = game->viewport.width / (float)game->viewport.aspect;
 		}
 	}
+	game->viewport.aspect = game->viewport.width / (float)game->viewport.height;
 
 	al_set_target_backbuffer(game->display);
 	al_identity_transform(&game->projection);
 	al_use_transform(&game->projection);
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
 
-	float resolution = al_get_display_width(game->display) / (float)game->viewport.width;
-	if (al_get_display_height(game->display) / game->viewport.height < resolution) resolution = al_get_display_height(game->display) / (float)game->viewport.height;
+	float resolution = al_get_display_height(game->display) / (float)game->viewport.height;
+	if (al_get_display_width(game->display) / (float)game->viewport.width < resolution) {
+		resolution = al_get_display_width(game->display) / (float)game->viewport.width;
+	}
 	if (game->viewport.integer_scaling) {
 		resolution = floor(resolution);
 	}
-	if (resolution < 1) resolution = 1;
-
-	if (atoi(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"))) {
-		int clipWidth = game->viewport.width * resolution, clipHeight = game->viewport.height * resolution;
-		int clipX = (al_get_display_width(game->display) - clipWidth) / 2, clipY = (al_get_display_height(game->display) - clipHeight) / 2;
-		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
-
-		al_build_transform(&game->projection, clipX, clipY, resolution, resolution, 0.0f);
-		al_use_transform(&game->projection);
-
-	} else if ((atoi(GetConfigOptionDefault(game, "SuperDerpy", "rotate", "1"))) && (game->viewport.height > game->viewport.width)) {
-		al_identity_transform(&game->projection);
-		al_rotate_transform(&game->projection, 0.5*ALLEGRO_PI);
-		al_translate_transform(&game->projection, game->viewport.width, 0);
-		al_scale_transform(&game->projection, resolution, resolution);
-		al_use_transform(&game->projection);
-		int temp = game->viewport.height;
-		game->viewport.height = game->viewport.width;
-		game->viewport.width = temp;
+	if ((!atoi(GetConfigOptionDefault(game, "SuperDerpy", "downscale", "1"))) && (resolution < 1)) {
+		resolution = 1;
 	}
+	if (!atoi(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"))) {
+		resolution = 1;
+	}
+	if (resolution == 0) {
+		resolution = 1;
+	}
+
+	int clipWidth = game->viewport.width * resolution;
+	int clipHeight = game->viewport.height * resolution;
+	if (atoi(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"))) {
+		int clipX = (al_get_display_width(game->display) - clipWidth) / 2;
+		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
+		al_build_transform(&game->projection, clipX, clipY, resolution, resolution, 0.0f);
+		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
+	} else if (atoi(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"))) {
+		al_build_transform(&game->projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
+	}
+	al_use_transform(&game->projection);
 	if (game->_priv.console) Console_Unload(game);
 	Console_Load(game);
+}
+
+SYMBOL_EXPORT void WindowCoordsToViewport(struct Game *game, int *x, int *y) {
+	int clipX, clipY, clipWidth, clipHeight;
+	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
+	*x -= clipX;
+	*y -= clipY;
+	*x /= clipWidth / (float)game->viewport.width;
+	*y /= clipHeight / (float)game->viewport.height;
 }

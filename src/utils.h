@@ -70,4 +70,5 @@ void FatalError(struct Game *game, bool exit, char* format, ...);
 
 void SetupViewport(struct Game *game, struct Viewport config);
 
+void WindowCoordsToViewport(struct Game *game, int *x, int *y);
 #endif
