@@ -82,7 +82,8 @@ ENDMACRO()
 include(InstallRequiredSystemLibraries)
 
 if(LIBSUPERDERPY_GAMENAME)
-    configure_file("${CMAKE_SOURCE_DIR}/libsuperderpy/src/defines.h.in" "${CMAKE_SOURCE_DIR}/src/defines.h")
+    configure_file("${CMAKE_SOURCE_DIR}/libsuperderpy/src/defines.h.in" "${CMAKE_BINARY_DIR}/gen/defines.h")
+    include_directories("${CMAKE_BINARY_DIR}/gen")
 endif(LIBSUPERDERPY_GAMENAME)
 
 MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
