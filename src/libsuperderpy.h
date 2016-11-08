@@ -122,6 +122,7 @@ struct Game {
 				struct libsuperderpy_list *garbage;
 
 				bool draw;
+				bool touch;
 
 #ifdef ALLEGRO_MACOSX
 				char cwd[MAXPATHLEN];

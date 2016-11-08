@@ -325,7 +325,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	char text[1024] = {};
 	vsnprintf(text, 1024, format, vl);
 	va_end(vl);
-	ALLEGRO_DEBUG(text);
+	ALLEGRO_DEBUG("%s", text);
 	if (game->config.debug) { printf("%s\n", text); fflush(stdout); }
 	if (!game->_priv.draw) return;
 	if (!game->_priv.console) return;

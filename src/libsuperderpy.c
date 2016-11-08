@@ -124,10 +124,12 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	al_install_touch_input();
+	game->_priv.touch = al_install_touch_input();
 
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
-	al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
+	if (game->_priv.touch) {
+		al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
+	}
 #endif
 
 	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
@@ -207,10 +209,12 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
-	al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
+	if (game->_priv.touch) {
+		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
-	al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
+		al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
 #endif
+	}
 	al_register_event_source(game->_priv.event_queue, &(game->event_source));
 
 	al_clear_to_color(al_map_rgb(0,0,0));
