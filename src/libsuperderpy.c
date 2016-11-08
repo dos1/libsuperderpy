@@ -207,7 +207,9 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
+#ifndef ALLEGRO_MACOSX
 	al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
+#endif
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
 	al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
 #endif
