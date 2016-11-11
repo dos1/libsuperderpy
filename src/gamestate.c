@@ -159,10 +159,8 @@ SYMBOL_EXPORT void PauseGamestate(struct Game *game, const char* name) {
 			return;
 		}
 		gs->paused = true;
-		if (!gs->frozen) {
-			game->_priv.current_gamestate = gs;
-			(*gs->api->Gamestate_Pause)(game, gs->data);
-		}
+		game->_priv.current_gamestate = gs;
+		(*gs->api->Gamestate_Pause)(game, gs->data);
 		PrintConsole(game, "Gamestate \"%s\" paused.", name);
 	} else {
 		PrintConsole(game, "Tried to pause nonexisitent gamestate \"%s\"", name);
@@ -181,10 +179,8 @@ SYMBOL_EXPORT void ResumeGamestate(struct Game *game, const char* name) {
 			return;
 		}
 		gs->paused = false;
-		if (!gs->frozen) {
-			game->_priv.current_gamestate = gs;
-			(*gs->api->Gamestate_Resume)(game, gs->data);
-		}
+		game->_priv.current_gamestate = gs;
+		(*gs->api->Gamestate_Resume)(game, gs->data);
 		PrintConsole(game, "Gamestate \"%s\" resumed.", name);
 	} else {
 		PrintConsole(game, "Tried to resume nonexisitent gamestate \"%s\"", name);
