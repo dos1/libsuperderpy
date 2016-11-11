@@ -47,6 +47,17 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game *game) {
 	}
 }
 
+SYMBOL_INTERNAL void ReloadGamestates(struct Game *game) {
+	struct Gamestate *tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->loaded) {
+			game->_priv.current_gamestate = tmp;
+			(*tmp->api->Gamestate_Reload)(game, tmp->data);
+		}
+		tmp = tmp->next;
+	}
+}
+
 SYMBOL_INTERNAL void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
@@ -61,9 +72,9 @@ SYMBOL_INTERNAL void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev) {
 SYMBOL_INTERNAL void FreezeGamestates(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (tmp->started || !tmp->paused) {
-			PauseGamestate(game, tmp->name);
+		if (tmp->started && !tmp->paused) {
 			tmp->frozen = true;
+			PauseGamestate(game, tmp->name);
 		}
 		tmp = tmp->next;
 	}

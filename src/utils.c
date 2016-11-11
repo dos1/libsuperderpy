@@ -164,11 +164,14 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 	char* origfn = GetDataFilePath(game, filename);
 
-	if (memoryscale) al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+	int flags = al_get_new_bitmap_flags();
+	if (memoryscale) {
+		al_add_new_bitmap_flag(ALLEGRO_MEMORY_BITMAP);
+	}
 
 	source = al_load_bitmap( origfn );
 	if (memoryscale) {
-		al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR);
+		al_set_new_bitmap_flags(flags);
 		ScaleBitmap(source, width, height);
 	}
 	else {

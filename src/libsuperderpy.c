@@ -411,11 +411,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 				break;
 			}
-			else if(ev.type == ALLEGRO_EVENT_DISPLAY_FOUND) {
-				SetupViewport(game, game->viewport_config);
-			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING) {
-				PrintConsole(game, "halt drawing");
+				PrintConsole(game, "Engine halted.");
 				game->_priv.draw = false;
 				al_stop_timer(game->_priv.timer);
 				al_detach_voice(game->audio.v);
@@ -423,19 +420,17 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				al_acknowledge_drawing_halt(game->display);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
-				al_acknowledge_drawing_resume(game->display);
-				PrintConsole(game, "resume drawing");
 				game->_priv.draw = true;
-				SetupViewport(game, game->viewport_config);
+				al_acknowledge_drawing_resume(game->display);
+				PrintConsole(game, "Engine resumed.");
+				ReloadGamestates(game);
 				UnfreezeGamestates(game);
 				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 				al_resume_timer(game->_priv.timer);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(game->display);
-				if (game->_priv.draw) {
-					SetupViewport(game, game->viewport_config);
-				}
+				SetupViewport(game, game->viewport_config);
 			}
 #ifdef ALLEGRO_MACOSX
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == 104)) { //TODO: report to upstream
