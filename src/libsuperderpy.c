@@ -138,6 +138,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 #endif
 
+	al_install_joystick();
+
 	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
 	al_set_new_display_option(ALLEGRO_OPENGL, atoi(GetConfigOptionDefault(game, "SuperDerpy", "opengl", "1")), ALLEGRO_SUGGEST);
@@ -215,6 +217,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
+	al_register_event_source(game->_priv.event_queue, al_get_joystick_event_source());
 	if (game->touch) {
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
