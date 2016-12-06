@@ -65,6 +65,8 @@ void RegisterSpritesheet(struct Game *game, struct Character *character, char* n
 
 void DrawCharacterF(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags);
 void DrawCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, int flags);
+void DrawScaledCharacterF(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, float scalex, float scaley, int flags);
+void DrawScaledCharacter(struct Game *game, struct Character *character, ALLEGRO_COLOR tilt, float scalex, float scaley, int flags);
 
 struct Character* CreateCharacter(struct Game *game, char* name);
 void DestroyCharacter(struct Game *game, struct Character *character);
