@@ -14,6 +14,8 @@ Used by such games as:
 - [Dr. Sauce](https://github.com/dos1/DrSauce)
 - [Love Case](https://github.com/dos1/lovecase)
 - [Dziady The Musical](https://github.com/dos1/DziadyTheMusical)
+- [SUPERSHOD](https://github.com/dos1/supershod)
+- [Kaczuchokalipsa!](https://github.com/dos1/kaczuchokalipsa)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
