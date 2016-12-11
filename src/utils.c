@@ -320,6 +320,38 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	return AddGarbage(game, result);
 }
 
+SYMBOL_EXPORT char* GetDataFilePathNull(struct Game *game, char* filename) {
+
+	char *result = 0;
+
+	if (al_filename_exists(filename)) {
+		return AddGarbage(game, strdup(filename));
+	}
+
+	{
+		char origfn[255] = "data/";
+		strcat(origfn, filename);
+
+		if (al_filename_exists(origfn)) {
+			return AddGarbage(game, strdup(origfn));
+		}
+	}
+
+	TestPath(filename, "data/", &result);
+	TestPath(filename, GetGameName(game, "../share/%s/data/"), &result);
+
+	TestPath(filename, "../data/", &result);
+#ifdef ALLEGRO_MACOSX
+	TestPath(filename, "../Resources/data/", &result);
+	TestPath(filename, "../Resources/gamestates/", &result);
+#endif
+
+	if (!result) {
+		return filename;
+	}
+	return AddGarbage(game, result);
+}
+
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
 SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
