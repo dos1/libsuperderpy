@@ -16,6 +16,9 @@ Used by such games as:
 - [Dziady The Musical](https://github.com/dos1/DziadyTheMusical)
 - [SUPERSHOD](https://github.com/dos1/supershod)
 - [Kaczuchokalipsa!](https://github.com/dos1/kaczuchokalipsa)
+- [Pchnijdolino](https://github.com/dos1/pchnijdolino)
+- [Jam Fighter](https://github.com/dos1/jamfighter)
+- [WAAAA](https://github.com/dos1/waaaa)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
