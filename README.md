@@ -19,6 +19,7 @@ Used by such games as:
 - [Pchnijdolino](https://github.com/dos1/pchnijdolino)
 - [Jam Fighter](https://github.com/dos1/jamfighter)
 - [WAAAA](https://github.com/dos1/waaaa)
+- [Fajer](https://github.com/dos1/fajer)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
