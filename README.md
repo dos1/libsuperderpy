@@ -20,6 +20,7 @@ Used by such games as:
 - [Jam Fighter](https://github.com/dos1/jamfighter)
 - [WAAAA](https://github.com/dos1/waaaa)
 - [Fajer](https://github.com/dos1/fajer)
+- [Doctor von Wissenschäftler Strikes Again](https://github.com/dos1/dwsa)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 

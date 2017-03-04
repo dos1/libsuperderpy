@@ -42,6 +42,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game *game, struct Character *charac
 			} else {
 				character->successor = NULL;
 			}
+			character->repeat = tmp->repeat;
 			character->pos = 0;
 			if (character->bitmap) {
 				if ((al_get_bitmap_width(character->bitmap) != tmp->width / tmp->cols) || (al_get_bitmap_height(character->bitmap) != tmp->height / tmp->rows)) {
@@ -110,6 +111,12 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game *game, struct Character *char
 	s->rows = atoi(al_get_config_value(config, "", "rows"));
 	s->blanks = atoi(al_get_config_value(config, "", "blanks"));
 	s->delay = atof(al_get_config_value(config, "", "delay"));
+	char* val = al_get_config_value(config, "", "repeat");
+	if (val) {
+		s->repeat = atof(val);
+	} else {
+		s->repeat = 0;
+	}
 	s->kill = false;
 	const char *kill = al_get_config_value(config, "", "kill");
 	if (kill)	s->kill = atoi(kill);
@@ -138,6 +145,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game *game, char* name) {
 	character->spritesheets = NULL;
 	character->spritesheet = NULL;
 	character->successor = NULL;
+	character->repeat = 0;
 	character->shared = false;
 	character->dead = false;
 	return character;
@@ -174,10 +182,14 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game *game, struct Character *charact
 		}
 		if (character->pos>=character->spritesheet->cols*character->spritesheet->rows-character->spritesheet->blanks) {
 			character->pos=0;
-			if (character->spritesheet->kill) {
-				character->dead = true;
-			} else if (character->successor) {
-				SelectSpritesheet(game, character, character->successor);
+			if (character->repeat) {
+				character->repeat--;
+			} else {
+				if (character->spritesheet->kill) {
+					character->dead = true;
+				} else if (character->successor) {
+					SelectSpritesheet(game, character, character->successor);
+				}
 			}
 		}
 	}

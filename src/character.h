@@ -37,6 +37,7 @@ struct Spritesheet {
 		int height;
 		int delay;
 		bool kill;
+		int repeat;
 		float scale; /*!< Scale modifier of the frame. */
 		char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
 		struct Spritesheet* next; /*!< Next spritesheet in the queue. */
@@ -55,6 +56,7 @@ struct Character {
 		float y; /*!< Vertical position of character. */
 		float angle; /*!< Characters display angle (radians). */
 		void* data; /*!< Additional, custom character data (HP etc.). */
+		int repeat;
 		bool shared;
 		bool dead;
 };
