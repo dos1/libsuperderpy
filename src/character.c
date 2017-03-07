@@ -111,7 +111,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game *game, struct Character *char
 	s->rows = atoi(al_get_config_value(config, "", "rows"));
 	s->blanks = atoi(al_get_config_value(config, "", "blanks"));
 	s->delay = atof(al_get_config_value(config, "", "delay"));
-	char* val = al_get_config_value(config, "", "repeat");
+	const char* val = al_get_config_value(config, "", "repeat");
 	if (val) {
 		s->repeat = atof(val);
 	} else {
