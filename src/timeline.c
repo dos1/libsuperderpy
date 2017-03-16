@@ -349,6 +349,54 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	timeline->background = NULL;
 }
 
+SYMBOL_INTERNAL void DrawQueue(struct Game *game, struct TM_Action* queue, int clipX, int clipY) {
+
+	int pos = clipX;
+
+	struct TM_Action *pom = queue;
+	while (pom!=NULL) {
+
+		int width = al_get_text_width(game->_priv.font_console, pom->name);
+		al_draw_filled_rectangle(pos-10, clipY, pos+width+10, clipY+ 60, pom->active ? al_map_rgba(255,255,255,192) : al_map_rgba(0, 0, 0, 0) );
+		al_draw_rectangle(pos-10, clipY, pos+width+10, clipY+ 60, al_map_rgb(255,255,255), 2);
+		al_draw_text(game->_priv.font_console, pom->active ? al_map_rgb(0,0,0) : al_map_rgb(255,255,255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
+
+		if (pom->delay) {
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - 50, ALLEGRO_ALIGN_LEFT, "%d", pom->delay);
+		}
+
+		if (pom->function == *runinbackground) {
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - 50, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
+		}
+
+		pos += width + 20;
+		pom = pom->next;
+	}
+}
+
+SYMBOL_EXPORT void TM_DrawDebug(struct Game *game, struct Timeline* timeline, int pos) {
+
+	if (!game->_priv.showconsole) {
+		return;
+	}
+
+	al_set_target_backbuffer(game->display);
+	ALLEGRO_TRANSFORM trans;
+	al_identity_transform(&trans);
+	int clipX, clipY, clipWidth, clipHeight;
+	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
+	al_use_transform(&trans);
+
+	al_draw_filled_rectangle(clipX, clipY+clipHeight-340*(pos+1), clipX + clipWidth, clipY+clipHeight-340*pos, al_map_rgba(0,0,0,92));
+
+	al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth / 2, clipY+clipHeight-340*(pos+1) + 10, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
+
+	DrawQueue(game, timeline->queue, clipX + 25, clipY + clipHeight - 220 - 340*pos);
+	DrawQueue(game, timeline->background, clipX + 25, clipY + clipHeight - 100 - 340*pos);
+
+	al_use_transform(&game->projection);
+}
+
 SYMBOL_EXPORT void TM_SkipDelay(struct Timeline* timeline) {
 	if (timeline->queue && timeline->queue->timer) {
 		al_stop_timer(timeline->queue->timer);
