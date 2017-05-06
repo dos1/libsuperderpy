@@ -402,3 +402,11 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game *game, int *x, int *y) {
 	*x /= clipWidth / (float)game->viewport.width;
 	*y /= clipHeight / (float)game->viewport.height;
 }
+
+SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
+	int flags = al_get_new_bitmap_flags();
+	al_add_new_bitmap_flag(ALLEGRO_NO_PRESERVE_TEXTURE);
+	ALLEGRO_BITMAP *bitmap = al_create_bitmap(width, height);
+	al_set_new_bitmap_flags(flags);
+	return bitmap;
+}
