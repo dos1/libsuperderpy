@@ -420,11 +420,13 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				al_stop_timer(game->_priv.timer);
 				al_detach_voice(game->audio.v);
 				FreezeGamestates(game);
+				if (game->_priv.console) Console_Unload(game);
 				al_acknowledge_drawing_halt(game->display);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
 				game->_priv.draw = true;
 				al_acknowledge_drawing_resume(game->display);
+				Console_Load(game);
 				PrintConsole(game, "Engine resumed.");
 				ReloadGamestates(game);
 				UnfreezeGamestates(game);

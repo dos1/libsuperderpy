@@ -128,8 +128,8 @@ SYMBOL_INTERNAL void Console_Load(struct Game *game) {
 	if (!game->viewport.integer_scaling) {
 		width = (al_get_display_width(game->display) / (float)game->viewport.width) * game->viewport.width;
 	}
-	game->_priv.console = al_create_bitmap(width, al_get_font_line_height(game->_priv.font_console)*5);
-	game->_priv.console_tmp = al_create_bitmap(width, al_get_font_line_height(game->_priv.font_console)*5);
+	game->_priv.console = CreateNotPreservedBitmap(width, al_get_font_line_height(game->_priv.font_console)*5);
+	game->_priv.console_tmp = CreateNotPreservedBitmap(width, al_get_font_line_height(game->_priv.font_console)*5);
 	al_set_target_bitmap(game->_priv.console);
 	al_clear_to_color(al_map_rgba(0,0,0,80));
 	al_set_target_bitmap(al_get_backbuffer(game->display));
