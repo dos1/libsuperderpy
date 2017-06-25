@@ -437,12 +437,10 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
 			}
-#ifdef ALLEGRO_MACOSX
-			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == 104)) { //TODO: report to upstream
-#elif defined(ALLEGRO_ANDROID)
+#ifdef ALLEGRO_ANDROID
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_MENU)) {
 #else
-			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_TILDE)) {
+			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && ((ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
 #endif
 				game->_priv.showconsole = !game->_priv.showconsole;
 			}
@@ -467,7 +465,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(speed));
 				game->_priv.showconsole = true;
 				PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed/60.0);
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
+			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
 				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 				char filename[255] = { };
 				snprintf(filename, 255, "%s_%lld_%ld.png", game->name, (long long)time(NULL), clock());
