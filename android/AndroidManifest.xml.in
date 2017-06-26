@@ -3,13 +3,13 @@
       package="net.dosowisko.${LIBSUPERDERPY_GAMENAME}"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="15"/>
+    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="16" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     <application android:label="@string/app_name" android:debuggable="true" android:icon="@mipmap/${LIBSUPERDERPY_GAMENAME}">
         <activity android:name="net.dosowisko.${LIBSUPERDERPY_GAMENAME}.SuperDerpyActivity"
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
-                  android:screenOrientation="unspecified"
+                  android:screenOrientation="${LIBSUPERDERPY_ANDROID_ORIENTATION}"
                   android:configChanges="screenLayout|uiMode|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

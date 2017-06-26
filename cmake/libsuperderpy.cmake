@@ -2,6 +2,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 add_definitions(-D_XOPEN_SOURCE=600)
 
+add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
 
 if(APPLE)
@@ -117,7 +119,7 @@ MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
 ENDMACRO()
 
 if(ANDROID)
-    set(ANDROID_TARGET "android-15" CACHE STRING "What Android target to compile for.")
+    set(ANDROID_TARGET "android-16" CACHE STRING "What Android target to compile for.")
 
     # The android tool on Windows is a batch file wrapper, which cannot be
     # started by MSYS shell directly. We invoke it via cmd.exe instead.
@@ -138,6 +140,14 @@ if(ANDROID)
         configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
 	file(REMOVE "${CMAKE_BINARY_DIR}/android/${PATH}.in")
     ENDMACRO()
+
+    if (LIBSUPERDERPY_ORIENTATION STREQUAL "PORTRAIT")
+      set(LIBSUPERDERPY_ANDROID_ORIENTATION "sensorPortrait")
+    elseif(LIBSUPERDERPY_ORIENTATION STREQUAL "LANDSCAPE")
+      set(LIBSUPERDERPY_ANDROID_ORIENTATION "sensorLandscape")
+    else()
+      set(LIBSUPERDERPY_ANDROID_ORIENTATION "unspecified")
+    endif()
 
     configure_android_file("AndroidManifest.xml")
     configure_android_file("localgen.properties")
