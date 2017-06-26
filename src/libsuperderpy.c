@@ -142,7 +142,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
-	al_set_new_display_option(ALLEGRO_OPENGL, atoi(GetConfigOptionDefault(game, "SuperDerpy", "opengl", "1")), ALLEGRO_SUGGEST);
+	al_set_new_display_option(ALLEGRO_OPENGL, true, ALLEGRO_REQUIRE);
 
 #ifdef LIBSUPERDERPY_ORIENTATION_LANDSCAPE
 	  al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS, ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE, ALLEGRO_SUGGEST);
