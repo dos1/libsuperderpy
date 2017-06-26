@@ -16,6 +16,7 @@ public class SuperDerpyActivity extends AllegroActivity {
       System.loadLibrary("allegro_ttf-debug");
       System.loadLibrary("allegro_audio-debug");
       System.loadLibrary("allegro_acodec-debug");
+      System.loadLibrary("allegro_video-debug");
    }
 
    /* By default, AllegroActivity.onCreate will cause Allegro to load the

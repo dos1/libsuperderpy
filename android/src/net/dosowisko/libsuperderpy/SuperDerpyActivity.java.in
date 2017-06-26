@@ -16,6 +16,7 @@ public class SuperDerpyActivity extends AllegroActivity {
       System.loadLibrary("allegro_ttf");
       System.loadLibrary("allegro_audio");
       System.loadLibrary("allegro_acodec");
+      System.loadLibrary("allegro_video");
    }
 
    /* By default, AllegroActivity.onCreate will cause Allegro to load the
