@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.dosowisko.${LIBSUPERDERPY_GAMENAME}"
-      android:versionCode="1"
+      android:versionCode="${LIBSUPERDERPY_RELEASE}"
       android:versionName="${LIBSUPERDERPY_VERSION}"
       android:installLocation="auto">
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="16" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
-    <application android:label="@string/app_name" android:debuggable="true" android:icon="@mipmap/${LIBSUPERDERPY_GAMENAME}">
+    <application android:label="@string/app_name" android:debuggable="${LIBSUPERDERPY_ANDROID_DEBUGGABLE}" android:icon="@mipmap/${LIBSUPERDERPY_GAMENAME}">
         <activity android:name="net.dosowisko.${LIBSUPERDERPY_GAMENAME}.SuperDerpyActivity"
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
