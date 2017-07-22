@@ -336,8 +336,8 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	while (pom!=NULL) {
 		if (*pom->function) (*pom->function)(timeline->game, pom, TM_ACTIONSTATE_DESTROY);
 		if (pom->timer) {
-			  al_stop_timer(pom->timer);
-				al_destroy_timer(pom->timer);
+			al_stop_timer(pom->timer);
+			al_destroy_timer(pom->timer);
 		}
 		TM_DestroyArgs(pom->arguments);
 		tmp = pom->next;

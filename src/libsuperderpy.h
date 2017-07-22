@@ -46,10 +46,10 @@
 struct Gamestate;
 
 struct Viewport {
-	int width; /*!< Actual available width of the drawing canvas. */
-	int height; /*!< Actual available height of the drawing canvas. */
-	float aspect;
-	bool integer_scaling;
+		int width; /*!< Actual available width of the drawing canvas. */
+		int height; /*!< Actual available height of the drawing canvas. */
+		float aspect;
+		bool integer_scaling;
 };
 
 /*! \brief Main struct of the game. */
