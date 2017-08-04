@@ -22,6 +22,12 @@ Used by such games as:
 - [Fajer](https://github.com/dos1/fajer)
 - [Doctor von Wissenschäftler Strikes Again](https://github.com/dos1/dwsa)
 - [Spider Disco](https://github.com/dos1/spiderdisco)
+- [Veto!](https://github.com/dos1/veto)
+- [The Blind Date](https://github.com/dos1/blinddate)
+- [OMG Dragon!](https://github.com/dos1/omgdragon)
+- [HIT ME](https://github.com/dos1/hitme)
+- [Boiled Corn](https://github.com/dos1/boiledcorn)
+- [Amber Quest](https://github.com/dos1/amberquest)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
