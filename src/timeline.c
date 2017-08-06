@@ -326,8 +326,8 @@ SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {
 		free(pom->name);
 		free(pom);
 		pom = tmp;
+		timeline->queue = pom;
 	}
-	timeline->queue = NULL;
 }
 
 SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
@@ -344,8 +344,8 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 		free(pom->name);
 		free(pom);
 		pom = tmp;
+		timeline->background = pom;
 	}
-	timeline->background = NULL;
 }
 
 SYMBOL_INTERNAL void DrawQueue(struct Game *game, struct TM_Action* queue, int clipX, int clipY) {
