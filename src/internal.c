@@ -228,6 +228,7 @@ SYMBOL_INTERNAL void RemoveTimeline(struct Game *game, struct Timeline *timeline
 			tmp->next = next;
 			return;
 		}
+		tmp = tmp->next;
 	}
 }
 
@@ -252,19 +253,19 @@ SYMBOL_INTERNAL void DrawQueue(struct Game *game, struct TM_Action* queue, int c
 	while (pom!=NULL) {
 
 		int width = al_get_text_width(game->_priv.font_console, pom->name);
-		al_draw_filled_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, pom->active ? al_map_rgba(255,255,255,192) : al_map_rgba(0, 0, 0, 0) );
-		al_draw_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, al_map_rgb(255,255,255), 2);
+		al_draw_filled_rectangle(pos-(10/3200.0)*al_get_display_width(game->display), clipY, pos+width+(10/3200.0)*al_get_display_width(game->display), clipY+ (60/1800.0)*al_get_display_height(game->display), pom->active ? al_map_rgba(255,255,255,192) : al_map_rgba(0, 0, 0, 0) );
+		al_draw_rectangle(pos-(10/3200.0)*al_get_display_width(game->display), clipY, pos+width+(10/3200.0)*al_get_display_width(game->display), clipY+ (60/1800.0)*al_get_display_height(game->display), al_map_rgb(255,255,255), 2);
 		al_draw_text(game->_priv.font_console, pom->active ? al_map_rgb(0,0,0) : al_map_rgb(255,255,255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
 
 		if (pom->delay) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%d", pom->delay);
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*al_get_display_height(game->display), ALLEGRO_ALIGN_LEFT, "%d", pom->delay);
 		}
 
 		if (strncmp(pom->name, "TM_BackgroundAction", 19) == 0) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*al_get_display_height(game->display), ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
 		}
 
-		pos += width + (20/3200.0)*game->viewport.width;
+		pos += width + (20/3200.0)*al_get_display_width(game->display);
 		pom = pom->next;
 	}
 }
@@ -277,12 +278,12 @@ SYMBOL_INTERNAL void DrawTimeline(struct Game *game, struct Timeline* timeline, 
 	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 	al_use_transform(&trans);
 
-	al_draw_filled_rectangle(clipX, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1), clipX + clipWidth, clipY+clipHeight-(340/1800.0)*game->viewport.height*pos, al_map_rgba(0,0,0,92));
+	al_draw_filled_rectangle(clipX, clipY+clipHeight-(340/1800.0)*al_get_display_height(game->display)*(pos+1), clipX + clipWidth, clipY+clipHeight-(340/1800.0)*al_get_display_height(game->display)*pos, al_map_rgba(0,0,0,92));
 
-	al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth / 2, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1) + (10/1800.0)*game->viewport.height, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
+	al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth / 2, clipY+clipHeight-(340/1800.0)*al_get_display_height(game->display)*(pos+1) + (10/1800.0)*al_get_display_height(game->display), ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
 
-	DrawQueue(game, timeline->queue, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (220/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
-	DrawQueue(game, timeline->background, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (100/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
+	DrawQueue(game, timeline->queue, clipX + (25/3200.0)*al_get_display_width(game->display), clipY + clipHeight - (220/1800.0)*al_get_display_height(game->display) - (340/1800.0)*al_get_display_height(game->display)*pos);
+	DrawQueue(game, timeline->background, clipX + (25/3200.0)*al_get_display_width(game->display), clipY + clipHeight - (100/1800.0)*al_get_display_height(game->display) - (340/1800.0)*al_get_display_height(game->display)*pos);
 
 	al_use_transform(&game->projection);
 }
