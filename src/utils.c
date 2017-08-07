@@ -286,12 +286,12 @@ SYMBOL_EXPORT char* GetGameName(struct Game *game, char* format) {
 	return AddGarbage(game, result);
 }
 
-SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 
-	char *result = 0;
+SYMBOL_INTERNAL char* TestDataFilePath(struct Game *game, char* filename) {
+	char *result = NULL;
 
 	if (al_filename_exists(filename)) {
-		return AddGarbage(game, strdup(filename));
+		return strdup(filename);
 	}
 
 	{
@@ -299,7 +299,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 		strcat(origfn, filename);
 
 		if (al_filename_exists(origfn)) {
-			return AddGarbage(game, strdup(origfn));
+			return strdup(origfn);
 		}
 	}
 
@@ -312,11 +312,30 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	TestPath(filename, "../Resources/gamestates/", &result);
 #endif
 
-	if (!result) {
-		FatalError(game, true, "Could not find data file: %s!", filename);
-		exit(1);
+	return result;
+}
+
+SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
+
+	char *result = 0;
+
+#ifdef ALLEGRO_ANDROID
+	char origfn[255] = "android/";
+	strcat(origfn, filename);
+
+	result = TestDataFilePath(game, origfn);
+	if (result) {
+		return AddGarbage(game, result);
 	}
-	return AddGarbage(game, result);
+#endif
+
+	result = TestDataFilePath(game, filename);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+
+	FatalError(game, true, "Could not find data file: %s!", filename);
+	exit(1);
 }
 
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
