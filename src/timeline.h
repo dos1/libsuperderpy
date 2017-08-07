@@ -101,7 +101,5 @@ void TM_SkipDelay(struct Timeline*);
 bool TM_IsEmpty(struct Timeline* timeline);
 /*! \brief Checks if the background queue is empty */
 bool TM_IsBackgroundEmpty(struct Timeline* timeline);
-/*! \brief Draws debug info when console is visible */
-void TM_DrawDebug(struct Game *game, struct Timeline* timeline, int pos);
 
 #endif

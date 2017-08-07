@@ -71,6 +71,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.console_tmp = NULL;
 
 	game->_priv.garbage = NULL;
+	game->_priv.timelines = NULL;
 
 	game->eventHandler = NULL;
 
@@ -85,6 +86,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	if (game->config.height<180) game->config.height=180;
 
 	game->_priv.showconsole = game->config.debug;
+	game->_priv.showtimeline = false;
 
 	if(!al_init_image_addon()) {
 		fprintf(stderr, "failed to initialize image addon!\n");
@@ -446,9 +448,12 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 #ifdef ALLEGRO_ANDROID
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_MENU)) {
 #else
-			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && ((ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
+			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
 #endif
 				game->_priv.showconsole = !game->_priv.showconsole;
+				if (ev.keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) {
+					game->_priv.showtimeline = game->_priv.showconsole;
+				}
 			}
 			else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
 				int i;

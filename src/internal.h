@@ -55,5 +55,8 @@ void GamestateProgress(struct Game *game);
 void* AddGarbage(struct Game *game, void* data);
 void ClearGarbage(struct Game *game);
 void ClearScreen(struct Game *game);
+void AddTimeline(struct Game *game, struct Timeline *timeline);
+void RemoveTimeline(struct Game *game, struct Timeline *timeline);
+void DrawTimelines(struct Game *game);
 
 #endif

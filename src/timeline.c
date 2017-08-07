@@ -22,14 +22,15 @@
 #include "utils.h"
 #include "timeline.h"
 
-SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* g, char* name) {
-	PrintConsole(g, "Timeline Manager[%s]: init", name);
+SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, char* name) {
+	PrintConsole(game, "Timeline Manager[%s]: init", name);
 	struct Timeline* timeline = malloc(sizeof(struct Timeline));
-	timeline->game = g;
+	timeline->game = game;
 	timeline->lastid = 0;
 	timeline->queue = NULL;
 	timeline->background = NULL;
 	timeline->name = strdup(name);
+	AddTimeline(game, timeline);
 	return timeline;
 }
 
@@ -348,54 +349,6 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	}
 }
 
-SYMBOL_INTERNAL void DrawQueue(struct Game *game, struct TM_Action* queue, int clipX, int clipY) {
-
-	int pos = clipX;
-
-	struct TM_Action *pom = queue;
-	while (pom!=NULL) {
-
-		int width = al_get_text_width(game->_priv.font_console, pom->name);
-		al_draw_filled_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, pom->active ? al_map_rgba(255,255,255,192) : al_map_rgba(0, 0, 0, 0) );
-		al_draw_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, al_map_rgb(255,255,255), 2);
-		al_draw_text(game->_priv.font_console, pom->active ? al_map_rgb(0,0,0) : al_map_rgb(255,255,255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
-
-		if (pom->delay) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%d", pom->delay);
-		}
-
-		if (pom->function == *runinbackground) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
-		}
-
-		pos += width + (20/3200.0)*game->viewport.width;
-		pom = pom->next;
-	}
-}
-
-SYMBOL_EXPORT void TM_DrawDebug(struct Game *game, struct Timeline* timeline, int pos) {
-
-	if (!game->_priv.showconsole) {
-		return;
-	}
-
-	al_set_target_backbuffer(game->display);
-	ALLEGRO_TRANSFORM trans;
-	al_identity_transform(&trans);
-	int clipX, clipY, clipWidth, clipHeight;
-	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
-	al_use_transform(&trans);
-
-	al_draw_filled_rectangle(clipX, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1), clipX + clipWidth, clipY+clipHeight-(340/1800.0)*game->viewport.height*pos, al_map_rgba(0,0,0,92));
-
-	al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth / 2, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1) + (10/1800.0)*game->viewport.height, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
-
-	DrawQueue(game, timeline->queue, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (220/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
-	DrawQueue(game, timeline->background, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (100/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
-
-	al_use_transform(&game->projection);
-}
-
 SYMBOL_EXPORT void TM_SkipDelay(struct Timeline* timeline) {
 	if (timeline->queue && timeline->queue->timer) {
 		al_stop_timer(timeline->queue->timer);
@@ -412,6 +365,7 @@ SYMBOL_EXPORT bool TM_IsBackgroundEmpty(struct Timeline* timeline) {
 }
 
 SYMBOL_EXPORT void TM_Destroy(struct Timeline* timeline) {
+	RemoveTimeline(timeline->game, timeline);
 	TM_CleanQueue(timeline);
 	TM_CleanBackgroundQueue(timeline);
 	PrintConsole(timeline->game, "Timeline Manager[%s]: destroy", timeline->name);

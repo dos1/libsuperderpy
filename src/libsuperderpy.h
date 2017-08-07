@@ -88,6 +88,7 @@ struct Game {
 				ALLEGRO_EVENT_QUEUE *event_queue; /*!< Main event queue. */
 				ALLEGRO_TIMER *timer; /*!< Main LPS (logic) timer. */
 				bool showconsole; /*!< If true, game console is rendered on screen. */
+				bool showtimeline;
 
 				struct {
 						double old_time, fps;
@@ -118,7 +119,7 @@ struct Game {
 
 				struct Gamestate *current_gamestate;
 
-				struct libsuperderpy_list *garbage;
+				struct libsuperderpy_list *garbage, *timelines;
 
 				bool draw;
 

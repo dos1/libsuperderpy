@@ -114,6 +114,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game *game) {
 
 	}
 	game->_priv.fps_count.frames_done++;
+	DrawTimelines(game);
 }
 
 SYMBOL_INTERNAL void Console_Load(struct Game *game) {
@@ -208,6 +209,28 @@ SYMBOL_INTERNAL void ClearGarbage(struct Game *game) {
 	}
 }
 
+SYMBOL_INTERNAL void AddTimeline(struct Game *game, struct Timeline *timeline) {
+	game->_priv.timelines = AddToList(game->_priv.timelines, timeline);
+}
+
+SYMBOL_INTERNAL void RemoveTimeline(struct Game *game, struct Timeline *timeline) {
+	struct libsuperderpy_list *tmp = game->_priv.timelines;
+	if (tmp->data == timeline) {
+		struct libsuperderpy_list *next = tmp->next;
+		free(tmp);
+		game->_priv.timelines = next;
+		return;
+	}
+	while (tmp->next) {
+		if (tmp->next->data == timeline) {
+			struct libsuperderpy_list *next = tmp->next->next;
+			free(tmp->next);
+			tmp->next = next;
+			return;
+		}
+	}
+}
+
 SYMBOL_INTERNAL void ClearScreen(struct Game *game) {
 	ALLEGRO_TRANSFORM identity;
 	int clipX, clipY, clipWidth, clipHeight;
@@ -219,4 +242,60 @@ SYMBOL_INTERNAL void ClearScreen(struct Game *game) {
 	al_clear_to_color(al_map_rgb(0,0,0));
 	al_use_transform(&game->projection);
 	al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
+}
+
+SYMBOL_INTERNAL void DrawQueue(struct Game *game, struct TM_Action* queue, int clipX, int clipY) {
+
+	int pos = clipX;
+
+	struct TM_Action *pom = queue;
+	while (pom!=NULL) {
+
+		int width = al_get_text_width(game->_priv.font_console, pom->name);
+		al_draw_filled_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, pom->active ? al_map_rgba(255,255,255,192) : al_map_rgba(0, 0, 0, 0) );
+		al_draw_rectangle(pos-(10/3200.0)*game->viewport.width, clipY, pos+width+(10/3200.0)*game->viewport.width, clipY+ (60/1800.0)*game->viewport.height, al_map_rgb(255,255,255), 2);
+		al_draw_text(game->_priv.font_console, pom->active ? al_map_rgb(0,0,0) : al_map_rgb(255,255,255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
+
+		if (pom->delay) {
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%d", pom->delay);
+		}
+
+		if (strncmp(pom->name, "TM_BackgroundAction", 19) == 0) {
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), pos, clipY - (50/1800.0)*game->viewport.height, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
+		}
+
+		pos += width + (20/3200.0)*game->viewport.width;
+		pom = pom->next;
+	}
+}
+
+SYMBOL_INTERNAL void DrawTimeline(struct Game *game, struct Timeline* timeline, int pos) {
+	al_set_target_backbuffer(game->display);
+	ALLEGRO_TRANSFORM trans;
+	al_identity_transform(&trans);
+	int clipX, clipY, clipWidth, clipHeight;
+	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
+	al_use_transform(&trans);
+
+	al_draw_filled_rectangle(clipX, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1), clipX + clipWidth, clipY+clipHeight-(340/1800.0)*game->viewport.height*pos, al_map_rgba(0,0,0,92));
+
+	al_draw_textf(game->_priv.font_console, al_map_rgb(255,255,255), clipX + clipWidth / 2, clipY+clipHeight-(340/1800.0)*game->viewport.height*(pos+1) + (10/1800.0)*game->viewport.height, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
+
+	DrawQueue(game, timeline->queue, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (220/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
+	DrawQueue(game, timeline->background, clipX + (25/3200.0)*game->viewport.width, clipY + clipHeight - (100/1800.0)*game->viewport.height - (340/1800.0)*game->viewport.height*pos);
+
+	al_use_transform(&game->projection);
+}
+
+SYMBOL_INTERNAL void DrawTimelines(struct Game *game) {
+	if ((!game->_priv.showconsole) || (!game->_priv.showtimeline)) {
+		return;
+	}
+	struct libsuperderpy_list *tmp = game->_priv.timelines;
+	int i=0;
+	while (tmp) {
+		DrawTimeline(game, tmp->data, i);
+		i++;
+		tmp = tmp->next;
+	}
 }
