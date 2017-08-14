@@ -1,5 +1,5 @@
 # libsuperderpy
-A game engine for games written in C and Allegro 5.
+A multiplatform game engine for games written in C and Allegro 5. Supports GNU/Linux, Android, macOS and Windows.
 
 Used by such games as:
 - [Super Derpy: Muffin Attack](https://github.com/dos1/SuperDerpy)
@@ -27,7 +27,6 @@ Used by such games as:
 - [OMG Dragon!](https://github.com/dos1/omgdragon)
 - [HIT ME](https://github.com/dos1/hitme)
 - [Boiled Corn](https://github.com/dos1/boiledcorn)
-- [Amber Quest](https://github.com/dos1/amberquest)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
