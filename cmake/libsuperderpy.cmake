@@ -128,7 +128,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	ENDMACRO()
 
 	if(ANDROID)
-		set(ANDROID_TARGET "android-16" CACHE STRING "What Android target to compile for.")
+		set(ANDROID_TARGET "android-23" CACHE STRING "What Android target to compile for.")
 
 		# The android tool on Windows is a batch file wrapper, which cannot be
 		# started by MSYS shell directly. We invoke it via cmd.exe instead.
@@ -169,12 +169,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		configure_android_file("res/values/strings.xml")
 		configure_android_file("jni/localgen.mk")
 		if (ALLEGRO5_LIBRARIES MATCHES "^.*-debug.*$")
-			configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.debug.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
-		else()
-			configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
+			set(ALLEGRO_DEBUG_SUFFIX "-debug")
 		endif()
+		configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
 		file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in")
-		file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.debug.in")
 
 		file(RENAME "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/${LIBSUPERDERPY_GAMENAME}")
 
