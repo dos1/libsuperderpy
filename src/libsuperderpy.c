@@ -57,6 +57,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	if(!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
+		free(game);
 		return NULL;
 	}
 

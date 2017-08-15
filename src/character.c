@@ -154,7 +154,6 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game *game, struct Character *charact
 	PrintConsole(game, "Destroying character %s...", character->name);
 	if (!character->shared) {
 		struct Spritesheet *tmp, *s = character->spritesheets;
-		tmp = s;
 		while (s) {
 			tmp = s;
 			s = s->next;

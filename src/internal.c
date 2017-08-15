@@ -171,7 +171,7 @@ SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list *
 }
 
 SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list **list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data) {
-	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start = *list;
+	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start;
 	void* d = NULL;
 	while (tmp) {
 		if (identity(tmp, data)) {
