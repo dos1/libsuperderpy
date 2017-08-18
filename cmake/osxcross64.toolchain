@@ -1,8 +1,16 @@
 set(CMAKE_SYSTEM_NAME Darwin)
 
 # replace with your path to OSXCross toolchain
-set(OSXCROSS_PATH /home/dos/git/osxcross/target)
-set(OSXCROSS_SDK_VERSION 10.11)
+set(OSXCROSS_PATH "$ENV{LIBSUPERDERPY_OSXCROSS_ROOT}" CACHE PATH "Path to OSXCross toolchain" )
+set(OSXCROSS_SDK_VERSION "$ENV{LIBSUPERDERPY_OSXCROSS_SDK_VERSION}" CACHE STRING "Version of Xcode SDK used to build the toolchain")
+
+message( STATUS "Selected OSXCross toolchain: ${OSXCROSS_PATH}, SDK version: ${OSXCROSS_SDK_VERSION}" )
+if(NOT EXISTS "${OSXCROSS_PATH}")
+   message( FATAL_ERROR "Invalid OSXCROSS_PATH!")
+endif()
+if(NOT EXISTS "${OSXCROSS_PATH}/SDK/MacOSX${OSXCROSS_SDK_VERSION}.sdk")
+   message( FATAL_ERROR "Invalid OSXCROSS_SDK_VERSION! Make sure ${OSXCROSS_PATH}/SDK/MacOSX\${OSXCROSS_SDK_VERSION}.sdk/ directory exists.")
+endif()
 
 set(CMAKE_C_COMPILER ${OSXCROSS_PATH}/bin/o64-clang)
 set(CMAKE_CXX_COMPILER ${OSXCROSS_PATH}/bin/o64-clang++)
@@ -15,3 +23,5 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 set(CMAKE_PREFIX_PATH ${OSXCROSS_PATH}/SDK/MacOSX${OSXCROSS_SDK_VERSION}.sdk/usr)
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${OSXCROSS_PATH}/macports/pkgs/opt/local/lib)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${OSXCROSS_PATH}/macports/pkgs/opt/local/include)
