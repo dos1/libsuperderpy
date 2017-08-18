@@ -5,7 +5,12 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
 
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=undefined")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=leak -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
+	if(APPLE)
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
+	else(APPLE)
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+	endif(APPLE)
 
 	if(APPLE)
 		if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")

@@ -514,8 +514,10 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 			tmp->loaded = false;
 		}
 		if (tmp->handle && !RUNNING_ON_VALGRIND) {
+#ifndef LEAK_SANITIZER
 			PrintConsole(game, "Closing gamestate \"%s\"...", tmp->name);
 			dlclose(tmp->handle);
+#endif
 		}
 		free(tmp->name);
 		if (tmp->api) {
@@ -556,6 +558,6 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 #ifdef ALLEGRO_MACOSX
 		chdir(game->_priv.cwd);
 #endif
-		execv(argv[0], argv); // FIXME: on OSX there's chdir called which might break it
+		execv(argv[0], argv);
 	}
 }

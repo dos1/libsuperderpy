@@ -51,6 +51,7 @@ SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, f
 }
 
 SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text) {
+	// TODO: use al_do_multiline_text; and switch to al_draw_multiline_text once it returns number of lines
 
 	char stext[1024]; // Copy of the passed text.
 	char *pch; // A pointer to each word.
