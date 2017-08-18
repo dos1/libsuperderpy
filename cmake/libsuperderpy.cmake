@@ -130,6 +130,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	if(ANDROID)
 		set(ANDROID_TARGET "android-23" CACHE STRING "What Android target to compile for.")
+		STRING(REGEX REPLACE "^android-" "" ANDROID_TARGET_VERSION ${ANDROID_TARGET})
 
 		# The android tool on Windows is a batch file wrapper, which cannot be
 		# started by MSYS shell directly. We invoke it via cmd.exe instead.
