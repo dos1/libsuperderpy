@@ -96,13 +96,13 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	if(!al_init_acodec_addon()){
-		fprintf(stderr, "failed to initialize audio codecs!\n");
+	if(!al_install_audio()){
+		fprintf(stderr, "failed to initialize audio!\n");
 		return NULL;
 	}
 
-	if(!al_install_audio()){
-		fprintf(stderr, "failed to initialize audio!\n");
+	if(!al_init_acodec_addon()){
+		fprintf(stderr, "failed to initialize audio codecs!\n");
 		return NULL;
 	}
 
