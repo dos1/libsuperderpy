@@ -254,6 +254,8 @@ SYMBOL_EXPORT void FatalError(struct Game *game, bool fatal, char* format, ...) 
 		ALLEGRO_KEYBOARD_STATE kb;
 		al_get_keyboard_state(&kb);
 
+		// FIXME: implement proper event loop there
+#ifndef __EMSCRIPTEN__
 		int i;
 		for (i=0; i<ALLEGRO_KEY_PAUSE; i++) {
 			if (al_key_down(&kb, i)) {
@@ -261,6 +263,9 @@ SYMBOL_EXPORT void FatalError(struct Game *game, bool fatal, char* format, ...) 
 				break;
 			}
 		}
+#else
+		done = true;
+#endif
 	}
 	al_use_transform(&game->projection);
 }
@@ -336,6 +341,9 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	}
 
 	FatalError(game, true, "Could not find data file: %s!", filename);
+#ifdef __EMSCRIPTEN__
+	emscripten_exit_with_live_runtime();
+#endif
 	exit(1);
 }
 
@@ -348,7 +356,13 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	vsnprintf(text, 1024, format, vl);
 	va_end(vl);
 	ALLEGRO_DEBUG("%s", text);
-	if (game->config.debug) { printf("%s\n", text); fflush(stdout); }
+#ifndef __EMSCRIPTEN__
+	if (game->config.debug)
+#endif
+	{
+		printf("%s\n", text);
+		fflush(stdout);
+	}
 	if (!game->_priv.draw) return;
 	if (!game->_priv.console) return;
 	if ((!game->config.debug) && (!game->_priv.showconsole)) return;

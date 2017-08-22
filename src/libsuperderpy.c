@@ -75,6 +75,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.timelines = NULL;
 
 	game->eventHandler = NULL;
+	game->destroyHandler = NULL;
 
 	game->config.fullscreen = atoi(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"));
 	game->config.music = atoi(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"));
@@ -143,6 +144,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_install_joystick();
 
 	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
+#ifdef __EMSCRIPTEN__
+	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
+#endif
 	al_set_new_display_option(ALLEGRO_VSYNC, 2-atoi(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1")), ALLEGRO_SUGGEST);
 	al_set_new_display_option(ALLEGRO_OPENGL, true, ALLEGRO_REQUIRE);
 
@@ -222,7 +226,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 }
 
 SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
-
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
@@ -272,10 +275,30 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 	game->_priv.loading.data = (*game->_priv.loading.Load)(game);
 
-	bool redraw = false;
 	game->_priv.draw = true;
 
-	while(1) {
+#ifdef __EMSCRIPTEN__
+	void libsuperderpy_mainloop(void *game);
+	emscripten_set_main_loop_arg(libsuperderpy_mainloop, game, 0, true);
+	return 0;
+}
+
+bool redraw = false;
+
+SYMBOL_INTERNAL void libsuperderpy_mainloop_exit(struct Game *game) {
+	libsuperderpy_destroy(game);
+	free(game);
+	printf("Halted.\n");
+	emscripten_cancel_main_loop();
+}
+
+SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
+	struct Game *game = (struct Game*)g;
+	while (!al_is_event_queue_empty(game->_priv.event_queue) || redraw) {
+#else
+	bool redraw = false;
+	while (1) {
+#endif
 		ClearGarbage(game);
 
 		// TODO: split mainloop to functions to make it readable
@@ -398,6 +421,9 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 
 			if (!gameActive) {
 				PrintConsole(game, "No gamestates left, exiting...");
+#ifdef __EMSCRIPTEN__
+				libsuperderpy_mainloop_exit(game);
+#endif
 				break;
 			}
 
@@ -407,6 +433,12 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 			redraw = false;
 
 		} else {
+
+#ifdef __EMSCRIPTEN__
+			if (al_is_event_queue_empty(game->_priv.event_queue)) {
+				return;
+			}
+#endif
 
 			al_wait_for_event(game->_priv.event_queue, &ev);
 
@@ -421,6 +453,9 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 				redraw = true;
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+#ifdef __EMSCRIPTEN__
+				libsuperderpy_mainloop_exit(game);
+#endif
 				break;
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING) {
@@ -490,7 +525,12 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 		}
 	}
 
+#ifndef __EMSCRIPTEN__
+	if (game->destroyHandler) {
+		libsuperderpy_destroy(game);
+	}
 	return 0;
+#endif
 }
 
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
@@ -498,7 +538,6 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 
 	ClearGarbage(game);
 
-	// in case of restart
 	struct Gamestate *tmp = game->_priv.gamestates, *pom;
 	while (tmp) {
 		if (tmp->started) {
@@ -528,7 +567,26 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 		tmp=pom;
 	}
 
+	if (game->destroyHandler) {
+		(*game->destroyHandler)(game);
+	}
+
 	ClearScreen(game);
+#ifdef __EMSCRIPTEN__
+{
+	ALLEGRO_BITMAP *bmp = al_create_bitmap(320, 180);
+	al_set_target_bitmap(bmp);
+	al_clear_to_color(al_map_rgb(0,0,0));
+	ALLEGRO_FONT *font = al_create_builtin_font();
+	al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 - 6, ALLEGRO_ALIGN_CENTER, "It's now safe to turn off");
+	al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 + 6, ALLEGRO_ALIGN_CENTER, "your browser.");
+	al_set_target_backbuffer(game->display);
+	al_draw_scaled_bitmap(bmp, 0, 0, 320, 180, 0, -game->viewport.height*0.2, game->viewport.width, game->viewport.height*1.4, 0);
+	al_flip_display();
+	al_destroy_bitmap(bmp);
+	al_destroy_font(font);
+}
+#endif
 	PrintConsole(game, "Shutting down...");
 	DrawConsole(game);
 	al_flip_display();
@@ -548,9 +606,8 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 	al_destroy_voice(game->audio.v);
 	al_uninstall_audio();
 	DeinitConfig(game);
+#ifndef __EMSCRIPTEN__
 	al_uninstall_system();
-	al_shutdown_ttf_addon();
-	al_shutdown_font_addon();
 	char** argv = game->_priv.argv;
 	bool restart = game->restart;
 	free(game);
@@ -560,4 +617,5 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 #endif
 		execv(argv[0], argv);
 	}
+#endif
 }

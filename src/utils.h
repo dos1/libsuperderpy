@@ -29,6 +29,8 @@
 #define LIBRARY_EXTENSION ".dll"
 #elif defined(ALLEGRO_MACOSX)
 #define LIBRARY_EXTENSION ".dylib"
+#elif defined(__EMSCRIPTEN__)
+#define LIBRARY_EXTENSION ".js"
 #else
 #define LIBRARY_EXTENSION ".so"
 #endif
