@@ -210,21 +210,24 @@ SYMBOL_EXPORT unsigned int emscripten_get_available_audio_stream_fragments(ALLEG
 }
 
 SYMBOL_EXPORT double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM *stream) {
-	// FIXME
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
-	return al_get_sample_instance_length(s->instance);
+	unsigned int samples_per_sec = al_get_sample_instance_frequency(s->instance);
+	return al_get_sample_instance_length(s->instance) / (double)samples_per_sec;
 }
 
 SYMBOL_EXPORT bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *stream, double val) {
-	// FIXME
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
-	return al_set_sample_instance_position(s->instance, val);
+	double length = emscripten_get_audio_stream_length_sec(stream);
+	unsigned int samples = emscripten_get_audio_stream_length(stream);
+	return al_set_sample_instance_position(s->instance, samples * (val / length));
 }
 
 SYMBOL_EXPORT double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM *stream) {
-	// FIXME
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
-	return al_get_sample_instance_position(s->instance);
+	double sample_pos = al_get_sample_instance_position(s->instance);
+	double length = emscripten_get_audio_stream_length_sec(stream);
+	unsigned int samples = emscripten_get_audio_stream_length(stream);
+	return length * (sample_pos / (double)samples);
 }
 
 SYMBOL_EXPORT void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM *stream) {

@@ -50,9 +50,9 @@ float emscripten_get_audio_stream_gain(ALLEGRO_AUDIO_STREAM *stream);
 float emscripten_get_audio_stream_pan(ALLEGRO_AUDIO_STREAM *stream);
 bool emscripten_set_audio_stream_speed(ALLEGRO_AUDIO_STREAM *stream, float val);
 bool emscripten_set_audio_stream_pan(ALLEGRO_AUDIO_STREAM *stream, float val);
-double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM *stream) __attribute__((deprecated("not implemented yet for Emscripten")));
-bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *stream, double val) __attribute__((deprecated("not implemented yet for Emscripten")));
-double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM *stream) __attribute__((deprecated("not implemented yet for Emscripten")));
+double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM *stream);
+bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *stream, double val);
+double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM *stream);
 void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM *stream);
 #ifdef ALLEGRO_UNSTABLE
 bool emscripten_set_audio_stream_channel_matrix(ALLEGRO_AUDIO_STREAM *stream, const float *val);
