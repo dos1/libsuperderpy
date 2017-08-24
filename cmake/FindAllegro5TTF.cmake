@@ -5,7 +5,7 @@
 #  ALLEGRO5_TTF_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_TTF_INCLUDE_DIR allegro5/allegro_ttf.h)
+FIND_PATH(ALLEGRO5_TTF_INCLUDE_DIR allegro5/allegro_ttf.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_TTF_NAMES ${ALLEGRO5_TTF_NAMES} allegro_ttf allegro_ttf_static liballegro_ttf liballegro_ttf_static AllegroTTF-5.2 allegro_ttf-debug)
 FIND_LIBRARY(ALLEGRO5_TTF_LIBRARY NAMES ${ALLEGRO5_TTF_NAMES} )

@@ -5,7 +5,7 @@
 #  ALLEGRO5_VIDEO_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_VIDEO_INCLUDE_DIR allegro5/allegro_video.h)
+FIND_PATH(ALLEGRO5_VIDEO_INCLUDE_DIR allegro5/allegro_video.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_VIDEO_NAMES ${ALLEGRO5_VIDEO_NAMES} allegro_video allegro_video_static liballegro_video liballegro_video_static AllegroVideo-5.2 allegro_video-debug)
 FIND_LIBRARY(ALLEGRO5_VIDEO_LIBRARY NAMES ${ALLEGRO5_VIDEO_NAMES} )

@@ -1,7 +1,7 @@
-/*! \file main.h
- *  \brief Headers of main file of SuperDerpy engine.
+/*! \file libsuperderpy.h
+ *  \brief Headers of main file of libsuperderpy engine.
  *
- *   Contains basic functions shared by all views.
+ *   Include this to use the engine functions.
  */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
@@ -34,6 +34,7 @@
 #endif
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include "emscripten-audio-stream.h"
 #endif
 #include <sys/param.h>
 #include "gamestate.h"
@@ -44,17 +45,6 @@
 
 #ifndef LIBSUPERDERPY_DATA_TYPE
 #define LIBSUPERDERPY_DATA_TYPE void
-#endif
-
-#ifdef __EMSCRIPTEN__
-#define al_load_audio_stream(x,y,z) NULL
-#define al_set_audio_stream_playing(x, y)
-#define al_set_audio_stream_playmode(x, y)
-#define al_get_audio_stream_playing(x) true
-#define al_attach_audio_stream_to_mixer(x, y)
-#define al_set_audio_stream_gain(x, y)
-#define al_destroy_audio_stream(x)
-#define al_rewind_audio_stream(x)
 #endif
 
 struct Gamestate;

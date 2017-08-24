@@ -4,8 +4,8 @@
 #  ALLEGRO5_ACODEC_INCLUDE_DIR - the allrgo5 include directory
 #  ALLEGRO5_ACODEC_LIBRARIES - Link these to use allegro5
 #
-
-FIND_PATH(ALLEGRO5_ACODEC_INCLUDE_DIR allegro5/allegro_acodec.h)
+message(${ALLEGRO5_INCLUDE_DIR})
+FIND_PATH(ALLEGRO5_ACODEC_INCLUDE_DIR allegro5/allegro_acodec.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_ACODEC_NAMES ${ALLEGRO5_ACODEC_NAMES} allegro_acodec allegro_acodec_static liballegro_acodec liballegro_acodec_static AllegroAcodec-5.2 allegro_acodec-debug)
 FIND_LIBRARY(ALLEGRO5_ACODEC_LIBRARY NAMES ${ALLEGRO5_ACODEC_NAMES} )

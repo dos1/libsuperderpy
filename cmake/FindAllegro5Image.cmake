@@ -5,7 +5,7 @@
 #  ALLEGRO5_IMAGE_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_IMAGE_INCLUDE_DIR allegro5/allegro_image.h)
+FIND_PATH(ALLEGRO5_IMAGE_INCLUDE_DIR allegro5/allegro_image.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_IMAGE_NAMES ${ALLEGRO5_IMAGE_NAMES} allegro_image allegro_image_static liballegro_image liballegro_image_static AllegroImage-5.2 allegro_image-debug)
 FIND_LIBRARY(ALLEGRO5_IMAGE_LIBRARY NAMES ${ALLEGRO5_IMAGE_NAMES} )

@@ -5,7 +5,7 @@
 #  ALLEGRO5_AUDIO_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_AUDIO_INCLUDE_DIR allegro5/allegro_audio.h)
+FIND_PATH(ALLEGRO5_AUDIO_INCLUDE_DIR allegro5/allegro_audio.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_AUDIO_NAMES ${ALLEGRO5_AUDIO_NAMES} allegro_audio allegro_audio_static liballegro_audio liballegro_audio_static AllegroAudio-5.2 allegro_audio-debug)
 FIND_LIBRARY(ALLEGRO5_AUDIO_LIBRARY NAMES ${ALLEGRO5_AUDIO_NAMES} )

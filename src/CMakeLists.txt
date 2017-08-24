@@ -1,12 +1,15 @@
 SET(SRC_LIST
-    utils.c
-    config.c
-    timeline.c
-    gamestate.c
-    libsuperderpy.c
-    character.c
-    internal.c
-    )
+	  utils.c
+		config.c
+		timeline.c
+		gamestate.c
+		libsuperderpy.c
+		character.c
+		internal.c
+		)
+if (EMSCRIPTEN)
+	list(APPEND SRC_LIST emscripten-audio-stream.c)
+endif()
 
 add_library("libsuperderpy" SHARED ${SRC_LIST})
 

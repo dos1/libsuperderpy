@@ -5,7 +5,7 @@
 #  ALLEGRO5_PRIMITIVES_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_PRIMITIVES_INCLUDE_DIR allegro5/allegro_primitives.h)
+FIND_PATH(ALLEGRO5_PRIMITIVES_INCLUDE_DIR allegro5/allegro_primitives.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_PRIMITIVES_NAMES ${ALLEGRO5_PRIMITIVES_NAMES} allegro_primitives allegro_primitives_static liballegro_primitives liballegro_primitives_static AllegroPrimitives-5.2 allegro_primitives-debug)
 FIND_LIBRARY(ALLEGRO5_PRIMITIVES_LIBRARY NAMES ${ALLEGRO5_PRIMITIVES_NAMES} )

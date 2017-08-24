@@ -166,3 +166,7 @@ endif()
 #set these global flags for cmake client scripts to change behavior
 set(ANDROID True)
 set(BUILD_ANDROID True)
+
+# Do a no-op access on the CMAKE_TOOLCHAIN_FILE variable so that CMake will not issue a warning on it being unused.
+if (CMAKE_TOOLCHAIN_FILE)
+endif()

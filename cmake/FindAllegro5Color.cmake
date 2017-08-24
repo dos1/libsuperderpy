@@ -5,7 +5,7 @@
 #  ALLEGRO5_COLOR_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_COLOR_INCLUDE_DIR allegro5/allegro_color.h)
+FIND_PATH(ALLEGRO5_COLOR_INCLUDE_DIR allegro5/allegro_color.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
 SET(ALLEGRO5_COLOR_NAMES ${ALLEGRO5_COLOR_NAMES} allegro_color allegro_color_static liballegro_color liballegro_color_static AllegroColor-5.2 allegro_color-debug)
 FIND_LIBRARY(ALLEGRO5_COLOR_LIBRARY NAMES ${ALLEGRO5_COLOR_NAMES} )

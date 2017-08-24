@@ -335,6 +335,22 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	}
 #endif
 
+#if (defined __EMSCRIPTEN__) || (defined ALLEGRO_ANDROID)
+	char* file = AddGarbage(game, strdup(filename));
+	char* sub = strstr(file, ".flac");
+	if (sub) {
+		 sub[0] = '.';
+		 sub[1] = 'o';
+		 sub[2] = 'g';
+		 sub[3] = 'g';
+		 sub[4] = 0;
+	}
+	result = TestDataFilePath(game, file);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+#endif
+
 	result = TestDataFilePath(game, filename);
 	if (result) {
 		return AddGarbage(game, result);
