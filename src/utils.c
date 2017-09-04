@@ -382,6 +382,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	if (!game->_priv.draw) return;
 	if (!game->_priv.console) return;
 	if ((!game->config.debug) && (!game->_priv.showconsole)) return;
+	ALLEGRO_BITMAP *target = al_get_target_bitmap();
 	al_set_target_bitmap(game->_priv.console_tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,80));
 	al_draw_bitmap_region(game->_priv.console, 0, (int)(al_get_bitmap_height(game->_priv.console)*0.2), al_get_bitmap_width(game->_priv.console), (int)(al_get_bitmap_height(game->_priv.console)*0.8), 0, 0, 0);
@@ -389,7 +390,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	al_set_target_bitmap(game->_priv.console);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 	al_draw_bitmap(game->_priv.console_tmp, 0, 0, 0);
-	al_set_target_bitmap(al_get_backbuffer(game->display));
+	al_set_target_bitmap(target);
 }
 
 SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
