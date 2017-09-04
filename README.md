@@ -3,7 +3,7 @@ A multiplatform game engine for games written in C and Allegro 5. Supports GNU/L
 
 Used by such games as:
 - [Super Derpy: Muffin Attack](https://github.com/dos1/SuperDerpy)
-- [Cadence Throw: Throwing Wives is Magic](https://github.com/dos1/CadenceThrow)
+- [Cadence Throw](https://github.com/dos1/CadenceThrow)
 - [Radio Edit](https://github.com/dos1/RadioEdit)
 - [Controls Control](https://github.com/dos1/moreisbetter/tree/master/controlscontrol)
 - [Tickle Monster vs. Suits](https://github.com/dos1/TickleMonster)
@@ -27,6 +27,7 @@ Used by such games as:
 - [OMG Dragon!](https://github.com/dos1/omgdragon)
 - [HIT ME](https://github.com/dos1/hitme)
 - [Boiled Corn](https://github.com/dos1/boiledcorn)
+- [Now and Then](https://github.com/dos1/nowandthen)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
