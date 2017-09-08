@@ -71,6 +71,10 @@ if(EMSCRIPTEN)
 
 endif()
 
+if(ANDROID OR EMSCRIPTEN)
+	add_definitions(-DLIBSUPERDERPY_SINGLE_THREAD=1)
+endif()
+
   find_package(Allegro5 REQUIRED)
 	find_package(Allegro5Font REQUIRED)
 	find_package(Allegro5TTF REQUIRED)

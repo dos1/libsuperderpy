@@ -22,34 +22,22 @@
 #include "utils.h"
 #include "gamestate.h"
 
-SYMBOL_INTERNAL struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
+static struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	if (!tmp) {
-		game->_priv.gamestates = malloc(sizeof(struct Gamestate));
+		game->_priv.gamestates = AllocateGamestate(game, name);
 		tmp = game->_priv.gamestates;
 	} else {
 		while (tmp->next) {
 			tmp = tmp->next;
 		}
-		tmp->next = malloc(sizeof(struct Gamestate));
+		tmp->next = AllocateGamestate(game, name);
 		tmp = tmp->next;
 	}
-	tmp->name = strdup(name);
-	tmp->handle = NULL;
-	tmp->loaded = false;
-	tmp->paused = false;
-	tmp->frozen = false;
-	tmp->started = false;
-	tmp->pending_load = false;
-	tmp->pending_start = false;
-	tmp->pending_stop = false;
-	tmp->pending_unload = false;
-	tmp->next = NULL;
-	tmp->api = NULL;
 	return tmp;
 }
 
-SYMBOL_INTERNAL struct Gamestate* FindGamestate(struct Game *game, const char* name) {
+static struct Gamestate* FindGamestate(struct Game *game, const char* name) {
 	struct Gamestate *tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (!strcmp(name, tmp->name)) {

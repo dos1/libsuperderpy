@@ -128,7 +128,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline) {
 	}
 }
 
-SYMBOL_INTERNAL void PauseTimers(struct Timeline* timeline, bool pause) {
+static void PauseTimers(struct Timeline* timeline, bool pause) {
 	if (timeline->queue) {
 		if (timeline->queue->timer) {
 			if (pause) {
@@ -147,7 +147,7 @@ SYMBOL_INTERNAL void PauseTimers(struct Timeline* timeline, bool pause) {
 	}
 }
 
-SYMBOL_EXPORT void TM_Propagate(struct Timeline* timeline, enum TM_ActionState action) {
+static void TM_Propagate(struct Timeline* timeline, enum TM_ActionState action) {
 	if (timeline->queue) {
 		if ((*timeline->queue->function) && (timeline->queue->active)) {
 			(*timeline->queue->function)(timeline->game, timeline->queue, action);
@@ -273,7 +273,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline
 }
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
-SYMBOL_INTERNAL bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
+static bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
 	int* delay = (int*) TM_GetArg(action->arguments, 1);
 	char* name = (char*) TM_GetArg(action->arguments, 2);
 	struct Timeline *timeline = (struct Timeline*) TM_GetArg(action->arguments, 3);

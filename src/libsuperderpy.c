@@ -34,7 +34,6 @@
 #include <sys/param.h>
 #include "internal.h"
 #include "libsuperderpy.h"
-#include "3rdparty/valgrind.h"
 #ifdef ALLEGRO_MACOSX
 #include <mach-o/dyld.h>
 #endif
@@ -67,15 +66,18 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.fps_count.fps = 0;
 	game->_priv.fps_count.old_time = 0;
 
+	game->_priv.font_console = NULL;
 	game->_priv.font_bsod = NULL;
-	game->_priv.console = NULL;
-	game->_priv.console_tmp = NULL;
+	game->_priv.console_pos = 0;
+	for (unsigned int i=0; i<(sizeof(game->_priv.console)/sizeof(game->_priv.console[0])); i++) {
+		game->_priv.console[i][0] = '\0';
+	}
 
 	game->_priv.garbage = NULL;
 	game->_priv.timelines = NULL;
 
-	game->eventHandler = NULL;
-	game->destroyHandler = NULL;
+	game->handlers.event = NULL;
+	game->handlers.destroy = NULL;
 
 	game->config.fullscreen = atoi(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"));
 	game->config.music = atoi(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"));
@@ -143,7 +145,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_install_joystick();
 
-	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL ); // TODO: make ALLEGRO_PROGRAMMABLE_PIPELINE game-optional
+	al_set_new_display_flags(ALLEGRO_OPENGL_ES_PROFILE |  ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
 #ifdef __EMSCRIPTEN__
 	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
 #endif
@@ -183,7 +185,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	if (game->config.fullscreen) al_hide_mouse_cursor(game->display);
 	al_inhibit_screensaver(true);
 
-	al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR);
+	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
 	game->_priv.gamestates = NULL;
 	game->_priv.gamestate_scheduled = false;
@@ -197,9 +199,15 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	game->audio.v = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_FLOAT32;
+#ifdef ALLEGRO_ANDROID
+	depth = ALLEGRO_AUDIO_DEPTH_INT16;
+#endif
+	game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
 	if (!game->audio.v) {
-		game->audio.v = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+		// fallback
+		depth = (depth == ALLEGRO_AUDIO_DEPTH_FLOAT32) ? ALLEGRO_AUDIO_DEPTH_INT16 : ALLEGRO_AUDIO_DEPTH_FLOAT32;
+		game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
 	}
 	game->audio.mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	game->audio.fx = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
@@ -220,10 +228,12 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->data = NULL;
 
-	game->shuttingdown = false;
+	game->shutting_down = false;
 	game->restart = false;
 
 	game->show_loading_on_launch = false;
+
+	game->loading_progress = 0;
 
 	return game;
 }
@@ -259,24 +269,13 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game *game) {
 		tmp = tmp->next;
 	}
 
-	char libname[1024] = {};
-	snprintf(libname, 1024, "libsuperderpy-%s-loading" LIBRARY_EXTENSION, game->name);
-	void *handle = dlopen(libname, RTLD_NOW);
-	if (!handle) {
-		FatalError(game, true, "Error while initializing loading screen: %s", dlerror());
+	game->_priv.loading.gamestate = AllocateGamestate(game, "loading");
+	if (!OpenGamestate(game, game->_priv.loading.gamestate) || !LinkGamestate(game, game->_priv.loading.gamestate)) {
+		// TODO: support loading-less scenario
 		return 2;
-	} else {
-
-#define GS_LOADINGERROR FatalError(game, true, "Error on resolving loading symbol: %s", dlerror()); return 3;
-
-		if (!(game->_priv.loading.Draw = dlsym(handle, "Draw"))) { GS_LOADINGERROR; }
-		if (!(game->_priv.loading.Load = dlsym(handle, "Load"))) { GS_LOADINGERROR; }
-		if (!(game->_priv.loading.Start = dlsym(handle, "Start"))) { GS_LOADINGERROR; }
-		if (!(game->_priv.loading.Stop = dlsym(handle, "Stop"))) { GS_LOADINGERROR; }
-		if (!(game->_priv.loading.Unload = dlsym(handle, "Unload"))) { GS_LOADINGERROR; }
 	}
-
-	game->_priv.loading.data = (*game->_priv.loading.Load)(game);
+	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->Gamestate_Load)(game, NULL);
+	PrintConsole(game, "Loading screen registered.");
 
 	game->_priv.draw = true;
 
@@ -311,10 +310,11 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 			game->_priv.gamestate_scheduled = false;
 			struct Gamestate *tmp = game->_priv.gamestates;
 
-			game->_priv.tmp_gamestate.toLoad = 0;
-			game->_priv.tmp_gamestate.loaded = 0;
+			game->_priv.loading.toLoad = 0;
+			game->_priv.loading.loaded = 0;
+			game->loading_progress = 0;
 
-			// TODO: support gamestate dependences
+			// TODO: support gamestate dependences/ordering
 			while (tmp) {
 				if (tmp->pending_stop) {
 					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
@@ -324,13 +324,11 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 					tmp->pending_stop = false;
 				}
 
-				if (tmp->pending_load) game->_priv.tmp_gamestate.toLoad++;
+				if (tmp->pending_load) game->_priv.loading.toLoad++;
 				tmp=tmp->next;
 			}
 
 			tmp = game->_priv.gamestates;
-
-			game->_priv.tmp_gamestate.t = -1;
 
 			while (tmp) {
 				if (tmp->pending_unload) {
@@ -344,60 +342,48 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 				}
 				if (tmp->pending_load) {
 					al_stop_timer(game->_priv.timer);
+					if (tmp->showLoading) (*game->_priv.loading.gamestate->api->Gamestate_Start)(game, game->_priv.loading.gamestate->data);
 
 					if (!tmp->api) {
-						PrintConsole(game, "Opening gamestate \"%s\"...", tmp->name);
-						char libname[1024];
-						snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->name, tmp->name);
-						tmp->handle = dlopen(libname,RTLD_NOW);
-						if (!tmp->handle) {
-							FatalError(game, false, "Error while opening gamestate \"%s\": %s", tmp->name, dlerror());
-
+						if (!OpenGamestate(game, tmp) || !LinkGamestate(game, tmp)) {
 							tmp->pending_load = false;
 							tmp->pending_start = false;
-						} else {
-
-							tmp->api = malloc(sizeof(struct Gamestate_API));
-
-#define GS_ERROR FatalError(game, false, "Error on resolving gamestate symbol: %s", dlerror()); tmp->pending_load = false; tmp->pending_start = false; tmp=tmp->next; continue;
-
-							if (!(tmp->api->Gamestate_Draw = dlsym(tmp->handle, "Gamestate_Draw"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Logic = dlsym(tmp->handle, "Gamestate_Logic"))) { GS_ERROR; }
-
-							if (!(tmp->api->Gamestate_Load = dlsym(tmp->handle, "Gamestate_Load"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Start = dlsym(tmp->handle, "Gamestate_Start"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Pause = dlsym(tmp->handle, "Gamestate_Pause"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Resume = dlsym(tmp->handle, "Gamestate_Resume"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Stop = dlsym(tmp->handle, "Gamestate_Stop"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Unload = dlsym(tmp->handle, "Gamestate_Unload"))) { GS_ERROR; }
-
-							if (!(tmp->api->Gamestate_ProcessEvent = dlsym(tmp->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
-							if (!(tmp->api->Gamestate_Reload = dlsym(tmp->handle, "Gamestate_Reload"))) { GS_ERROR; }
-
-							if (!(tmp->api->Gamestate_ProgressCount = dlsym(tmp->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
+							tmp->next = tmp;
+							continue;
 						}
 					}
 					if (tmp->api) {
 						PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
-						game->_priv.tmp_gamestate.p = 0;
+						game->_priv.loading.progress = -1;
 
-						DrawGamestates(game);
-						if (tmp->showLoading) {
-							(*game->_priv.loading.Draw)(game, game->_priv.loading.data, game->_priv.tmp_gamestate.loaded/(float)game->_priv.tmp_gamestate.toLoad);
-						}
-						DrawConsole(game);
-						if (al_get_time() - game->_priv.tmp_gamestate.t >= 1/60.0) {
-							al_flip_display();
-							game->_priv.tmp_gamestate.t = al_get_time();
-						}
-						game->_priv.tmp_gamestate.tmp = tmp;
+						game->_priv.loading.current = tmp;
 						game->_priv.current_gamestate = tmp;
-						tmp->data = (*tmp->api->Gamestate_Load)(game, &GamestateProgress);
-						game->_priv.tmp_gamestate.loaded++;
+
+						struct GamestateLoadingThreadData data = { .game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags() };
+						game->_priv.loading.inProgress = true;
+
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+						al_run_detached_thread(GamestateLoadingThread, &data);
+						while (game->_priv.loading.inProgress) {
+							DrawGamestates(game);
+							if (tmp->showLoading) (*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
+							DrawConsole(game);
+							al_flip_display();
+						}
+#else
+						GamestateLoadingThread(&data);
+#endif
+
+						al_set_new_bitmap_flags(data.bitmap_flags);
+						// TODO: compile shaders
+						al_convert_memory_bitmaps();
+						game->_priv.loading.loaded++;
 
 						tmp->loaded = true;
 						tmp->pending_load = false;
+
 					}
+					if (tmp->showLoading) (*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
 					al_resume_timer(game->_priv.timer);
 				}
 
@@ -430,6 +416,8 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 				break;
 			}
 
+			al_convert_memory_bitmaps();
+
 			DrawGamestates(game);
 			DrawConsole(game);
 			al_flip_display();
@@ -445,8 +433,8 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 
 			al_wait_for_event(game->_priv.event_queue, &ev);
 
-			if (game->eventHandler) {
-				if ((*game->eventHandler)(game, &ev)) {
+			if (game->handlers.event) {
+				if ((*game->handlers.event)(game, &ev)) {
 					continue;
 				}
 			}
@@ -467,13 +455,11 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 				al_stop_timer(game->_priv.timer);
 				al_detach_voice(game->audio.v);
 				FreezeGamestates(game);
-				if (game->_priv.console) Console_Unload(game);
 				al_acknowledge_drawing_halt(game->display);
 			}
 			else if(ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
 				game->_priv.draw = true;
 				al_acknowledge_drawing_resume(game->display);
-				Console_Load(game);
 				PrintConsole(game, "Engine resumed.");
 				ReloadGamestates(game);
 				UnfreezeGamestates(game);
@@ -529,7 +515,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 	}
 
 #ifndef __EMSCRIPTEN__
-	if (game->destroyHandler) {
+	if (game->handlers.destroy) {
 		libsuperderpy_destroy(game);
 	}
 	return 0;
@@ -537,7 +523,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 }
 
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
-	game->shuttingdown = true;
+	game->shutting_down = true;
 
 	ClearGarbage(game);
 
@@ -555,41 +541,37 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 			(*tmp->api->Gamestate_Unload)(game, tmp->data);
 			tmp->loaded = false;
 		}
-		if (tmp->handle && !RUNNING_ON_VALGRIND) {
-#ifndef LEAK_SANITIZER
-			PrintConsole(game, "Closing gamestate \"%s\"...", tmp->name);
-			dlclose(tmp->handle);
-#endif
-		}
-		free(tmp->name);
-		if (tmp->api) {
-			free(tmp->api);
-		}
+		CloseGamestate(game, tmp);
 		pom = tmp->next;
 		free(tmp);
 		tmp=pom;
 	}
 
-	if (game->destroyHandler) {
-		(*game->destroyHandler)(game);
+	(*game->_priv.loading.gamestate->api->Gamestate_Unload)(game, game->_priv.loading.gamestate->data);
+	CloseGamestate(game, game->_priv.loading.gamestate);
+	free(game->_priv.loading.gamestate);
+
+	if (game->handlers.destroy) {
+		(*game->handlers.destroy)(game);
 	}
 
 	ClearScreen(game);
 #ifdef __EMSCRIPTEN__
-{
-	ALLEGRO_BITMAP *bmp = al_create_bitmap(320, 180);
-	al_set_target_bitmap(bmp);
-	al_clear_to_color(al_map_rgb(0,0,0));
-	ALLEGRO_FONT *font = al_create_builtin_font();
-	al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 - 6, ALLEGRO_ALIGN_CENTER, "It's now safe to turn off");
-	al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 + 6, ALLEGRO_ALIGN_CENTER, "your browser.");
-	al_set_target_backbuffer(game->display);
-	al_draw_scaled_bitmap(bmp, 0, 0, 320, 180, 0, -game->viewport.height*0.2, game->viewport.width, game->viewport.height*1.4, 0);
-	al_flip_display();
-	al_destroy_bitmap(bmp);
-	al_destroy_font(font);
-}
+	{
+		ALLEGRO_BITMAP *bmp = al_create_bitmap(320, 180);
+		al_set_target_bitmap(bmp);
+		al_clear_to_color(al_map_rgb(0,0,0));
+		ALLEGRO_FONT *font = al_create_builtin_font();
+		al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 - 6, ALLEGRO_ALIGN_CENTER, "It's now safe to turn off");
+		al_draw_text(font, al_map_rgb(228,127,59), 320/2, 180/2 - 8 + 6, ALLEGRO_ALIGN_CENTER, "your browser.");
+		al_set_target_backbuffer(game->display);
+		al_draw_scaled_bitmap(bmp, 0, 0, 320, 180, 0, -game->viewport.height*0.2, game->viewport.width, game->viewport.height*1.4, 0);
+		al_flip_display();
+		al_destroy_bitmap(bmp);
+		al_destroy_font(font);
+	}
 #endif
+
 	PrintConsole(game, "Shutting down...");
 	DrawConsole(game);
 	al_flip_display();
@@ -597,7 +579,6 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game *game) {
 		free(game->_priv.garbage->data);
 		game->_priv.garbage = game->_priv.garbage->next;
 	}
-	(*game->_priv.loading.Unload)(game, game->_priv.loading.data);
 	al_destroy_timer(game->_priv.timer);
 	Console_Unload(game);
 	al_destroy_display(game->display);

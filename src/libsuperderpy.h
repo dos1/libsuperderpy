@@ -87,8 +87,8 @@ struct Game {
 				bool gamestate_scheduled; /*!< Whether there's some gamestate lifecycle management work to do. */
 				ALLEGRO_FONT *font_console; /*!< Font used in game console. */
 				ALLEGRO_FONT *font_bsod; /*!< Font used in Blue Screens of Derp. */
-				ALLEGRO_BITMAP *console; /*!< Bitmap with game console. */
-				ALLEGRO_BITMAP *console_tmp; /*!< Bitmap used for drawing game console. */
+				char console[5][1024];
+				unsigned int console_pos;
 				ALLEGRO_EVENT_QUEUE *event_queue; /*!< Main event queue. */
 				ALLEGRO_TIMER *timer; /*!< Main LPS (logic) timer. */
 				bool showconsole; /*!< If true, game console is rendered on screen. */
@@ -101,25 +101,16 @@ struct Game {
 
 				ALLEGRO_CONFIG *config; /*!< Configuration file interface. */
 
-				struct {
-						void (*Draw)(struct Game *game, void* data, float p);
-						void* (*Load)(struct Game *game);
-						void (*Start)(struct Game *game, void* data);
-						void (*Stop)(struct Game *game, void* data);
-						void (*Unload)(struct Game *game, void* data);
-
-						void* data;
-				} loading; /*!< Interface for accessing loading screen functions. */
-
 				int argc;
 				char** argv;
 
 				struct {
-						int p;
-						struct Gamestate *tmp;
-						double t;
+						struct Gamestate *gamestate;
+						struct Gamestate *current;
+						int progress;
 						int loaded, toLoad;
-				} tmp_gamestate;
+						bool inProgress;
+				} loading;
 
 				struct Gamestate *current_gamestate;
 
@@ -133,7 +124,7 @@ struct Game {
 
 		} _priv; /*!< Private resources. Do not use in gamestates! */
 
-		bool shuttingdown; /*!< If true then shut down of the game is pending. */
+		bool shutting_down; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
 		bool touch;
 
@@ -143,8 +134,12 @@ struct Game {
 
 		ALLEGRO_EVENT_SOURCE event_source;
 
-		bool (*eventHandler)(struct Game *game, ALLEGRO_EVENT *ev);
-		void (*destroyHandler)(struct Game *game);
+		float loading_progress;
+
+		struct {
+			bool (*event)(struct Game *game, ALLEGRO_EVENT *ev);
+			void (*destroy)(struct Game *game);
+		} handlers;
 
 		LIBSUPERDERPY_DATA_TYPE *data;
 
@@ -153,5 +148,18 @@ struct Game {
 struct Game* libsuperderpy_init(int argc, char **argv, const char* name, struct Viewport viewport);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
+
+struct GamestateResources;
+extern int Gamestate_ProgressCount;
+void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources *data, ALLEGRO_EVENT *ev);
+void Gamestate_Logic(struct Game *game, struct GamestateResources *data);
+void Gamestate_Draw(struct Game *game, struct GamestateResources *data);
+void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*));
+void Gamestate_Unload(struct Game *game, struct GamestateResources *data);
+void Gamestate_Start(struct Game *game, struct GamestateResources *data);
+void Gamestate_Stop(struct Game *game, struct GamestateResources *data);
+void Gamestate_Reload(struct Game *game, struct GamestateResources* data);
+void Gamestate_Pause(struct Game *game, struct GamestateResources* data);
+void Gamestate_Resume(struct Game *game, struct GamestateResources* data);
 
 #endif

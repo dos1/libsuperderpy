@@ -42,6 +42,12 @@ struct libsuperderpy_list {
 		struct libsuperderpy_list *next;
 };
 
+struct GamestateLoadingThreadData {
+		struct Game *game;
+		struct Gamestate *gamestate;
+		int bitmap_flags;
+};
+
 void DrawGamestates(struct Game *game);
 void LogicGamestates(struct Game *game);
 void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);
@@ -51,12 +57,19 @@ void UnfreezeGamestates(struct Game *game);
 void DrawConsole(struct Game *game);
 void Console_Load(struct Game *game);
 void Console_Unload(struct Game *game);
+void* GamestateLoadingThread(void *arg);
 void GamestateProgress(struct Game *game);
 void* AddGarbage(struct Game *game, void* data);
 void ClearGarbage(struct Game *game);
 void ClearScreen(struct Game *game);
+struct libsuperderpy_list* AddToList(struct libsuperderpy_list *list, void* data);
+struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list **list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data);
 void AddTimeline(struct Game *game, struct Timeline *timeline);
 void RemoveTimeline(struct Game *game, struct Timeline *timeline);
 void DrawTimelines(struct Game *game);
+bool OpenGamestate(struct Game *game, struct Gamestate *gamestate);
+bool LinkGamestate(struct Game *game, struct Gamestate *gamestate);
+void CloseGamestate(struct Game *game, struct Gamestate *gamestate);
+struct Gamestate* AllocateGamestate(struct Game *game, const char* name);
 
 #endif

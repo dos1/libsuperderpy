@@ -51,6 +51,9 @@ void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float 
 int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
 int DrawWrappedTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
 
+ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac);
+void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
+
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height);
 

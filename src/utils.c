@@ -187,20 +187,12 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename
 
 SYMBOL_EXPORT void FatalError(struct Game *game, bool fatal, char* format, ...) {
 	char text[1024] = {};
-	if (!game->_priv.console) {
-		va_list vl;
-		va_start(vl, format);
-		vsnprintf(text, 1024, format, vl);
-		va_end(vl);
-		printf("%s\n", text);
-	} else {
-		PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
-		va_list vl;
-		va_start(vl, format);
-		vsnprintf(text, 1024, format, vl);
-		va_end(vl);
-		PrintConsole(game, text);
-	}
+	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
+	va_list vl;
+	va_start(vl, format);
+	vsnprintf(text, 1024, format, vl);
+	va_end(vl);
+	PrintConsole(game, text);
 
 	ALLEGRO_TRANSFORM trans;
 	al_identity_transform(&trans);
@@ -270,7 +262,7 @@ SYMBOL_EXPORT void FatalError(struct Game *game, bool fatal, char* format, ...) 
 	al_use_transform(&game->projection);
 }
 
-SYMBOL_INTERNAL void TestPath(char* filename, char* subpath, char** result) {
+static void TestPath(char* filename, char* subpath, char** result) {
 	if (*result) return; //already found
 	ALLEGRO_PATH *tail = al_create_path(filename);
 	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
@@ -293,7 +285,7 @@ SYMBOL_EXPORT char* GetGameName(struct Game *game, char* format) {
 }
 
 
-SYMBOL_INTERNAL char* TestDataFilePath(struct Game *game, char* filename) {
+static char* TestDataFilePath(struct Game *game, char* filename) {
 	char *result = NULL;
 
 	if (al_filename_exists(filename)) {
@@ -339,11 +331,11 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game *game, char* filename) {
 	char* file = AddGarbage(game, strdup(filename));
 	char* sub = strstr(file, ".flac");
 	if (sub) {
-		 sub[0] = '.';
-		 sub[1] = 'o';
-		 sub[2] = 'g';
-		 sub[3] = 'g';
-		 sub[4] = 0;
+		sub[0] = '.';
+		sub[1] = 'o';
+		sub[2] = 'g';
+		sub[3] = 'g';
+		sub[4] = 0;
 	}
 	result = TestDataFilePath(game, file);
 	if (result) {
@@ -368,8 +360,8 @@ ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
-	char text[1024] = {};
-	vsnprintf(text, 1024, format, vl);
+	char* text = game->_priv.console[game->_priv.console_pos];
+	vsnprintf(text, (sizeof(game->_priv.console[0])/sizeof(game->_priv.console[0][0])), format, vl);
 	va_end(vl);
 	ALLEGRO_DEBUG("%s", text);
 #ifndef __EMSCRIPTEN__
@@ -379,18 +371,11 @@ SYMBOL_EXPORT void PrintConsole(struct Game *game, char* format, ...) {
 		printf("%s\n", text);
 		fflush(stdout);
 	}
-	if (!game->_priv.draw) return;
-	if (!game->_priv.console) return;
-	if ((!game->config.debug) && (!game->_priv.showconsole)) return;
-	ALLEGRO_BITMAP *target = al_get_target_bitmap();
-	al_set_target_bitmap(game->_priv.console_tmp);
-	al_clear_to_color(al_map_rgba(0,0,0,80));
-	al_draw_bitmap_region(game->_priv.console, 0, (int)(al_get_bitmap_height(game->_priv.console)*0.2), al_get_bitmap_width(game->_priv.console), (int)(al_get_bitmap_height(game->_priv.console)*0.8), 0, 0, 0);
-	al_draw_text(game->_priv.font_console, al_map_rgb(255,255,255), (int)(game->viewport.width*0.005), (int)(al_get_bitmap_height(game->_priv.console)*0.81), ALLEGRO_ALIGN_LEFT, text);
-	al_set_target_bitmap(game->_priv.console);
-	al_clear_to_color(al_map_rgba(0,0,0,0));
-	al_draw_bitmap(game->_priv.console_tmp, 0, 0, 0);
-	al_set_target_bitmap(target);
+	game->_priv.console_pos++;
+	if (game->_priv.console_pos >= (sizeof(game->_priv.console)/sizeof(game->_priv.console[0]))) {
+		game->_priv.console_pos = 0;
+	}
+	return;
 }
 
 SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
@@ -418,14 +403,14 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 	}
 	if (game->viewport.integer_scaling) {
 		resolution = floor(resolution);
+		if (floor(resolution) == 0) {
+			resolution = 1;
+		}
 	}
 	if ((!atoi(GetConfigOptionDefault(game, "SuperDerpy", "downscale", "1"))) && (resolution < 1)) {
 		resolution = 1;
 	}
 	if (!atoi(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"))) {
-		resolution = 1;
-	}
-	if (resolution == 0) {
 		resolution = 1;
 	}
 
@@ -440,7 +425,7 @@ SYMBOL_EXPORT void SetupViewport(struct Game *game, struct Viewport config) {
 		al_build_transform(&game->projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
 	}
 	al_use_transform(&game->projection);
-	if (game->_priv.console) Console_Unload(game);
+	Console_Unload(game);
 	Console_Load(game);
 }
 
