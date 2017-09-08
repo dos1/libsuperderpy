@@ -145,7 +145,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_install_joystick();
 
-	al_set_new_display_flags(ALLEGRO_OPENGL_ES_PROFILE |  ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
+	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
 #ifdef __EMSCRIPTEN__
 	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
 #endif
@@ -502,13 +502,25 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void *g) {
 				game->_priv.showconsole = true;
 				PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed/60.0);
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
-				ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
-				char filename[255] = { };
-				snprintf(filename, 255, "%s_%lld_%ld.png", game->name, (long long)time(NULL), clock());
-				al_set_path_filename(path, filename);
-				al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), al_get_backbuffer(game->display));
-				PrintConsole(game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
-				al_destroy_path(path);
+				DrawGamestates(game);
+				int flags = al_get_new_bitmap_flags();
+				al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+				ALLEGRO_BITMAP *bitmap = al_create_bitmap(al_get_display_width(game->display), al_get_display_height(game->display));
+				al_set_new_bitmap_flags(flags);
+				ALLEGRO_BITMAP *target = al_get_target_bitmap();
+				al_set_target_bitmap(bitmap);
+				al_draw_bitmap(al_get_backbuffer(game->display), 0, 0, 0);
+				al_set_target_bitmap(target);
+				PrintConsole(game, "Screenshot made! Storing...");
+
+				struct ScreenshotThreadData *data = malloc(sizeof(struct ScreenshotThreadData));
+				data->game = game;
+				data->bitmap = bitmap;
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+				al_run_detached_thread(ScreenshotThread, data);
+#else
+				ScreenshotThread(data);
+#endif
 			}
 			EventGamestates(game, &ev);
 		}

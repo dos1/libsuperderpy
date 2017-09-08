@@ -163,6 +163,20 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void *arg) {
 	return NULL;
 }
 
+SYMBOL_INTERNAL void* ScreenshotThread(void *arg) {
+	struct ScreenshotThreadData *data = arg;
+	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
+	char filename[255];
+	snprintf(filename, 255, "%s_%ju_%ju.png", data->game->name, (uintmax_t)time(NULL), (uintmax_t)clock());
+	al_set_path_filename(path, filename);
+	al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), data->bitmap);
+	PrintConsole(data->game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
+	al_destroy_path(path);
+	al_destroy_bitmap(data->bitmap);
+	free(data);
+	return NULL;
+}
+
 SYMBOL_INTERNAL void GamestateProgress(struct Game *game) {
 	struct Gamestate *tmp = game->_priv.loading.current;
 	game->_priv.loading.progress++;

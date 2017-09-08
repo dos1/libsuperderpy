@@ -48,6 +48,11 @@ struct GamestateLoadingThreadData {
 		int bitmap_flags;
 };
 
+struct ScreenshotThreadData {
+		struct Game *game;
+		ALLEGRO_BITMAP *bitmap;
+};
+
 void DrawGamestates(struct Game *game);
 void LogicGamestates(struct Game *game);
 void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);
@@ -58,6 +63,7 @@ void DrawConsole(struct Game *game);
 void Console_Load(struct Game *game);
 void Console_Unload(struct Game *game);
 void* GamestateLoadingThread(void *arg);
+void* ScreenshotThread(void *arg);
 void GamestateProgress(struct Game *game);
 void* AddGarbage(struct Game *game, void* data);
 void ClearGarbage(struct Game *game);
