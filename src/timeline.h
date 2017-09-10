@@ -23,7 +23,9 @@
 
 #include "libsuperderpy.h"
 
-#define TM_WrapArg(type, result, val) type* result = malloc(sizeof(type)); *result = val;
+#define TM_WrapArg(type, result, val)  \
+	type* result = malloc(sizeof(type)); \
+	*result = val;
 
 /*! \brief State of the TM_Action. */
 enum TM_ActionState {
@@ -38,29 +40,29 @@ enum TM_ActionState {
 
 /*! \brief Timeline structure. */
 struct Timeline {
-		struct TM_Action *queue; /*!< Main timeline queue. */
-		struct TM_Action *background; /*!< Background queue. */
-		char* name; /*!< Name of the timeline. */
-		unsigned int lastid; /*!< Last ID given to timeline action. */
-		struct Game* game; /*!< Reference to the game object. */
+	struct TM_Action* queue; /*!< Main timeline queue. */
+	struct TM_Action* background; /*!< Background queue. */
+	char* name; /*!< Name of the timeline. */
+	unsigned int lastid; /*!< Last ID given to timeline action. */
+	struct Game* game; /*!< Reference to the game object. */
 };
 
 /*! \brief Arguments for TM_Action. */
 struct TM_Arguments {
-		void *value; /*!< Value of argument. */
-		struct TM_Arguments *next; /*!< Pointer to next argument. */
+	void* value; /*!< Value of argument. */
+	struct TM_Arguments* next; /*!< Pointer to next argument. */
 };
 
 /*! \brief Timeline action. */
 struct TM_Action {
-		bool (*function)(struct Game*, struct TM_Action*, enum TM_ActionState); /*!< Function callback of the action. */
-		struct TM_Arguments *arguments; /*!< Arguments of the action. */
-		ALLEGRO_TIMER *timer; /*!< Delay timer. */
-		bool active; /*!< If false, then this action is waiting for it's delay to finish. */
-		int delay; /*!< Number of miliseconds to delay before action is started. */
-		struct TM_Action *next; /*!< Pointer to next action in queue. */
-		unsigned int id; /*!< ID of the action. */
-		char* name; /*!< "User friendly" name of the action. */
+	bool (*function)(struct Game*, struct TM_Action*, enum TM_ActionState); /*!< Function callback of the action. */
+	struct TM_Arguments* arguments; /*!< Arguments of the action. */
+	ALLEGRO_TIMER* timer; /*!< Delay timer. */
+	bool active; /*!< If false, then this action is waiting for it's delay to finish. */
+	int delay; /*!< Number of miliseconds to delay before action is started. */
+	struct TM_Action* next; /*!< Pointer to next action in queue. */
+	unsigned int id; /*!< ID of the action. */
+	char* name; /*!< "User friendly" name of the action. */
 };
 
 /*! \brief Init timeline. */
@@ -74,7 +76,7 @@ void TM_Pause(struct Timeline*);
 /*! \brief Resumes the timeline. */
 void TM_Resume(struct Timeline*);
 /*! \brief Handle timer events. */
-void TM_HandleEvent(struct Timeline*, ALLEGRO_EVENT *ev);
+void TM_HandleEvent(struct Timeline*, ALLEGRO_EVENT* ev);
 /*! \brief Add new action to main queue. */
 struct TM_Action* TM_AddAction(struct Timeline*, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, char* name);
 /*! \brief Add new action to background queue. */
@@ -92,7 +94,7 @@ void TM_Destroy(struct Timeline*);
 /*! \brief Add data to TM_Arguments queue. */
 struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...);
 /*! \brief Get nth argument from TM_Arguments queue (counted from 0). */
-void* TM_GetArg(struct TM_Arguments *args, int num);
+void* TM_GetArg(struct TM_Arguments* args, int num);
 /*! \brief Destroy TM_Arguments queue. */
 void TM_DestroyArgs(struct TM_Arguments* args);
 /*! \brief Skip delay if it's currently the first action in the queue */

@@ -17,41 +17,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <allegro5/allegro.h>
-#include "internal.h"
 #include "config.h"
+#include "internal.h"
+#include <allegro5/allegro.h>
 
-SYMBOL_EXPORT void InitConfig(struct Game *game) {
-	const ALLEGRO_FILE_INTERFACE *interface = al_get_new_file_interface();
+SYMBOL_EXPORT void InitConfig(struct Game* game) {
+	const ALLEGRO_FILE_INTERFACE* interface = al_get_new_file_interface();
 	al_set_standard_file_interface();
-	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
-	ALLEGRO_PATH *data = al_create_path("SuperDerpy.ini");
+	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
+	ALLEGRO_PATH* data = al_create_path("SuperDerpy.ini");
 	al_join_paths(path, data);
 	game->_priv.config = al_load_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
-	if (!game->_priv.config) game->_priv.config=al_create_config();
+	if (!game->_priv.config) {
+		game->_priv.config = al_create_config();
+	}
 	al_destroy_path(path);
 	al_destroy_path(data);
 	al_set_new_file_interface(interface);
 }
 
-SYMBOL_EXPORT void SetConfigOption(struct Game *game, char* section, char* name, char* value) {
+SYMBOL_EXPORT void SetConfigOption(struct Game* game, char* section, char* name, char* value) {
 	al_set_config_value(game->_priv.config, section, name, value);
 }
 
-SYMBOL_EXPORT const char* GetConfigOption(struct Game *game, char* section, char* name) {
+SYMBOL_EXPORT const char* GetConfigOption(struct Game* game, char* section, char* name) {
 	return al_get_config_value(game->_priv.config, section, name);
 }
 
-SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game *game, char* section, char* name, const char* def) {
+SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game* game, char* section, char* name, const char* def) {
 	const char* ret = GetConfigOption(game, section, name);
-	if (!ret) return def; else return ret;
+	if (!ret) {
+		return def;
+	}
+	return ret;
 }
 
-SYMBOL_EXPORT void DeinitConfig(struct Game *game) {
-	const ALLEGRO_FILE_INTERFACE *interface = al_get_new_file_interface();
+SYMBOL_EXPORT void DeinitConfig(struct Game* game) {
+	const ALLEGRO_FILE_INTERFACE* interface = al_get_new_file_interface();
 	al_set_standard_file_interface();
-	ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
-	ALLEGRO_PATH *data = al_create_path("SuperDerpy.ini");
+	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
+	ALLEGRO_PATH* data = al_create_path("SuperDerpy.ini");
 	al_make_directory(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 	al_join_paths(path, data);
 	al_save_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), game->_priv.config);

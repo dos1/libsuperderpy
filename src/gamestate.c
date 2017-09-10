@@ -18,12 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamestate.h"
 #include "internal.h"
 #include "utils.h"
-#include "gamestate.h"
 
-static struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
-	struct Gamestate *tmp = game->_priv.gamestates;
+static struct Gamestate* AddNewGamestate(struct Game* game, const char* name) {
+	struct Gamestate* tmp = game->_priv.gamestates;
 	if (!tmp) {
 		game->_priv.gamestates = AllocateGamestate(game, name);
 		tmp = game->_priv.gamestates;
@@ -37,8 +37,8 @@ static struct Gamestate* AddNewGamestate(struct Game *game, const char* name) {
 	return tmp;
 }
 
-static struct Gamestate* FindGamestate(struct Game *game, const char* name) {
-	struct Gamestate *tmp = game->_priv.gamestates;
+static struct Gamestate* FindGamestate(struct Game* game, const char* name) {
+	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (!strcmp(name, tmp->name)) {
 			return tmp;
@@ -48,8 +48,8 @@ static struct Gamestate* FindGamestate(struct Game *game, const char* name) {
 	return NULL;
 }
 
-SYMBOL_EXPORT void RegisterGamestate(struct Game *game, const char* name, struct Gamestate_API *api) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void RegisterGamestate(struct Game* game, const char* name, struct Gamestate_API* api) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (!gs) {
 		gs = AddNewGamestate(game, name);
 	}
@@ -61,8 +61,8 @@ SYMBOL_EXPORT void RegisterGamestate(struct Game *game, const char* name, struct
 	PrintConsole(game, "Gamestate \"%s\" registered.", name);
 }
 
-SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void LoadGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (gs->loaded && !gs->pending_unload) {
 			PrintConsole(game, "Gamestate \"%s\" already loaded.", name);
@@ -78,8 +78,8 @@ SYMBOL_EXPORT void LoadGamestate(struct Game *game, const char* name) {
 	game->_priv.gamestate_scheduled = true;
 }
 
-SYMBOL_EXPORT void UnloadGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void UnloadGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (gs->pending_load) {
 			gs->pending_load = false;
@@ -90,7 +90,7 @@ SYMBOL_EXPORT void UnloadGamestate(struct Game *game, const char* name) {
 			PrintConsole(game, "Gamestate \"%s\" already unloaded.", name);
 			return;
 		}
-		if (gs->started) gs->pending_stop=true;
+		if (gs->started) { gs->pending_stop = true; }
 		gs->pending_unload = true;
 		PrintConsole(game, "Gamestate \"%s\" marked to be UNLOADED.", name);
 	} else {
@@ -99,8 +99,8 @@ SYMBOL_EXPORT void UnloadGamestate(struct Game *game, const char* name) {
 	game->_priv.gamestate_scheduled = true;
 }
 
-SYMBOL_EXPORT void StartGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void StartGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (gs->started && !gs->pending_stop) {
 			PrintConsole(game, "Gamestate \"%s\" already started.", name);
@@ -114,8 +114,8 @@ SYMBOL_EXPORT void StartGamestate(struct Game *game, const char* name) {
 	game->_priv.gamestate_scheduled = true;
 }
 
-SYMBOL_EXPORT void StopGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void StopGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (gs->pending_start) {
 			gs->pending_start = false;
@@ -134,8 +134,8 @@ SYMBOL_EXPORT void StopGamestate(struct Game *game, const char* name) {
 	game->_priv.gamestate_scheduled = true;
 }
 
-SYMBOL_EXPORT void PauseGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void PauseGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (!gs->started) {
 			PrintConsole(game, "Tried to pause gamestate \"%s\" which is not started.", name);
@@ -154,8 +154,8 @@ SYMBOL_EXPORT void PauseGamestate(struct Game *game, const char* name) {
 	}
 }
 
-SYMBOL_EXPORT void ResumeGamestate(struct Game *game, const char* name) {
-	struct Gamestate *gs = FindGamestate(game, name);
+SYMBOL_EXPORT void ResumeGamestate(struct Game* game, const char* name) {
+	struct Gamestate* gs = FindGamestate(game, name);
 	if (gs) {
 		if (!gs->started) {
 			PrintConsole(game, "Tried to resume gamestate \"%s\" which is not started.", name);
@@ -174,16 +174,16 @@ SYMBOL_EXPORT void ResumeGamestate(struct Game *game, const char* name) {
 	}
 }
 
-SYMBOL_EXPORT void UnloadAllGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
+SYMBOL_EXPORT void UnloadAllGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		UnloadGamestate(game, tmp->name);
 		tmp = tmp->next;
 	}
 }
 
-SYMBOL_EXPORT void PauseAllGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
+SYMBOL_EXPORT void PauseAllGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (tmp->started || !tmp->paused) {
 			PauseGamestate(game, tmp->name);
@@ -192,8 +192,8 @@ SYMBOL_EXPORT void PauseAllGamestates(struct Game *game) {
 	}
 }
 
-SYMBOL_EXPORT void ResumeAllGamestates(struct Game *game) {
-	struct Gamestate *tmp = game->_priv.gamestates;
+SYMBOL_EXPORT void ResumeAllGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (tmp->paused) {
 			ResumeGamestate(game, tmp->name);
@@ -202,35 +202,35 @@ SYMBOL_EXPORT void ResumeAllGamestates(struct Game *game) {
 	}
 }
 
-SYMBOL_EXPORT void SwitchGamestate(struct Game *game, const char* current, const char* n) {
+SYMBOL_EXPORT void SwitchGamestate(struct Game* game, const char* current, const char* n) {
 	StopGamestate(game, current);
 	UnloadGamestate(game, current);
 	LoadGamestate(game, n);
 	StartGamestate(game, n);
 }
 
-SYMBOL_EXPORT void ChangeGamestate(struct Game *game, const char* current, const char* n) {
+SYMBOL_EXPORT void ChangeGamestate(struct Game* game, const char* current, const char* n) {
 	StopGamestate(game, current);
 	LoadGamestate(game, n);
 	StartGamestate(game, n);
 }
 
-SYMBOL_EXPORT void SwitchCurrentGamestate(struct Game *game, const char* n) {
+SYMBOL_EXPORT void SwitchCurrentGamestate(struct Game* game, const char* n) {
 	SwitchGamestate(game, game->_priv.current_gamestate->name, n);
 }
 
-SYMBOL_EXPORT void ChangeCurrentGamestate(struct Game *game, const char* n) {
+SYMBOL_EXPORT void ChangeCurrentGamestate(struct Game* game, const char* n) {
 	ChangeGamestate(game, game->_priv.current_gamestate->name, n);
 }
 
-SYMBOL_EXPORT void StopCurrentGamestate(struct Game *game) {
+SYMBOL_EXPORT void StopCurrentGamestate(struct Game* game) {
 	StopGamestate(game, game->_priv.current_gamestate->name);
 }
 
-SYMBOL_EXPORT void PauseCurrentGamestate(struct Game *game) {
+SYMBOL_EXPORT void PauseCurrentGamestate(struct Game* game) {
 	PauseGamestate(game, game->_priv.current_gamestate->name);
 }
 
-SYMBOL_EXPORT void UnloadCurrentGamestate(struct Game *game) {
+SYMBOL_EXPORT void UnloadCurrentGamestate(struct Game* game) {
 	UnloadGamestate(game, game->_priv.current_gamestate->name);
 }

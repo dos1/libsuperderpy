@@ -20,54 +20,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef LIBSUPERDERPY_EMSCRIPTEN_H
 #define LIBSUPERDERPY_EMSCRIPTEN_H
 
 typedef struct {
-		ALLEGRO_SAMPLE *sample;
-		ALLEGRO_SAMPLE_INSTANCE *instance;
+	ALLEGRO_SAMPLE* sample;
+	ALLEGRO_SAMPLE_INSTANCE* instance;
 } EMSCRIPTEN_AUDIO_STREAM;
 
-ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream(const char* filename, size_t buffer_count, unsigned int samples);
-ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream_f(ALLEGRO_FILE *file, const char *ident, size_t buffer_count, unsigned int samples);
-bool emscripten_set_audio_stream_gain(ALLEGRO_AUDIO_STREAM *stream, float val);
-bool emscripten_set_audio_stream_playing(ALLEGRO_AUDIO_STREAM *stream, bool val);
-bool emscripten_set_audio_stream_playmode(ALLEGRO_AUDIO_STREAM *stream, ALLEGRO_PLAYMODE mode);
-bool emscripten_get_audio_stream_playing(ALLEGRO_AUDIO_STREAM *stream);
-bool emscripten_get_audio_stream_attached(ALLEGRO_AUDIO_STREAM *stream);
-ALLEGRO_PLAYMODE emscripten_get_audio_stream_playmode(ALLEGRO_AUDIO_STREAM *stream);
-bool emscripten_rewind_audio_stream(ALLEGRO_AUDIO_STREAM *stream);
-bool emscripten_attach_audio_stream_to_mixer(ALLEGRO_AUDIO_STREAM *stream, ALLEGRO_MIXER *mixer);
-bool emscripten_attach_audio_stream_to_voice(ALLEGRO_AUDIO_STREAM *stream, ALLEGRO_VOICE *voice);
-bool emscripten_detach_audio_stream(ALLEGRO_AUDIO_STREAM *stream);
-unsigned int emscripten_get_audio_stream_frequency(ALLEGRO_AUDIO_STREAM *stream);
-ALLEGRO_CHANNEL_CONF emscripten_get_audio_stream_channels(ALLEGRO_AUDIO_STREAM *stream);
-ALLEGRO_AUDIO_DEPTH emscripten_get_audio_stream_depth(ALLEGRO_AUDIO_STREAM *stream);
-unsigned int emscripten_get_audio_stream_length(ALLEGRO_AUDIO_STREAM *stream);
-float emscripten_get_audio_stream_speed(ALLEGRO_AUDIO_STREAM *stream);
-float emscripten_get_audio_stream_gain(ALLEGRO_AUDIO_STREAM *stream);
-float emscripten_get_audio_stream_pan(ALLEGRO_AUDIO_STREAM *stream);
-bool emscripten_set_audio_stream_speed(ALLEGRO_AUDIO_STREAM *stream, float val);
-bool emscripten_set_audio_stream_pan(ALLEGRO_AUDIO_STREAM *stream, float val);
-double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM *stream);
-bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *stream, double val);
-double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM *stream);
-void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM *stream);
+ALLEGRO_AUDIO_STREAM* emscripten_load_audio_stream(const char* filename, size_t buffer_count, unsigned int samples);
+ALLEGRO_AUDIO_STREAM* emscripten_load_audio_stream_f(ALLEGRO_FILE* file, const char* ident, size_t buffer_count, unsigned int samples);
+bool emscripten_set_audio_stream_gain(ALLEGRO_AUDIO_STREAM* stream, float val);
+bool emscripten_set_audio_stream_playing(ALLEGRO_AUDIO_STREAM* stream, bool val);
+bool emscripten_set_audio_stream_playmode(ALLEGRO_AUDIO_STREAM* stream, ALLEGRO_PLAYMODE mode);
+bool emscripten_get_audio_stream_playing(ALLEGRO_AUDIO_STREAM* stream);
+bool emscripten_get_audio_stream_attached(ALLEGRO_AUDIO_STREAM* stream);
+ALLEGRO_PLAYMODE emscripten_get_audio_stream_playmode(ALLEGRO_AUDIO_STREAM* stream);
+bool emscripten_rewind_audio_stream(ALLEGRO_AUDIO_STREAM* stream);
+bool emscripten_attach_audio_stream_to_mixer(ALLEGRO_AUDIO_STREAM* stream, ALLEGRO_MIXER* mixer);
+bool emscripten_attach_audio_stream_to_voice(ALLEGRO_AUDIO_STREAM* stream, ALLEGRO_VOICE* voice);
+bool emscripten_detach_audio_stream(ALLEGRO_AUDIO_STREAM* stream);
+unsigned int emscripten_get_audio_stream_frequency(ALLEGRO_AUDIO_STREAM* stream);
+ALLEGRO_CHANNEL_CONF emscripten_get_audio_stream_channels(ALLEGRO_AUDIO_STREAM* stream);
+ALLEGRO_AUDIO_DEPTH emscripten_get_audio_stream_depth(ALLEGRO_AUDIO_STREAM* stream);
+unsigned int emscripten_get_audio_stream_length(ALLEGRO_AUDIO_STREAM* stream);
+float emscripten_get_audio_stream_speed(ALLEGRO_AUDIO_STREAM* stream);
+float emscripten_get_audio_stream_gain(ALLEGRO_AUDIO_STREAM* stream);
+float emscripten_get_audio_stream_pan(ALLEGRO_AUDIO_STREAM* stream);
+bool emscripten_set_audio_stream_speed(ALLEGRO_AUDIO_STREAM* stream, float val);
+bool emscripten_set_audio_stream_pan(ALLEGRO_AUDIO_STREAM* stream, float val);
+double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM* stream);
+bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM* stream, double val);
+double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM* stream);
+void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM* stream);
 #ifdef ALLEGRO_UNSTABLE
-bool emscripten_set_audio_stream_channel_matrix(ALLEGRO_AUDIO_STREAM *stream, const float *val);
+bool emscripten_set_audio_stream_channel_matrix(ALLEGRO_AUDIO_STREAM* stream, const float* val);
 #endif
 
-uint64_t emscripten_get_audio_stream_played_samples(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-void *emscripten_get_audio_stream_fragment(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-bool emscripten_set_audio_stream_fragment(ALLEGRO_AUDIO_STREAM *stream, void *val) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-bool emscripten_set_audio_stream_loop_secs(ALLEGRO_AUDIO_STREAM *stream, double start, double end) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-unsigned int emscripten_get_audio_stream_fragments(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-unsigned int emscripten_get_available_audio_stream_fragments(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-ALLEGRO_EVENT_SOURCE *emscripten_get_audio_stream_event_source(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-void emscripten_drain_audio_stream(ALLEGRO_AUDIO_STREAM *stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+uint64_t emscripten_get_audio_stream_played_samples(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+void* emscripten_get_audio_stream_fragment(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+bool emscripten_set_audio_stream_fragment(ALLEGRO_AUDIO_STREAM* stream, void* val) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+bool emscripten_set_audio_stream_loop_secs(ALLEGRO_AUDIO_STREAM* stream, double start, double end) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+unsigned int emscripten_get_audio_stream_fragments(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+unsigned int emscripten_get_available_audio_stream_fragments(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+ALLEGRO_EVENT_SOURCE* emscripten_get_audio_stream_event_source(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
+void emscripten_drain_audio_stream(ALLEGRO_AUDIO_STREAM* stream) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
 ALLEGRO_AUDIO_STREAM* emscripten_create_audio_stream(size_t fragment_count, unsigned int frag_samples, unsigned int freq, ALLEGRO_AUDIO_DEPTH depth, ALLEGRO_CHANNEL_CONF chan_conf) __attribute__((unavailable("won't work in Emscripten until proper audio stream support is fixed!")));
-
 
 #define al_create_audio_stream emscripten_create_audio_stream
 #define al_load_audio_stream emscripten_load_audio_stream

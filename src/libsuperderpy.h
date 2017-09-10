@@ -22,26 +22,28 @@
 #ifndef LIBSUPERDERPY_MAIN_H
 #define LIBSUPERDERPY_MAIN_H
 
+struct Game;
+
 #include <allegro5/allegro.h>
-#include <allegro5/allegro_audio.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #ifdef ALLEGRO_ANDROID
 #include <allegro5/allegro_android.h>
 #endif
 #ifdef __EMSCRIPTEN__
-#include <emscripten.h>
 #include "emscripten-audio-stream.h"
+#include <emscripten.h>
 #endif
-#include <sys/param.h>
-#include "gamestate.h"
+#include "character.h"
 #include "config.h"
+#include "gamestate.h"
 #include "timeline.h"
 #include "utils.h"
-#include "character.h"
+#include <sys/param.h>
 
 #ifndef LIBSUPERDERPY_DATA_TYPE
 #define LIBSUPERDERPY_DATA_TYPE void
@@ -50,116 +52,115 @@
 struct Gamestate;
 
 struct Viewport {
-		int width; /*!< Actual available width of the drawing canvas. */
-		int height; /*!< Actual available height of the drawing canvas. */
-		float aspect;
-		bool integer_scaling;
+	int width; /*!< Actual available width of the drawing canvas. */
+	int height; /*!< Actual available height of the drawing canvas. */
+	float aspect;
+	bool integer_scaling;
 };
 
 /*! \brief Main struct of the game. */
 struct Game {
-		ALLEGRO_DISPLAY *display; /*!< Main Allegro display. */
+	ALLEGRO_DISPLAY* display; /*!< Main Allegro display. */
 
-		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
+	ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
-		struct Viewport viewport, viewport_config;
+	struct Viewport viewport, viewport_config;
+
+	struct {
+		int fx; /*!< Effects volume. */
+		int music; /*!< Music volume. */
+		int voice; /*!< Voice volume. */
+		bool fullscreen; /*!< Fullscreen toggle. */
+		bool debug; /*!< Toggles debug mode. */
+		int width; /*!< Width of window as being set in configuration. */
+		int height; /*!< Height of window as being set in configuration. */
+	} config;
+
+	struct {
+		ALLEGRO_VOICE* v; /*!< Main voice used by the game. */
+		ALLEGRO_MIXER* mixer; /*!< Main mixer of the game. */
+		ALLEGRO_MIXER* music; /*!< Music mixer. */
+		ALLEGRO_MIXER* voice; /*!< Voice mixer. */
+		ALLEGRO_MIXER* fx; /*!< Effects mixer. */
+	} audio; /*!< Audio resources. */
+
+	struct {
+		struct Gamestate* gamestates; /*!< List of known gamestates. */
+		bool gamestate_scheduled; /*!< Whether there's some gamestate lifecycle management work to do. */
+		ALLEGRO_FONT* font_console; /*!< Font used in game console. */
+		ALLEGRO_FONT* font_bsod; /*!< Font used in Blue Screens of Derp. */
+		char console[5][1024];
+		unsigned int console_pos;
+		ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
+		ALLEGRO_TIMER* timer; /*!< Main LPS (logic) timer. */
+		bool showconsole; /*!< If true, game console is rendered on screen. */
+		bool showtimeline;
 
 		struct {
-				int fx; /*!< Effects volume. */
-				int music; /*!< Music volume. */
-				int voice; /*!< Voice volume. */
-				bool fullscreen; /*!< Fullscreen toggle. */
-				bool debug; /*!< Toggles debug mode. */
-				int width; /*!< Width of window as being set in configuration. */
-				int height; /*!< Height of window as being set in configuration. */
-		} config;
+			double old_time, fps;
+			int frames_done;
+		} fps_count; /*!< Used for counting the effective FPS. */
+
+		ALLEGRO_CONFIG* config; /*!< Configuration file interface. */
+
+		int argc;
+		char** argv;
 
 		struct {
-				ALLEGRO_VOICE *v; /*!< Main voice used by the game. */
-				ALLEGRO_MIXER *mixer; /*!< Main mixer of the game. */
-				ALLEGRO_MIXER *music; /*!< Music mixer. */
-				ALLEGRO_MIXER *voice; /*!< Voice mixer. */
-				ALLEGRO_MIXER *fx; /*!< Effects mixer. */
-		} audio; /*!< Audio resources. */
+			struct Gamestate* gamestate;
+			struct Gamestate* current;
+			int progress;
+			int loaded, toLoad;
+			bool inProgress;
+		} loading;
 
-		struct {
-				struct Gamestate *gamestates; /*!< List of known gamestates. */
-				bool gamestate_scheduled; /*!< Whether there's some gamestate lifecycle management work to do. */
-				ALLEGRO_FONT *font_console; /*!< Font used in game console. */
-				ALLEGRO_FONT *font_bsod; /*!< Font used in Blue Screens of Derp. */
-				char console[5][1024];
-				unsigned int console_pos;
-				ALLEGRO_EVENT_QUEUE *event_queue; /*!< Main event queue. */
-				ALLEGRO_TIMER *timer; /*!< Main LPS (logic) timer. */
-				bool showconsole; /*!< If true, game console is rendered on screen. */
-				bool showtimeline;
+		struct Gamestate* current_gamestate;
 
-				struct {
-						double old_time, fps;
-						int frames_done;
-				} fps_count; /*!< Used for counting the effective FPS. */
+		struct libsuperderpy_list *garbage, *timelines;
 
-				ALLEGRO_CONFIG *config; /*!< Configuration file interface. */
-
-				int argc;
-				char** argv;
-
-				struct {
-						struct Gamestate *gamestate;
-						struct Gamestate *current;
-						int progress;
-						int loaded, toLoad;
-						bool inProgress;
-				} loading;
-
-				struct Gamestate *current_gamestate;
-
-				struct libsuperderpy_list *garbage, *timelines;
-
-				bool draw;
+		bool draw;
 
 #ifdef ALLEGRO_MACOSX
-				char cwd[MAXPATHLEN];
+		char cwd[MAXPATHLEN];
 #endif
 
-		} _priv; /*!< Private resources. Do not use in gamestates! */
+	} _priv; /*!< Private resources. Do not use in gamestates! */
 
-		bool shutting_down; /*!< If true then shut down of the game is pending. */
-		bool restart; /*!< If true then restart of the game is pending. */
-		bool touch;
+	bool shutting_down; /*!< If true then shut down of the game is pending. */
+	bool restart; /*!< If true then restart of the game is pending. */
+	bool touch;
 
-		bool show_loading_on_launch;
+	bool show_loading_on_launch;
 
-		const char* name;
+	const char* name;
 
-		ALLEGRO_EVENT_SOURCE event_source;
+	ALLEGRO_EVENT_SOURCE event_source;
 
-		float loading_progress;
+	float loading_progress;
 
-		struct {
-			bool (*event)(struct Game *game, ALLEGRO_EVENT *ev);
-			void (*destroy)(struct Game *game);
-		} handlers;
+	struct {
+		bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
+		void (*destroy)(struct Game* game);
+	} handlers;
 
-		LIBSUPERDERPY_DATA_TYPE *data;
-
+	LIBSUPERDERPY_DATA_TYPE* data;
 };
 
-struct Game* libsuperderpy_init(int argc, char **argv, const char* name, struct Viewport viewport);
+struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 
 struct GamestateResources;
 extern int Gamestate_ProgressCount;
-void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources *data, ALLEGRO_EVENT *ev);
-void Gamestate_Logic(struct Game *game, struct GamestateResources *data);
-void Gamestate_Draw(struct Game *game, struct GamestateResources *data);
-void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*));
-void Gamestate_Unload(struct Game *game, struct GamestateResources *data);
-void Gamestate_Start(struct Game *game, struct GamestateResources *data);
-void Gamestate_Stop(struct Game *game, struct GamestateResources *data);
-void Gamestate_Reload(struct Game *game, struct GamestateResources* data);
-void Gamestate_Pause(struct Game *game, struct GamestateResources* data);
-void Gamestate_Resume(struct Game *game, struct GamestateResources* data);
+void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
+void Gamestate_Logic(struct Game* game, struct GamestateResources* data);
+void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
+void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
+void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
+void Gamestate_Start(struct Game* game, struct GamestateResources* data);
+void Gamestate_Stop(struct Game* game, struct GamestateResources* data);
+void Gamestate_Reload(struct Game* game, struct GamestateResources* data);
+void Gamestate_Pause(struct Game* game, struct GamestateResources* data);
+void Gamestate_Resume(struct Game* game, struct GamestateResources* data);
 
 #endif

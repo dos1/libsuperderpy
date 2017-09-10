@@ -24,14 +24,14 @@
 #include "libsuperderpy.h"
 
 /*! \brief Reads config from file into memory. */
-void InitConfig(struct Game *game);
+void InitConfig(struct Game* game);
 /*! \brief Returns value of requested config entry. */
-const char* GetConfigOption(struct Game *game, char* section, char* name);
+const char* GetConfigOption(struct Game* game, char* section, char* name);
 /*! \brief Returns value of requested config entry, or def if no such entry exists. */
-const char* GetConfigOptionDefault(struct Game *game, char* section, char* name, const char* def);
+const char* GetConfigOptionDefault(struct Game* game, char* section, char* name, const char* def);
 /*! \brief Sets new value of requested config entry, or created new if no such entry exists. */
-void SetConfigOption(struct Game *game, char* section, char* name, char* value);
+void SetConfigOption(struct Game* game, char* section, char* name, char* value);
 /*! \brief Writes config from memory to file. */
-void DeinitConfig(struct Game *game);
+void DeinitConfig(struct Game* game);
 
 #endif

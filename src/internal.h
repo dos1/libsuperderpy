@@ -18,64 +18,64 @@
 #ifndef LIBSUPERDERPY_INTERNAL_H
 #define LIBSUPERDERPY_INTERNAL_H
 
+#include "libsuperderpy.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
-#include "libsuperderpy.h"
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-#  define SYMBOL_INTERNAL
-#  define SYMBOL_EXPORT     __declspec(dllexport)
-#  define SYMBOL_IMPORT     __declspec(dllimport)
+#define SYMBOL_INTERNAL
+#define SYMBOL_EXPORT __declspec(dllexport)
+#define SYMBOL_IMPORT __declspec(dllimport)
 #else
-#  if defined(__GNUC__) && (__GNUC__ >= 4)
-#    define SYMBOL_INTERNAL __attribute__ ((visibility ("hidden")))
-#    define SYMBOL_EXPORT   __attribute__ ((visibility ("default")))
-#  else
-#    define SYMBOL_INTERNAL
-#    define SYMBOL_EXPORT
-#  endif
-#  define SYMBOL_IMPORT     extern
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define SYMBOL_INTERNAL __attribute__((visibility("hidden")))
+#define SYMBOL_EXPORT __attribute__((visibility("default")))
+#else
+#define SYMBOL_INTERNAL
+#define SYMBOL_EXPORT
+#endif
+#define SYMBOL_IMPORT extern
 #endif
 
 struct libsuperderpy_list {
-		void *data;
-		struct libsuperderpy_list *next;
+	void* data;
+	struct libsuperderpy_list* next;
 };
 
 struct GamestateLoadingThreadData {
-		struct Game *game;
-		struct Gamestate *gamestate;
-		int bitmap_flags;
+	struct Game* game;
+	struct Gamestate* gamestate;
+	int bitmap_flags;
 };
 
 struct ScreenshotThreadData {
-		struct Game *game;
-		ALLEGRO_BITMAP *bitmap;
+	struct Game* game;
+	ALLEGRO_BITMAP* bitmap;
 };
 
-void DrawGamestates(struct Game *game);
-void LogicGamestates(struct Game *game);
-void EventGamestates(struct Game *game, ALLEGRO_EVENT *ev);
-void ReloadGamestates(struct Game *game);
-void FreezeGamestates(struct Game *game);
-void UnfreezeGamestates(struct Game *game);
-void DrawConsole(struct Game *game);
-void Console_Load(struct Game *game);
-void Console_Unload(struct Game *game);
-void* GamestateLoadingThread(void *arg);
-void* ScreenshotThread(void *arg);
-void GamestateProgress(struct Game *game);
-void* AddGarbage(struct Game *game, void* data);
-void ClearGarbage(struct Game *game);
-void ClearScreen(struct Game *game);
-struct libsuperderpy_list* AddToList(struct libsuperderpy_list *list, void* data);
-struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list **list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data);
-void AddTimeline(struct Game *game, struct Timeline *timeline);
-void RemoveTimeline(struct Game *game, struct Timeline *timeline);
-void DrawTimelines(struct Game *game);
-bool OpenGamestate(struct Game *game, struct Gamestate *gamestate);
-bool LinkGamestate(struct Game *game, struct Gamestate *gamestate);
-void CloseGamestate(struct Game *game, struct Gamestate *gamestate);
-struct Gamestate* AllocateGamestate(struct Game *game, const char* name);
+void DrawGamestates(struct Game* game);
+void LogicGamestates(struct Game* game);
+void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev);
+void ReloadGamestates(struct Game* game);
+void FreezeGamestates(struct Game* game);
+void UnfreezeGamestates(struct Game* game);
+void DrawConsole(struct Game* game);
+void Console_Load(struct Game* game);
+void Console_Unload(struct Game* game);
+void* GamestateLoadingThread(void* arg);
+void* ScreenshotThread(void* arg);
+void GamestateProgress(struct Game* game);
+void* AddGarbage(struct Game* game, void* data);
+void ClearGarbage(struct Game* game);
+void ClearScreen(struct Game* game);
+struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data);
+struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data);
+void AddTimeline(struct Game* game, struct Timeline* timeline);
+void RemoveTimeline(struct Game* game, struct Timeline* timeline);
+void DrawTimelines(struct Game* game);
+bool OpenGamestate(struct Game* game, struct Gamestate* gamestate);
+bool LinkGamestate(struct Game* game, struct Gamestate* gamestate);
+void CloseGamestate(struct Game* game, struct Gamestate* gamestate);
+struct Gamestate* AllocateGamestate(struct Game* game, const char* name);
 
 #endif

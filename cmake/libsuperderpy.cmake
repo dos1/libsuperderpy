@@ -6,13 +6,26 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(EMSCRIPTEN_TOTAL_MEMORY "32" CACHE STRING "Amount of memory allocated by Emscripten (MB, must be multiple of 16)" )
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c11")
+	set(CMAKE_C_STANDARD 11)
+	set(CMAKE_C_STANDARD_REQUIRED true)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=leak -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
 	if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
 	else(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	endif(APPLE)
+
+	find_program(
+		CLANG_TIDY_EXE
+		NAMES "clang-tidy"
+		DOC "Path to clang-tidy executable"
+		)
+	if(NOT CLANG_TIDY_EXE)
+		message(STATUS "clang-tidy not found.")
+	else()
+		set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-google-readability-todo,-performance-type-promotion-in-math-fn,-misc-unused-parameters,-cert-msc30-c,-cert-msc50-cpp")
+	endif()
 
 	if(APPLE)
 		if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")

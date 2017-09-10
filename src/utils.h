@@ -21,9 +21,9 @@
 #ifndef LIBSUPERDERPY_UTILS_H
 #define LIBSUPERDERPY_UTILS_H
 
+#include "libsuperderpy.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
-#include "libsuperderpy.h"
 
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
@@ -46,21 +46,21 @@ void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLO
  * Draws given text two times: once with color (0,0,0,128) and 1px off in both x and y axis,
  * and second time with actual given color and position.
  */
-void DrawTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text);
+void DrawTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int flags, char const* text);
 
-int DrawWrappedText(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
-int DrawWrappedTextWithShadow(ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const *text);
+int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
+int DrawWrappedTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
 
 ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac);
 void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
-ALLEGRO_BITMAP* LoadScaledBitmap(struct Game *game, char* filename, int width, int height);
+ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height);
 
 /*! \brief Finds path for data file. */
-char* GetDataFilePath(struct Game *game, char* filename);
+char* GetDataFilePath(struct Game* game, char* filename);
 
-char* GetGameName(struct Game *game, char* format);
+char* GetGameName(struct Game* game, char* format);
 
 /*! \brief Print some message on game console.
  *
@@ -68,13 +68,13 @@ char* GetGameName(struct Game *game, char* format);
  * If game->debug is true, then it also prints given message on stdout.
  * It needs to be called in printf style.
  */
-void PrintConsole(struct Game *game, char* format, ...);
+void PrintConsole(struct Game* game, char* format, ...);
 
-void FatalError(struct Game *game, bool exit, char* format, ...);
+void FatalError(struct Game* game, bool exit, char* format, ...);
 
-void SetupViewport(struct Game *game, struct Viewport config);
+void SetupViewport(struct Game* game, struct Viewport config);
 
-void WindowCoordsToViewport(struct Game *game, int *x, int *y);
+void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 #endif
