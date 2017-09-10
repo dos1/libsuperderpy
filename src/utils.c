@@ -188,7 +188,9 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
 	va_list vl;
 	va_start(vl, format);
+	SUPPRESS_WARNING("-Wformat-nonliteral")
 	vsnprintf(text, 1024, format, vl);
+	SUPPRESS_END
 	va_end(vl);
 	PrintConsole(game, text);
 
@@ -274,18 +276,13 @@ static void TestPath(char* filename, char* subpath, char** result) {
 	al_destroy_path(path);
 }
 
-#if defined(__clang__) || defined(__codemodel__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
 SYMBOL_EXPORT char* GetGameName(struct Game* game, char* format) {
 	char* result = malloc(sizeof(char) * 255);
+	SUPPRESS_WARNING("-Wformat-nonliteral")
 	snprintf(result, 255, format, game->name);
+	SUPPRESS_END
 	return AddGarbage(game, result);
 }
-#if defined(__clang__) || defined(__codemodel__)
-#pragma clang diagnostic pop
-#endif
 
 static char* TestDataFilePath(struct Game* game, char* filename) {
 	char* result = NULL;
@@ -358,17 +355,19 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, char* filename) {
 
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
-#if defined(__clang__) || defined(__codemodel__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
 SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char* text = game->_priv.console[game->_priv.console_pos];
+	SUPPRESS_WARNING("-Wformat-nonliteral")
 	vsnprintf(text, (sizeof(game->_priv.console[0]) / sizeof(game->_priv.console[0][0])), format, vl);
+	SUPPRESS_END
 	va_end(vl);
+
+	SUPPRESS_WARNING("-Wused-but-marked-unused")
 	ALLEGRO_DEBUG("%s", text);
+	SUPPRESS_END
+
 #ifndef __EMSCRIPTEN__
 	if (game->config.debug)
 #endif
@@ -381,9 +380,6 @@ SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
 		game->_priv.console_pos = 0;
 	}
 }
-#if defined(__clang__) || defined(__codemodel__)
-#pragma clang diagnostic pop
-#endif
 
 SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 	game->viewport = config;

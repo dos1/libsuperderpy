@@ -37,6 +37,15 @@
 #define SYMBOL_IMPORT extern
 #endif
 
+#define STRINGIFY(a) #a
+#if defined(__clang__) || defined(__codemodel__)
+#define SUPPRESS_WARNING(x) _Pragma("clang diagnostic push") _Pragma(STRINGIFY(clang diagnostic ignored x))
+#define SUPPRESS_END _Pragma("clang diagnostic pop")
+#else
+#define SUPPRESS_WARNING(x)
+#define SUPPRESS_END
+#endif
+
 struct libsuperderpy_list {
 	void* data;
 	struct libsuperderpy_list* next;
