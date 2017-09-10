@@ -16,15 +16,14 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	endif(APPLE)
 
-	find_program(
-		CLANG_TIDY_EXE
-		NAMES "clang-tidy"
-		DOC "Path to clang-tidy executable"
-		)
-	if(NOT CLANG_TIDY_EXE)
-		message(STATUS "clang-tidy not found.")
-	else()
-		set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-google-readability-todo,-performance-type-promotion-in-math-fn,-misc-unused-parameters,-cert-msc30-c,-cert-msc50-cpp")
+	set(USE_CLANG_TIDY "yes" CACHE STRING "Analyze the code with clang-tidy" )
+	if(USE_CLANG_TIDY)
+		find_program(CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable")
+		if(NOT CLANG_TIDY_EXE)
+			message(STATUS "clang-tidy not found, analysis disabled")
+		else()
+			set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-google-readability-todo,-performance-type-promotion-in-math-fn,-misc-unused-parameters,-cert-msc30-c,-cert-msc50-cpp")
+		endif()
 	endif()
 
 	if(APPLE)

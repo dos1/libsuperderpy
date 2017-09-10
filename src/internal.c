@@ -188,7 +188,9 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	}
 #ifdef LIBSUPERDERPY_SINGLE_THREAD
 	DrawGamestates(game);
-	if (tmp->showLoading) (*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
+	if (tmp->showLoading) {
+		(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
+	}
 	DrawConsole(game);
 	al_flip_display();
 #endif
