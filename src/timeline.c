@@ -307,10 +307,6 @@ SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* ti
 }
 
 SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {
-	/*int *tmp;
-	tmp = malloc(sizeof(int));
-	*tmp = delay;
-	TM_AddAction(NULL, TM_AddToArgs(NULL, tmp));*/
 	struct TM_Action* tmp = TM_AddAction(timeline, NULL, NULL, "TM_Delay");
 	PrintConsole(timeline->game, "Timeline Manager[%s]: queue: adding delay %d ms (%d)", timeline->name, delay, tmp->id);
 	tmp->delay = delay;

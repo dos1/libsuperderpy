@@ -260,11 +260,13 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	al_flip_display();
 	al_start_timer(game->_priv.timer);
 
-	struct Gamestate* tmp = game->_priv.gamestates;
-	while (tmp) {
-		// don't show loading screen on init if requested
-		tmp->showLoading = game->show_loading_on_launch;
-		tmp = tmp->next;
+	{
+		struct Gamestate* tmp = game->_priv.gamestates;
+		while (tmp) {
+			// don't show loading screen on init if requested
+			tmp->showLoading = game->show_loading_on_launch;
+			tmp = tmp->next;
+		}
 	}
 
 	game->_priv.loading.gamestate = AllocateGamestate(game, "loading");

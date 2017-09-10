@@ -119,7 +119,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 			cur++;
 		}
 
-		char sfps[6] = {};
+		char sfps[6] = {0};
 		snprintf(sfps, 6, "%.0f", game->_priv.fps_count.fps);
 		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), clipX + clipWidth, clipY, ALLEGRO_ALIGN_RIGHT, sfps);
 

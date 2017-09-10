@@ -73,7 +73,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
 		if (!tmp->bitmap) {
-			char filename[255] = {};
+			char filename[255] = {0};
 			snprintf(filename, 255, "sprites/%s/%s.png", character->name, tmp->name);
 			tmp->bitmap = al_load_bitmap(GetDataFilePath(game, filename));
 			tmp->width = al_get_bitmap_width(tmp->bitmap);
@@ -105,7 +105,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s = s->next;
 	}
 	PrintConsole(game, "Registering %s spritesheet: %s", character->name, name);
-	char filename[255] = {};
+	char filename[255] = {0};
 	snprintf(filename, 255, "sprites/%s/%s.ini", character->name, name);
 	ALLEGRO_CONFIG* config = al_load_config_file(GetDataFilePath(game, filename));
 	s = malloc(sizeof(struct Spritesheet));
