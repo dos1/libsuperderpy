@@ -54,6 +54,7 @@ struct Character {
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
 	float angle; /*!< Characters display angle (radians). */
+	float pivotx, pivoty; /*!< Pivot point, relative of character's size. */
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	int repeat;
 	bool shared;
@@ -80,6 +81,7 @@ void MoveCharacter(struct Game* game, struct Character* character, float x, floa
 void MoveCharacterF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle);
+void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y);
 
 int GetCharacterX(struct Game* game, struct Character* character);
 int GetCharacterY(struct Game* game, struct Character* character);
