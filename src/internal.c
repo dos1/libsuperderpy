@@ -200,7 +200,7 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 	PrintConsole(game, "Opening gamestate \"%s\"...", gamestate->name);
 	char libname[1024];
 	snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->name, gamestate->name);
-	gamestate->handle = dlopen(libname, RTLD_NOW);
+	gamestate->handle = dlopen(AddGarbage(game, GetLibraryPath(game, libname)), RTLD_NOW);
 	if (!gamestate->handle) {
 		FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror()); // TODO: move out
 		return false;
@@ -406,4 +406,22 @@ SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
 		i++;
 		tmp = tmp->next;
 	}
+}
+
+SYMBOL_INTERNAL char* GetLibraryPath(struct Game* game, char* filename) {
+	char* result = NULL;
+	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_EXENAME_PATH);
+	al_set_path_filename(path, filename);
+	if (al_filename_exists(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP))) {
+		result = strdup(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
+	} else {
+		al_append_path_component(path, "gamestates");
+		if (al_filename_exists(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP))) {
+			result = strdup(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
+		} else {
+			result = strdup(filename);
+		}
+	}
+	al_destroy_path(path);
+	return result;
 }
