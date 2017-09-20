@@ -287,29 +287,27 @@ SYMBOL_EXPORT char* GetGameName(struct Game* game, char* format) {
 static char* TestDataFilePath(struct Game* game, char* filename) {
 	char* result = NULL;
 
-	if (al_filename_exists(filename)) {
-		return strdup(filename);
-	}
-
-	{
-		char origfn[255] = "data/";
-		strncat(origfn, filename, 249);
-
-		if (al_filename_exists(origfn)) {
-			return strdup(origfn);
-		}
-	}
-
 	TestPath(filename, "data/", &result);
 	TestPath(filename, GetGameName(game, "../share/%s/data/"), &result);
 
-	TestPath(filename, "../data/", &result);
 #ifdef ALLEGRO_MACOSX
 	TestPath(filename, "../Resources/data/", &result);
 	TestPath(filename, "../Resources/gamestates/", &result);
 #endif
 
-	return result;
+	if (result) {
+		return result;
+	}
+
+	// try current working directory if everything else fails
+	char origfn[255] = "data/";
+	strncat(origfn, filename, 249);
+
+	if (al_filename_exists(origfn)) {
+		return strdup(origfn);
+	}
+
+	return NULL;
 }
 
 SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, char* filename) {
