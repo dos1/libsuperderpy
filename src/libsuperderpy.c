@@ -143,7 +143,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_install_joystick();
 
-	al_set_new_display_flags(ALLEGRO_PROGRAMMABLE_PIPELINE | (game->config.fullscreen ? ALLEGRO_FULLSCREEN_WINDOW : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL);
+	al_set_new_display_flags((game->config.fullscreen ? (ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_FRAMELESS) : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
 #ifdef __EMSCRIPTEN__
 	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
 #endif
