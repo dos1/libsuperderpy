@@ -160,7 +160,7 @@ endif()
 
 	if (ANDROID OR EMSCRIPTEN)
 		if (ANDROID)
-			set(FLACTOOGG_DATADIR "${CMAKE_BINARY_DIR}/android/assets")
+			set(FLACTOOGG_DATADIR "${CMAKE_BINARY_DIR}/android/assets/data")
 			set(FLACTOOGG_DEPEND "")
 		else (EMSCRIPTEN)
 			set(FLACTOOGG_DATADIR "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}/data")
@@ -279,7 +279,7 @@ endif()
 		file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
 		file(COPY "${ANDROID_ALLEGRO_ROOT}/lib/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})
 
-		file(COPY "${CMAKE_SOURCE_DIR}/data/" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/")
+		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/")
 
 		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/48/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-mdpi/")
 		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/72/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-hdpi/")
