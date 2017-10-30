@@ -194,6 +194,8 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	va_end(vl);
 	PrintConsole(game, text);
 
+	// TODO: synchronize with loading thread
+
 	ALLEGRO_TRANSFORM trans;
 	al_identity_transform(&trans);
 	al_use_transform(&trans);
@@ -315,7 +317,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, char* filename) {
 
 #ifdef ALLEGRO_ANDROID
 	char origfn[255] = "android/";
-	strcat(origfn, filename);
+	strncat(origfn, filename, 246);
 
 	result = TestDataFilePath(game, origfn);
 	if (result) {
