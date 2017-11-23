@@ -76,5 +76,13 @@ void SetupViewport(struct Game* game, struct Viewport config);
 
 void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
+ALLEGRO_BITMAP* GetFramebuffer(struct Game* game);
+
+void SetFramebufferAsTarget(struct Game* game);
+
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
+
+void EnableCompositor(struct Game* game);
+void DisableCompositor(struct Game* game);
+
 #endif

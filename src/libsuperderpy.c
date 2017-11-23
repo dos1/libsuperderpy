@@ -76,6 +76,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->handlers.event = NULL;
 	game->handlers.destroy = NULL;
+	game->handlers.compositor = NULL;
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
@@ -277,8 +278,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->Gamestate_Load)(game, NULL);
 	PrintConsole(game, "Loading screen registered.");
 
+	game->_priv.timestamp = al_get_time();
 	game->_priv.draw = true;
-
 #ifdef __EMSCRIPTEN__
 	void libsuperderpy_mainloop(void* game);
 	emscripten_set_main_loop_arg(libsuperderpy_mainloop, game, 0, true);
@@ -305,7 +306,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 		// TODO: split mainloop to functions to make it readable
 		ALLEGRO_EVENT ev;
-		if (game->_priv.draw && ((redraw && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
+		if (game->_priv.draw && (((redraw || true) && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
 			game->_priv.gamestate_scheduled = false;
 			struct Gamestate* tmp = game->_priv.gamestates;
 
@@ -389,6 +390,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 						(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
 					}
 					al_resume_timer(game->_priv.timer);
+					game->_priv.timestamp = al_get_time();
 				}
 
 				tmp = tmp->next;
@@ -424,6 +426,12 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 			al_convert_memory_bitmaps();
 
+			double delta = al_get_time() - game->_priv.timestamp;
+			game->_priv.timestamp += delta;
+			delta /= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
+			LogicGamestates(game, delta);
+			redraw = true;
+
 			DrawGamestates(game);
 			DrawConsole(game);
 			al_flip_display();
@@ -445,8 +453,10 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			}
 
 			if ((ev.type == ALLEGRO_EVENT_TIMER) && (ev.timer.source == game->_priv.timer)) {
-				LogicGamestates(game);
-				redraw = true;
+				/*				double delta = al_get_time() - game->_priv.timestamp;
+				game->_priv.timestamp += delta;
+				LogicGamestates(game, delta);
+				redraw = true;*/
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 #ifdef __EMSCRIPTEN__
 				libsuperderpy_mainloop_exit(game);
@@ -468,8 +478,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 				al_resume_timer(game->_priv.timer);
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
+				ResizeGamestates(game);
+				al_acknowledge_resize(game->display);
 			}
 #ifdef ALLEGRO_ANDROID
 			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_MENU) || (ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
@@ -483,7 +494,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
 				int i;
 				for (i = 0; i < 512; i++) {
-					LogicGamestates(game);
+					LogicGamestates(game, ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)));
 				}
 				game->_priv.showconsole = true;
 				PrintConsole(game, "DEBUG: 512 frames skipped...");

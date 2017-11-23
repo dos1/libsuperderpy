@@ -62,12 +62,14 @@ struct ScreenshotThreadData {
 	ALLEGRO_BITMAP* bitmap;
 };
 
+void SimpleCompositor(struct Game* game, struct Gamestate* gamestates);
 void DrawGamestates(struct Game* game);
-void LogicGamestates(struct Game* game);
+void LogicGamestates(struct Game* game, double delta);
 void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev);
 void ReloadGamestates(struct Game* game);
 void FreezeGamestates(struct Game* game);
 void UnfreezeGamestates(struct Game* game);
+void ResizeGamestates(struct Game* game);
 void DrawConsole(struct Game* game);
 void Console_Load(struct Game* game);
 void Console_Unload(struct Game* game);

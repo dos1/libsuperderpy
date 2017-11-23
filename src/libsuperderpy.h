@@ -52,10 +52,11 @@ struct Game;
 struct Gamestate;
 
 struct Viewport {
-	int width; /*!< Actual available width of the drawing canvas. */
-	int height; /*!< Actual available height of the drawing canvas. */
-	float aspect;
-	bool integer_scaling;
+	int width; /*!< Width of the drawing canvas. */
+	int height; /*!< Height of the drawing canvas. */
+	float aspect; /*!< When set instead of width/height pair, makes the viewport side fluid; when non-zero, locks its aspect ratio. */
+	bool integer_scaling; /*!< Ensure that the viewport is zoomed only with integer factors. */
+	bool pixel_perfect; /*!< Ensure that the resulting image is really viewport-sized and (potentially) rescaled afterwards, as opposed to default transformation-based scaling. */
 };
 
 /*! \brief Main struct of the game. */
@@ -96,6 +97,8 @@ struct Game {
 		bool showconsole; /*!< If true, game console is rendered on screen. */
 		bool showtimeline;
 
+		ALLEGRO_BITMAP* fb; /*!< Default framebuffer. */
+
 		struct {
 			double old_time, fps;
 			int frames_done;
@@ -120,6 +123,13 @@ struct Game {
 
 		bool draw;
 
+		double timestamp;
+
+		struct {
+			int x, y;
+			int w, h;
+		} clip_rect;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif
@@ -141,6 +151,7 @@ struct Game {
 	struct {
 		bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
 		void (*destroy)(struct Game* game);
+		void (*compositor)(struct Game* game, struct Gamestate* gamestates);
 	} handlers;
 
 	LIBSUPERDERPY_DATA_TYPE* data;
@@ -153,7 +164,7 @@ void libsuperderpy_destroy(struct Game* game);
 struct GamestateResources;
 extern int Gamestate_ProgressCount;
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
-void Gamestate_Logic(struct Game* game, struct GamestateResources* data);
+void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
 void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
