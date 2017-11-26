@@ -523,6 +523,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 #endif
 			}
 			EventGamestates(game, &ev);
+			if (ALLEGRO_EVENT_TYPE_IS_USER(ev.type)) {
+				al_unref_user_event(&ev.user);
+			}
 		}
 	}
 
