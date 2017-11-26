@@ -239,6 +239,10 @@ static inline bool MainloopEvents(struct Game* game) {
 
 		EventGamestates(game, &ev);
 
+		if (ALLEGRO_EVENT_TYPE_IS_USER(ev.type)) {
+			al_unref_user_event(&ev.user);
+		}
+
 	} while (!al_is_event_queue_empty(game->_priv.event_queue));
 	return true;
 }
