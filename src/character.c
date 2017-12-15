@@ -115,6 +115,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->rows = strtol(al_get_config_value(config, "", "rows"), NULL, 10);
 	s->blanks = strtol(al_get_config_value(config, "", "blanks"), NULL, 10);
 	s->delay = strtod(al_get_config_value(config, "", "delay"), NULL);
+	s->flip = false;
 	const char* val = al_get_config_value(config, "", "repeat");
 	if (val) {
 		s->repeat = strtod(val, NULL);
@@ -256,6 +257,9 @@ SYMBOL_EXPORT void DrawScaledCharacter(struct Game* game, struct Character* char
 }
 
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags) {
+	if (character->spritesheet->flip) {
+		flags = flags | ALLEGRO_FLIP_HORIZONTAL | ALLEGRO_FLIP_VERTICAL;
+	}
 	DrawScaledCharacter(game, character, tint, 1, 1, flags);
 }
 

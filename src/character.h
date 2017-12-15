@@ -37,6 +37,7 @@ struct Spritesheet {
 	int delay;
 	bool kill;
 	int repeat;
+	bool flip;
 	float scale; /*!< Scale modifier of the frame. */
 	char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
 	struct Spritesheet* next; /*!< Next spritesheet in the queue. */

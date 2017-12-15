@@ -472,11 +472,13 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 }
 
 SYMBOL_EXPORT void EnableCompositor(struct Game* game) {
+	PrintConsole(game, "Compositor enabled.");
 	game->handlers.compositor = SimpleCompositor;
 	ResizeGamestates(game);
 }
 
 SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
+	PrintConsole(game, "Compositor disabled.");
 	game->handlers.compositor = NULL;
 	ResizeGamestates(game);
 }

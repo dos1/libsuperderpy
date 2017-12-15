@@ -297,6 +297,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop_exit(struct Game* game) {
 
 SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 	struct Game* game = (struct Game*)g;
+	redraw = true;
 	while (!al_is_event_queue_empty(game->_priv.event_queue) || redraw) {
 #else
 	bool redraw = false;
@@ -478,9 +479,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 				al_resume_timer(game->_priv.timer);
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
 				ResizeGamestates(game);
-				al_acknowledge_resize(game->display);
 			}
 #ifdef ALLEGRO_ANDROID
 			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_MENU) || (ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
