@@ -237,20 +237,39 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + 2 * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, header2);
 		al_draw_textf(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 3 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "%p and system just doesn't know what went wrong.", game);
 
-		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + 5 * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, text);
 
-		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 7 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Press any key to terminate this error.");
-		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 8 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Press any key to destroy all muffins in the world.");
-		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 9 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Just kidding, please press any key anyway.");
+		const int error_len = strlen(text);
+		const int error_w = al_get_text_width(game->_priv.font_bsod, text);
+		const int lines = ceil(error_w / (al_get_display_width(game->display) * 0.8));
+		const int letters_per_line = (error_len / lines)+1;
+		
+		int row = 5, l = 0;
+		for(; l < lines; ++l) {
+			int start = l * letters_per_line;
+			int end = (l+1) * letters_per_line; 
+			if(end >= sizeof(text)) end = sizeof(text)-1;
+			
+			const char save_char = text[end];
+			text[end] = '\0';
+			
+			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, text + start);
+			text[end] = save_char;
+		}
+		++row;
 
+		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Press any key to terminate this error.");
+		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Press any key to destroy all muffins in the world.");
+		al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "* Just kidding, please press any key anyway.");
+
+		++row;
 		if (exit) {	
 			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 11 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "This is fatal error. My bad.");
 
-			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + 13 * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, "Press any key to quit _");
+			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + (row+2) * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, "Press any key to quit _");
 		} else {
 			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2, (int)(offsety + 11 * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "Anything I can do to help?");
 
-			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + 13 * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, "Press any key to continue _");
+			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + (row+2) * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, "Press any key to continue _");
 		}
 
 		al_flip_display();
