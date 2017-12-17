@@ -216,7 +216,7 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 
 
 	const int offsetx = al_get_display_width(game->display) / 2;
-	const int offsety = al_get_display_height(game->display) * 0.32;
+	const int offsety = al_get_display_height(game->display) * 0.30;
 	const int fonth = al_get_font_line_height(game->_priv.font_bsod);
 
 	bool done = false;
@@ -252,7 +252,7 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 			const char save_char = text[end];
 			text[end] = '\0';
 			
-			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, text + start);
+			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - (error_w / lines) / 2, (int)(offsety + row++ * fonth * 1.25), ALLEGRO_ALIGN_LEFT, text + start);
 			text[end] = save_char;
 		}
 		++row;
