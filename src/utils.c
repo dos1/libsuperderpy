@@ -197,7 +197,7 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	vsnprintf(text, 1024, format, vl);
 	SUPPRESS_END
 	va_end(vl);
-	PrintConsole(game, text);
+	fprintf(stderr, "%s", text);
 
 	// TODO: synchronize with loading thread
 
