@@ -29,6 +29,7 @@ Used by such games as:
 - [Boiled Corn](https://github.com/dos1/boiledcorn)
 - [Now and Then](https://github.com/dos1/nowandthen)
 - [SUPERSHOD HD](https://github.com/dos1/supershod/tree/remake)
+- [Mouse Sensitivity](https://github.com/dos1/mousesensitivity)
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
 
