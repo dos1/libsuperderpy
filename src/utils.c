@@ -197,7 +197,7 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	vsnprintf(text, 1024, format, vl);
 	SUPPRESS_END
 	va_end(vl);
-	fprintf(stderr, "%s", text);
+	fprintf(stderr, "%s\n", text);
 
 	// TODO: synchronize with loading thread
 
@@ -396,7 +396,7 @@ SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
 	va_end(vl);
 
 	SUPPRESS_WARNING("-Wused-but-marked-unused")
-	ALLEGRO_DEBUG("%s", text);
+	ALLEGRO_DEBUG("%s\n", text);
 	SUPPRESS_END
 
 #ifndef __EMSCRIPTEN__
