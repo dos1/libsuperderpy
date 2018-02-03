@@ -63,7 +63,7 @@ struct ScreenshotThreadData {
 };
 
 void DrawGamestates(struct Game* game);
-void LogicGamestates(struct Game* game);
+void LogicGamestates(struct Game* game, double delta);
 void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev);
 void ReloadGamestates(struct Game* game);
 void FreezeGamestates(struct Game* game);

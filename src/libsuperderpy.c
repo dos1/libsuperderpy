@@ -277,8 +277,8 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->Gamestate_Load)(game, NULL);
 	PrintConsole(game, "Loading screen registered.");
 
+	game->_priv.timestamp = al_get_time();
 	game->_priv.draw = true;
-
 #ifdef __EMSCRIPTEN__
 	void libsuperderpy_mainloop(void* game);
 	emscripten_set_main_loop_arg(libsuperderpy_mainloop, game, 0, true);
@@ -389,6 +389,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 						(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
 					}
 					al_resume_timer(game->_priv.timer);
+					game->_priv.timestamp = al_get_time();
 				}
 
 				tmp = tmp->next;
@@ -445,7 +446,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			}
 
 			if ((ev.type == ALLEGRO_EVENT_TIMER) && (ev.timer.source == game->_priv.timer)) {
-				LogicGamestates(game);
+				double delta = al_get_time() - game->_priv.timestamp;
+				game->_priv.timestamp += delta;
+				LogicGamestates(game, delta);
 				redraw = true;
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 #ifdef __EMSCRIPTEN__
@@ -483,7 +486,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
 				int i;
 				for (i = 0; i < 512; i++) {
-					LogicGamestates(game);
+					LogicGamestates(game, ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)));
 				}
 				game->_priv.showconsole = true;
 				PrintConsole(game, "DEBUG: 512 frames skipped...");

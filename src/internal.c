@@ -37,12 +37,12 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	}
 }
 
-SYMBOL_INTERNAL void LogicGamestates(struct Game* game) {
+SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Logic)(game, tmp->data);
+			(*tmp->api->Gamestate_Logic)(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
 	}

@@ -120,6 +120,8 @@ struct Game {
 
 		bool draw;
 
+		double timestamp;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif
@@ -153,7 +155,7 @@ void libsuperderpy_destroy(struct Game* game);
 struct GamestateResources;
 extern int Gamestate_ProgressCount;
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
-void Gamestate_Logic(struct Game* game, struct GamestateResources* data);
+void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
 void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
