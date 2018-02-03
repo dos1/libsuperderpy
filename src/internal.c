@@ -37,8 +37,13 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* games
 }
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
-	ClearScreen(game);
+	if (!game->handlers.compositor) {
+		ClearScreen(game);
+	}
 	struct Gamestate* tmp = game->_priv.gamestates;
+	if (game->handlers.predraw) {
+		(*game->handlers.predraw)(game);
+	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
@@ -55,6 +60,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	if (game->handlers.compositor) {
 		ALLEGRO_TRANSFORM t;
 		al_set_target_backbuffer(game->display);
+		ClearScreen(game);
 		al_identity_transform(&t);
 		/*		double factor = (sin(al_get_time()) / 2.0 + 1.0) * 2;
 		al_translate_transform(&t, -game->_priv.clip_rect.w / factor, -game->_priv.clip_rect.h / factor);
@@ -64,16 +70,25 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		al_use_transform(&t);
 		game->handlers.compositor(game, game->_priv.gamestates);
 	}
+	if (game->handlers.postdraw) {
+		(*game->handlers.postdraw)(game);
+	}
 }
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+	if (game->handlers.prelogic) {
+		(*game->handlers.prelogic)(game, delta);
+	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->Gamestate_Logic)(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
+	}
+	if (game->handlers.postlogic) {
+		(*game->handlers.postlogic)(game, delta);
 	}
 }
 
@@ -142,6 +157,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 		int clipX, clipY, clipWidth, clipHeight;
 		al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 		al_use_transform(&trans);
+		al_hold_bitmap_drawing(true);
 
 		int width = (al_get_display_width(game->display) / game->viewport.width) * game->viewport.width;
 		if (!game->viewport.integer_scaling) {
@@ -169,6 +185,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 
 		DrawTimelines(game);
 	}
+	al_hold_bitmap_drawing(false);
 
 	double game_time = al_get_time();
 	if (game_time - game->_priv.fps_count.old_time >= 1.0) {
@@ -390,15 +407,10 @@ SYMBOL_INTERNAL void RemoveTimeline(struct Game* game, struct Timeline* timeline
 }
 
 SYMBOL_INTERNAL void ClearScreen(struct Game* game) {
-	ALLEGRO_TRANSFORM identity;
 	al_set_target_backbuffer(game->display);
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
-	al_identity_transform(&identity);
-	al_use_transform(&identity);
 	al_clear_to_color(al_map_rgb(0, 0, 0));
-	al_use_transform(&game->projection);
 	al_set_clipping_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
-	//	al_clear_to_color(al_map_rgb(0, 0, 0));
 }
 
 static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int clipY) {

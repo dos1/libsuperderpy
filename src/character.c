@@ -149,8 +149,10 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->pos_tmp = 0;
 	character->x = -1;
 	character->y = -1;
-	character->pivotx = 0.5;
-	character->pivoty = 0.5;
+	character->pivotX = 0.5;
+	character->pivotY = 0.5;
+	character->confineX = -1;
+	character->confineY = -1;
 	character->spritesheets = NULL;
 	character->spritesheet = NULL;
 	character->successor = NULL;
@@ -212,7 +214,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 }
 
 SYMBOL_EXPORT void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle) {
-	MoveCharacterF(game, character, x / (float)game->viewport.width, y / (float)game->viewport.height, angle);
+	MoveCharacterF(game, character, x / (float)GetCharacterConfineX(game, character), y / (float)GetCharacterConfineY(game, character), angle);
 }
 
 SYMBOL_EXPORT void MoveCharacterF(struct Game* game, struct Character* character, float x, float y, float angle) {
@@ -230,19 +232,19 @@ SYMBOL_EXPORT void SetCharacterPositionF(struct Game* game, struct Character* ch
 }
 
 SYMBOL_EXPORT void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle) {
-	SetCharacterPositionF(game, character, x / (float)game->viewport.width, y / (float)game->viewport.height, angle);
+	SetCharacterPositionF(game, character, x / (float)GetCharacterConfineX(game, character), y / (float)GetCharacterConfineY(game, character), angle);
 }
 
 SYMBOL_EXPORT void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y) {
-	character->pivotx = x;
-	character->pivoty = y;
+	character->pivotX = x;
+	character->pivotY = y;
 }
 
 SYMBOL_EXPORT void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags) {
 	if (character->dead) { return; }
 	int spritesheetX = al_get_bitmap_width(character->bitmap) * (character->pos % character->spritesheet->cols);
 	int spritesheetY = al_get_bitmap_height(character->bitmap) * (character->pos / character->spritesheet->cols);
-	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotx, al_get_bitmap_height(character->bitmap) * character->pivoty, character->x * game->viewport.width + al_get_bitmap_width(character->bitmap) * scalex * character->pivotx, character->y * game->viewport.height + al_get_bitmap_height(character->bitmap) * scaley * character->pivoty, scalex, scaley, character->angle, flags);
+	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotX, al_get_bitmap_height(character->bitmap) * character->pivotY, GetCharacterX(game, character) + al_get_bitmap_width(character->bitmap) * scalex * character->pivotX, GetCharacterY(game, character) + al_get_bitmap_height(character->bitmap) * scaley * character->pivotY, scalex, scaley, character->angle, flags);
 }
 
 SYMBOL_EXPORT void DrawCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags) {
@@ -253,7 +255,7 @@ SYMBOL_EXPORT void DrawScaledCharacter(struct Game* game, struct Character* char
 	if (character->dead) { return; }
 	int spritesheetX = al_get_bitmap_width(character->bitmap) * (character->pos % character->spritesheet->cols);
 	int spritesheetY = al_get_bitmap_height(character->bitmap) * (character->pos / character->spritesheet->cols);
-	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotx, al_get_bitmap_height(character->bitmap) * character->pivoty, (int)(character->x * game->viewport.width + al_get_bitmap_width(character->bitmap) * scalex * character->pivotx), (int)(character->y * game->viewport.height + al_get_bitmap_height(character->bitmap) * scaley * character->pivoty), scalex, scaley, character->angle, flags);
+	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotX, al_get_bitmap_height(character->bitmap) * character->pivotY, (int)(GetCharacterX(game, character) + al_get_bitmap_width(character->bitmap) * scalex * character->pivotX), (int)(GetCharacterY(game, character) + al_get_bitmap_height(character->bitmap) * scaley * character->pivotY), scalex, scaley, character->angle, flags);
 }
 
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags) {
@@ -263,12 +265,25 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character,
 	DrawScaledCharacter(game, character, tint, 1, 1, flags);
 }
 
+SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
+	character->confineX = x;
+	character->confineY = y;
+}
+
+SYMBOL_EXPORT int GetCharacterConfineX(struct Game* game, struct Character* character) {
+	return (character->confineX >= 0) ? character->confineX : game->viewport.width;
+}
+
+SYMBOL_EXPORT int GetCharacterConfineY(struct Game* game, struct Character* character) {
+	return (character->confineY >= 0) ? character->confineY : game->viewport.height;
+}
+
 SYMBOL_EXPORT int GetCharacterX(struct Game* game, struct Character* character) {
-	return character->x * game->viewport.width;
+	return character->x * GetCharacterConfineX(game, character);
 }
 
 SYMBOL_EXPORT int GetCharacterY(struct Game* game, struct Character* character) {
-	return character->y * game->viewport.height;
+	return character->y * GetCharacterConfineY(game, character);
 }
 
 SYMBOL_EXPORT float GetCharacterAngle(struct Game* game, struct Character* character) {

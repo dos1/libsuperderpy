@@ -152,6 +152,10 @@ struct Game {
 		bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
 		void (*destroy)(struct Game* game);
 		void (*compositor)(struct Game* game, struct Gamestate* gamestates);
+		void (*prelogic)(struct Game* game, double delta);
+		void (*postlogic)(struct Game* game, double delta);
+		void (*predraw)(struct Game* game);
+		void (*postdraw)(struct Game* game);
 	} handlers;
 
 	LIBSUPERDERPY_DATA_TYPE* data;

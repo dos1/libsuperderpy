@@ -77,6 +77,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->handlers.event = NULL;
 	game->handlers.destroy = NULL;
 	game->handlers.compositor = NULL;
+	game->handlers.prelogic = NULL;
+	game->handlers.postlogic = NULL;
+	game->handlers.predraw = NULL;
+	game->handlers.postdraw = NULL;
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
@@ -144,18 +148,19 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_install_joystick();
 
-	al_set_new_display_flags((game->config.fullscreen ? (ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_FRAMELESS) : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
+	al_set_new_display_flags((game->config.fullscreen ? (ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_FRAMELESS) : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL_3_0 | ALLEGRO_PROGRAMMABLE_PIPELINE);
 #ifdef __EMSCRIPTEN__
 	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
 #endif
 	al_set_new_display_option(ALLEGRO_VSYNC, 2 - strtol(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1"), NULL, 10), ALLEGRO_SUGGEST);
-	al_set_new_display_option(ALLEGRO_OPENGL, true, ALLEGRO_REQUIRE);
 
 #ifdef LIBSUPERDERPY_ORIENTATION_LANDSCAPE
 	al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS, ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE, ALLEGRO_SUGGEST);
 #elif defined(LIBSUPERDERPY_ORIENTATION_PORTRAIT)
 	al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS, ALLEGRO_DISPLAY_ORIENTATION_PORTRAIT, ALLEGRO_SUGGEST);
 #endif
+
+	al_set_new_display_option(ALLEGRO_DEPTH_SIZE, 24, ALLEGRO_SUGGEST);
 
 #ifdef ALLEGRO_WINDOWS
 	al_set_new_window_position(20, 40); // workaround nasty Windows bug with window being created off-screen
@@ -164,7 +169,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_window_title(game->name);
 	game->display = al_create_display(game->config.width, game->config.height);
 	if (!game->display) {
-		fprintf(stderr, "failed to create display!\n");
+		fprintf(stderr, "Failed to create display!\n");
 		return NULL;
 	}
 
@@ -176,6 +181,32 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	SetupViewport(game, viewport);
 
 	PrintConsole(game, "Viewport %dx%d", game->viewport.width, game->viewport.height);
+	PrintConsole(game, "Max bitmap size: %d", al_get_display_option(game->display, ALLEGRO_MAX_BITMAP_SIZE));
+	PrintConsole(game, "Color buffer bits: %d", al_get_display_option(game->display, ALLEGRO_COLOR_SIZE));
+	PrintConsole(game, "Depth buffer bits: %d", al_get_display_option(game->display, ALLEGRO_DEPTH_SIZE));
+	PrintConsole(game, "Stencil buffer bits: %d", al_get_display_option(game->display, ALLEGRO_STENCIL_SIZE));
+	PrintConsole(game, "NPOT bitmaps: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_NPOT_BITMAP));
+	PrintConsole(game, "Separate alpha: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_SEPARATE_ALPHA));
+
+	if (!al_get_display_option(game->display, ALLEGRO_COMPATIBLE_DISPLAY)) {
+		al_destroy_display(game->display);
+		fprintf(stderr, "Created display is Allegro incompatible!\n");
+		return NULL;
+	}
+
+	if (!al_get_display_option(game->display, ALLEGRO_CAN_DRAW_INTO_BITMAP)) {
+		FatalError(game, true, "The created display does not support drawing into bitmaps.");
+		al_destroy_display(game->display);
+		return NULL;
+	}
+
+	if (!al_get_display_option(game->display, ALLEGRO_RENDER_METHOD)) {
+		FatalError(game, true, "Failed to create hardware accelerated display.");
+		al_destroy_display(game->display);
+		return NULL;
+	}
+
+	PrintConsole(game, "libsuperderpy display created :)");
 
 	ALLEGRO_BITMAP* icon = al_load_bitmap(GetDataFilePath(game, GetGameName(game, "icons/%s.png")));
 	al_set_display_icon(game->display, icon);
@@ -369,6 +400,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 						al_run_detached_thread(GamestateLoadingThread, &data);
 						while (game->_priv.loading.inProgress) {
 							DrawGamestates(game);
+							al_set_target_backbuffer(game->display);
 							if (tmp->showLoading) {
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 							}
@@ -435,6 +467,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 			DrawGamestates(game);
 			DrawConsole(game);
+			//al_wait_for_vsync();
 			al_flip_display();
 			redraw = false;
 

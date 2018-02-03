@@ -46,6 +46,7 @@ SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h
 }
 
 SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int flags, char const* text) {
+	// TODO: consider using a set of shaders
 	al_draw_text(font, al_map_rgba(0, 0, 0, 128), x + 1, y + 1, flags, text);
 	al_draw_text(font, color, x, y, flags, text);
 }
@@ -491,15 +492,17 @@ SYMBOL_EXPORT void SetFramebufferAsTarget(struct Game* game) {
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	int flags = al_get_new_bitmap_flags();
+	//al_set_new_bitmap_depth(24);
 	al_add_new_bitmap_flag(ALLEGRO_NO_PRESERVE_TEXTURE);
 	ALLEGRO_BITMAP* bitmap = al_create_bitmap(width, height);
 	al_set_new_bitmap_flags(flags);
+	//al_set_new_bitmap_depth(0);
 	return bitmap;
 }
 
-SYMBOL_EXPORT void EnableCompositor(struct Game* game) {
+SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates)) {
 	PrintConsole(game, "Compositor enabled.");
-	game->handlers.compositor = SimpleCompositor;
+	game->handlers.compositor = compositor ? compositor : SimpleCompositor;
 	ResizeGamestates(game);
 }
 
