@@ -152,7 +152,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
 #endif
 	al_set_new_display_option(ALLEGRO_VSYNC, 2 - strtol(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1"), NULL, 10), ALLEGRO_SUGGEST);
-	al_set_new_display_option(ALLEGRO_OPENGL, true, ALLEGRO_REQUIRE);
 
 #ifdef LIBSUPERDERPY_ORIENTATION_LANDSCAPE
 	al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS, ALLEGRO_DISPLAY_ORIENTATION_LANDSCAPE, ALLEGRO_SUGGEST);
@@ -167,7 +166,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_window_title(game->name);
 	game->display = al_create_display(game->config.width, game->config.height);
 	if (!game->display) {
-		fprintf(stderr, "failed to create display!\n");
+		fprintf(stderr, "Failed to create display!\n");
 		return NULL;
 	}
 
@@ -177,6 +176,34 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 #endif
 
 	SetupViewport(game, viewport);
+
+	PrintConsole(game, "libsuperderpy");
+	PrintConsole(game, "OpenGL%s (%08X)", al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? " ES" : "", al_get_opengl_version());
+
+	PrintConsole(game, "Max bitmap size: %d", al_get_display_option(game->display, ALLEGRO_MAX_BITMAP_SIZE));
+	PrintConsole(game, "Color buffer bits: %d", al_get_display_option(game->display, ALLEGRO_COLOR_SIZE));
+	PrintConsole(game, "Depth buffer bits: %d", al_get_display_option(game->display, ALLEGRO_DEPTH_SIZE));
+	PrintConsole(game, "Stencil buffer bits: %d", al_get_display_option(game->display, ALLEGRO_STENCIL_SIZE));
+	PrintConsole(game, "NPOT bitmaps: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_NPOT_BITMAP));
+	PrintConsole(game, "Separate alpha blender: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_SEPARATE_ALPHA));
+
+	if (!al_get_display_option(game->display, ALLEGRO_COMPATIBLE_DISPLAY)) {
+		al_destroy_display(game->display);
+		fprintf(stderr, "Created display is Allegro incompatible!\n");
+		return NULL;
+	}
+
+	if (!al_get_display_option(game->display, ALLEGRO_CAN_DRAW_INTO_BITMAP)) {
+		FatalError(game, true, "The created display does not support drawing into bitmaps.");
+		al_destroy_display(game->display);
+		return NULL;
+	}
+
+	if (!al_get_display_option(game->display, ALLEGRO_RENDER_METHOD)) {
+		FatalError(game, true, "Failed to create hardware accelerated display.");
+		al_destroy_display(game->display);
+		return NULL;
+	}
 
 	PrintConsole(game, "Viewport %dx%d", game->viewport.width, game->viewport.height);
 
