@@ -46,6 +46,7 @@ SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h
 }
 
 SYMBOL_EXPORT void DrawTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int flags, char const* text) {
+	// TODO: consider using a set of shaders
 	al_draw_text(font, al_map_rgba(0, 0, 0, 128), x + 1, y + 1, flags, text);
 	al_draw_text(font, color, x, y, flags, text);
 }
@@ -454,6 +455,10 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
 		al_build_transform(&game->projection, clipX, clipY, resolution, resolution, 0.0f);
 		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
+		game->_priv.clip_rect.x = clipX;
+		game->_priv.clip_rect.y = clipY;
+		game->_priv.clip_rect.w = clipWidth;
+		game->_priv.clip_rect.h = clipHeight;
 	} else if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"), NULL, 10)) {
 		al_build_transform(&game->projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
 	}
@@ -471,10 +476,38 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
 	*y /= clipHeight / (float)game->viewport.height;
 }
 
+SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
+	return game->_priv.current_gamestate->fb;
+}
+
+SYMBOL_EXPORT void SetFramebufferAsTarget(struct Game* game) {
+	al_set_target_bitmap(GetFramebuffer(game));
+	double x = al_get_bitmap_width(GetFramebuffer(game)) / (double)game->viewport.width;
+	double y = al_get_bitmap_height(GetFramebuffer(game)) / (double)game->viewport.height;
+	ALLEGRO_TRANSFORM t;
+	al_identity_transform(&t);
+	al_scale_transform(&t, x, y);
+	al_use_transform(&t);
+}
+
 SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	int flags = al_get_new_bitmap_flags();
+	//al_set_new_bitmap_depth(24);
 	al_add_new_bitmap_flag(ALLEGRO_NO_PRESERVE_TEXTURE);
 	ALLEGRO_BITMAP* bitmap = al_create_bitmap(width, height);
 	al_set_new_bitmap_flags(flags);
+	//al_set_new_bitmap_depth(0);
 	return bitmap;
+}
+
+SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates)) {
+	PrintConsole(game, "Compositor enabled.");
+	game->handlers.compositor = compositor ? compositor : SimpleCompositor;
+	ResizeGamestates(game);
+}
+
+SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
+	PrintConsole(game, "Compositor disabled.");
+	game->handlers.compositor = NULL;
+	ResizeGamestates(game);
 }

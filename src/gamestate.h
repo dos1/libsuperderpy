@@ -49,8 +49,9 @@ struct Gamestate {
 	bool showLoading;
 	bool paused;
 	struct Gamestate* next;
-	void* data;
 	struct Gamestate_API* api;
+	ALLEGRO_BITMAP* fb;
+	void* data;
 };
 
 void LoadGamestate(struct Game* game, const char* name);

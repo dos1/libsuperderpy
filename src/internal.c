@@ -22,11 +22,24 @@
 #include "libsuperderpy.h"
 #include <allegro5/allegro_ttf.h>
 #include <dlfcn.h>
+#include <math.h>
 #include <stdio.h>
 
+SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates) {
+	struct Gamestate* tmp = gamestates;
+	al_clear_to_color(al_map_rgb(0, 0, 0));
+	while (tmp) {
+		if ((tmp->loaded) && (tmp->started)) {
+			al_draw_bitmap(tmp->fb, 0, 0, 0);
+		}
+		tmp = tmp->next;
+	}
+}
+
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
-	ClearScreen(game);
-	al_set_target_backbuffer(game->display);
+	if (!game->handlers.compositor) {
+		ClearScreen(game);
+	}
 	struct Gamestate* tmp = game->_priv.gamestates;
 	if (game->handlers.predraw) {
 		(*game->handlers.predraw)(game);
@@ -34,9 +47,28 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
+			SetFramebufferAsTarget(game);
+			if (game->handlers.compositor) { // don't clear when uncomposited
+				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
+			}
 			(*tmp->api->Gamestate_Draw)(game, tmp->data);
+			// TODO: save and restore more state for careless gamestating
 		}
 		tmp = tmp->next;
+	}
+
+	if (game->handlers.compositor) {
+		ALLEGRO_TRANSFORM t;
+		al_set_target_backbuffer(game->display);
+		ClearScreen(game);
+		al_identity_transform(&t);
+		/*		double factor = (sin(al_get_time()) / 2.0 + 1.0) * 2;
+		al_translate_transform(&t, -game->_priv.clip_rect.w / factor, -game->_priv.clip_rect.h / factor);
+		al_scale_transform(&t, factor, factor);
+		al_translate_transform(&t, game->_priv.clip_rect.w / factor, game->_priv.clip_rect.h / factor);*/
+		al_translate_transform(&t, game->_priv.clip_rect.x, game->_priv.clip_rect.y);
+		al_use_transform(&t);
+		game->handlers.compositor(game, game->_priv.gamestates);
 	}
 	if (game->handlers.postdraw) {
 		(*game->handlers.postdraw)(game);
@@ -99,6 +131,19 @@ SYMBOL_INTERNAL void UnfreezeGamestates(struct Game* game) {
 		if (tmp->frozen) {
 			ResumeGamestate(game, tmp->name);
 			tmp->frozen = false;
+		}
+		tmp = tmp->next;
+	}
+}
+
+SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
+		al_destroy_bitmap(tmp->fb);
+		if (game->handlers.compositor) {
+			tmp->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+		} else {
+			tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 		}
 		tmp = tmp->next;
 	}
@@ -264,6 +309,11 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->pending_unload = false;
 	tmp->next = NULL;
 	tmp->api = NULL;
+	if (game->handlers.compositor) {
+		tmp->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	} else {
+		tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	}
 	return tmp;
 }
 
@@ -278,6 +328,7 @@ SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamesta
 	if (gamestate->api) {
 		free(gamestate->api);
 	}
+	al_destroy_bitmap(gamestate->fb);
 }
 
 SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data) {
@@ -356,16 +407,10 @@ SYMBOL_INTERNAL void RemoveTimeline(struct Game* game, struct Timeline* timeline
 }
 
 SYMBOL_INTERNAL void ClearScreen(struct Game* game) {
-	ALLEGRO_TRANSFORM identity;
-	int clipX, clipY, clipWidth, clipHeight;
 	al_set_target_backbuffer(game->display);
-	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
-	al_identity_transform(&identity);
-	al_use_transform(&identity);
 	al_clear_to_color(al_map_rgb(0, 0, 0));
-	al_use_transform(&game->projection);
-	al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
+	al_set_clipping_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 }
 
 static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int clipY) {

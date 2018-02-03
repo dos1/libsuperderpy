@@ -36,6 +36,7 @@
 #endif
 
 struct Viewport;
+struct Gamestate;
 
 /*! \brief Draws rectangle filled with vertical gradient. */
 void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom);
@@ -76,5 +77,13 @@ void SetupViewport(struct Game* game, struct Viewport config);
 
 void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
+ALLEGRO_BITMAP* GetFramebuffer(struct Game* game);
+
+void SetFramebufferAsTarget(struct Game* game);
+
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
+
+void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates));
+void DisableCompositor(struct Game* game);
+
 #endif
