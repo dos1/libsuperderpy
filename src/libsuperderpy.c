@@ -76,6 +76,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->handlers.event = NULL;
 	game->handlers.destroy = NULL;
+	game->handlers.prelogic = NULL;
+	game->handlers.postlogic = NULL;
+	game->handlers.predraw = NULL;
+	game->handlers.postdraw = NULL;
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);

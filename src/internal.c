@@ -28,6 +28,9 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	ClearScreen(game);
 	al_set_target_backbuffer(game->display);
 	struct Gamestate* tmp = game->_priv.gamestates;
+	if (game->handlers.predraw) {
+		(*game->handlers.predraw)(game);
+	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
@@ -35,16 +38,25 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
+	if (game->handlers.postdraw) {
+		(*game->handlers.postdraw)(game);
+	}
 }
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+	if (game->handlers.prelogic) {
+		(*game->handlers.prelogic)(game, delta);
+	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->Gamestate_Logic)(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
+	}
+	if (game->handlers.postlogic) {
+		(*game->handlers.postlogic)(game, delta);
 	}
 }
 
