@@ -112,6 +112,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 		int clipX, clipY, clipWidth, clipHeight;
 		al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 		al_use_transform(&trans);
+		al_hold_bitmap_drawing(true);
 
 		int width = (al_get_display_width(game->display) / game->viewport.width) * game->viewport.width;
 		if (!game->viewport.integer_scaling) {
@@ -139,6 +140,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 
 		DrawTimelines(game);
 	}
+	al_hold_bitmap_drawing(false);
 
 	double game_time = al_get_time();
 	if (game_time - game->_priv.fps_count.old_time >= 1.0) {
