@@ -54,7 +54,8 @@ struct Character {
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
 	float angle; /*!< Characters display angle (radians). */
-	float pivotx, pivoty; /*!< Pivot point, relative of character's size. */
+	float pivotX, pivotY; /*!< Pivot point, relative of character's size. */
+	int confineX, confineY; /*!< Size of the canvas being drawn to, for correct position calculation; when -1, uses viewport size */
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	int repeat;
 	bool shared;
@@ -82,10 +83,13 @@ void MoveCharacterF(struct Game* game, struct Character* character, float x, flo
 void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y);
+void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y);
 
 int GetCharacterX(struct Game* game, struct Character* character);
 int GetCharacterY(struct Game* game, struct Character* character);
 float GetCharacterAngle(struct Game* game, struct Character* character);
+int GetCharacterConfineX(struct Game* game, struct Character* character);
+int GetCharacterConfineY(struct Game* game, struct Character* character);
 
 bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y);
 
