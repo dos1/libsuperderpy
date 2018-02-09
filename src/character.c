@@ -22,6 +22,7 @@
 #include "utils.h"
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -46,12 +47,14 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			character->repeat = tmp->repeat;
 			character->pos = 0;
 			if (character->bitmap) {
-				if ((al_get_bitmap_width(character->bitmap) != tmp->width / tmp->cols) || (al_get_bitmap_height(character->bitmap) != tmp->height / tmp->rows)) {
-					al_destroy_bitmap(character->bitmap);
-					character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
-				}
+				//if ((al_get_bitmap_width(character->bitmap) != tmp->width / tmp->cols) || (al_get_bitmap_height(character->bitmap) != tmp->height / tmp->rows)) {
+				//	al_destroy_bitmap(character->bitmap);
+				//	character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
+				//}
+				al_reparent_bitmap(character->bitmap, tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
 			} else {
-				character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
+				//character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
+				character->bitmap = al_create_sub_bitmap(tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
 			}
 			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap));
 			return;
@@ -210,6 +213,9 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 				}
 			}
 		}
+		al_reparent_bitmap(character->bitmap, character->spritesheet->bitmap,
+		  (character->pos % character->spritesheet->cols) * (character->spritesheet->width / character->spritesheet->cols), (character->pos / character->spritesheet->cols) * (character->spritesheet->height / character->spritesheet->rows),
+		  character->spritesheet->width / character->spritesheet->cols, character->spritesheet->height / character->spritesheet->rows);
 	}
 }
 
@@ -262,7 +268,8 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character,
 	if (character->spritesheet->flip) {
 		flags = flags | ALLEGRO_FLIP_HORIZONTAL | ALLEGRO_FLIP_VERTICAL;
 	}
-	DrawScaledCharacter(game, character, tint, 1, 1, flags);
+	al_draw_bitmap(character->bitmap, GetCharacterX(game, character), GetCharacterY(game, character), flags);
+	//	DrawScaledCharacter(game, character, tint, 1, 1, flags);
 }
 
 SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
@@ -290,9 +297,17 @@ SYMBOL_EXPORT float GetCharacterAngle(struct Game* game, struct Character* chara
 	return character->angle;
 }
 
-SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y) {
+SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y, bool pixelperfect) {
 	int x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
 	int x2 = x1 + al_get_bitmap_width(character->bitmap), y2 = y1 + al_get_bitmap_height(character->bitmap);
 
-	return ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
+	bool test = ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
+
+	if (test && pixelperfect) {
+		// TODO: handle being flipped
+		ALLEGRO_COLOR color = al_get_pixel(character->bitmap, x - x1, y - y1);
+		return (color.a > 0.0);
+	}
+
+	return test;
 }

@@ -410,6 +410,7 @@ SYMBOL_INTERNAL void ClearScreen(struct Game* game) {
 	al_set_target_backbuffer(game->display);
 	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
 	al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_clear_depth_buffer(1.0);
 	al_set_clipping_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 }
 

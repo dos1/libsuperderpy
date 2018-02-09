@@ -57,10 +57,10 @@ struct Character {
 	float angle; /*!< Characters display angle (radians). */
 	float pivotX, pivotY; /*!< Pivot point, relative of character's size. */
 	int confineX, confineY; /*!< Size of the canvas being drawn to, for correct position calculation; when -1, uses viewport size */
-	void* data; /*!< Additional, custom character data (HP etc.). */
-	int repeat;
+	int repeat; // TODO: remove
 	bool shared;
-	bool dead;
+	bool dead; // TODO: remove
+	void* data; /*!< Additional, custom character data (HP etc.). */
 };
 
 void SelectSpritesheet(struct Game* game, struct Character* character, char* name);
@@ -92,6 +92,6 @@ float GetCharacterAngle(struct Game* game, struct Character* character);
 int GetCharacterConfineX(struct Game* game, struct Character* character);
 int GetCharacterConfineY(struct Game* game, struct Character* character);
 
-bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y);
+bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y, bool pixelperfect);
 
 #endif
