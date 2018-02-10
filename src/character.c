@@ -44,16 +44,11 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			} else {
 				character->successor = NULL;
 			}
-			character->repeat = tmp->repeat;
+			character->repeats = tmp->repeats;
 			character->pos = 0;
 			if (character->bitmap) {
-				//if ((al_get_bitmap_width(character->bitmap) != tmp->width / tmp->cols) || (al_get_bitmap_height(character->bitmap) != tmp->height / tmp->rows)) {
-				//	al_destroy_bitmap(character->bitmap);
-				//	character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
-				//}
 				al_reparent_bitmap(character->bitmap, tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
 			} else {
-				//character->bitmap = al_create_bitmap(tmp->width / tmp->cols, tmp->height / tmp->rows);
 				character->bitmap = al_create_sub_bitmap(tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
 			}
 			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap));
@@ -64,7 +59,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 	PrintConsole(game, "ERROR: No spritesheets registered for %s with given name: %s", character->name, name);
 }
 
-SYMBOL_EXPORT void ChangeSpritesheet(struct Game* game, struct Character* character, char* name) {
+SYMBOL_EXPORT void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name) {
 	if (character->successor) {
 		free(character->successor);
 	}
@@ -114,21 +109,17 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s = malloc(sizeof(struct Spritesheet));
 	s->name = strdup(name);
 	s->bitmap = NULL;
-	s->cols = strtol(al_get_config_value(config, "", "cols"), NULL, 10);
 	s->rows = strtol(al_get_config_value(config, "", "rows"), NULL, 10);
+	s->cols = strtol(al_get_config_value(config, "", "cols"), NULL, 10);
 	s->blanks = strtol(al_get_config_value(config, "", "blanks"), NULL, 10);
 	s->delay = strtod(al_get_config_value(config, "", "delay"), NULL);
-	s->flip = false;
-	const char* val = al_get_config_value(config, "", "repeat");
+	s->width = 0;
+	s->height = 0;
+	const char* val = al_get_config_value(config, "", "repeats");
 	if (val) {
-		s->repeat = strtod(val, NULL);
+		s->repeats = strtod(val, NULL);
 	} else {
-		s->repeat = 0;
-	}
-	s->kill = false;
-	const char* kill = al_get_config_value(config, "", "kill");
-	if (kill) {
-		s->kill = strtol(kill, NULL, 10);
+		s->repeats = 0;
 	}
 	s->successor = NULL;
 	const char* successor = al_get_config_value(config, "", "successor");
@@ -145,23 +136,29 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	PrintConsole(game, "Creating character %s...", name);
 	struct Character* character = malloc(sizeof(struct Character));
 	character->name = strdup(name);
-	character->angle = 0;
 	character->bitmap = NULL;
-	character->data = NULL;
+	character->spritesheet = NULL;
+	character->spritesheets = NULL;
 	character->pos = 0;
 	character->pos_tmp = 0;
+	character->successor = NULL;
 	character->x = -1;
 	character->y = -1;
+	character->tint = al_map_rgb(255, 255, 255);
 	character->pivotX = 0.5;
 	character->pivotY = 0.5;
+	character->scaleX = 1.0;
+	character->scaleY = 1.0;
+	character->angle = 0;
 	character->confineX = -1;
 	character->confineY = -1;
-	character->spritesheets = NULL;
-	character->spritesheet = NULL;
-	character->successor = NULL;
-	character->repeat = 0;
+	character->flipX = false;
+	character->flipY = false;
 	character->shared = false;
-	character->dead = false;
+	character->repeats = 0;
+	character->parent = NULL;
+	character->data = NULL;
+
 	return character;
 }
 
@@ -193,8 +190,8 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 	free(character);
 }
 
-SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* character, float speed_modifier) {
-	if (character->dead) { return; }
+SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier) {
+	speed_modifier *= delta / (1 / 60.f); // TODO: proper delta handling
 	if (speed_modifier) {
 		character->pos_tmp++;
 		if (character->pos_tmp >= character->spritesheet->delay / speed_modifier) {
@@ -203,16 +200,13 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 		}
 		if (character->pos >= character->spritesheet->cols * character->spritesheet->rows - character->spritesheet->blanks) {
 			character->pos = 0;
-			if (character->repeat) {
-				character->repeat--;
-			} else {
-				if (character->spritesheet->kill) {
-					character->dead = true;
-				} else if (character->successor) {
-					SelectSpritesheet(game, character, character->successor);
-				}
+			if (character->repeats) {
+				character->repeats--;
+			} else if (character->successor) {
+				SelectSpritesheet(game, character, character->successor);
 			}
 		}
+
 		al_reparent_bitmap(character->bitmap, character->spritesheet->bitmap,
 		  (character->pos % character->spritesheet->cols) * (character->spritesheet->width / character->spritesheet->cols), (character->pos / character->spritesheet->cols) * (character->spritesheet->height / character->spritesheet->rows),
 		  character->spritesheet->width / character->spritesheet->cols, character->spritesheet->height / character->spritesheet->rows);
@@ -224,14 +218,12 @@ SYMBOL_EXPORT void MoveCharacter(struct Game* game, struct Character* character,
 }
 
 SYMBOL_EXPORT void MoveCharacterF(struct Game* game, struct Character* character, float x, float y, float angle) {
-	if (character->dead) { return; }
 	character->x += x;
 	character->y += y;
 	character->angle += angle;
 }
 
 SYMBOL_EXPORT void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle) {
-	if (character->dead) { return; }
 	character->x = x;
 	character->y = y;
 	character->angle = angle;
@@ -246,30 +238,13 @@ SYMBOL_EXPORT void SetCharacterPivotPoint(struct Game* game, struct Character* c
 	character->pivotY = y;
 }
 
-SYMBOL_EXPORT void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags) {
-	if (character->dead) { return; }
-	int spritesheetX = al_get_bitmap_width(character->bitmap) * (character->pos % character->spritesheet->cols);
-	int spritesheetY = al_get_bitmap_height(character->bitmap) * (character->pos / character->spritesheet->cols);
-	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotX, al_get_bitmap_height(character->bitmap) * character->pivotY, GetCharacterX(game, character) + al_get_bitmap_width(character->bitmap) * scalex * character->pivotX, GetCharacterY(game, character) + al_get_bitmap_height(character->bitmap) * scaley * character->pivotY, scalex, scaley, character->angle, flags);
-}
-
-SYMBOL_EXPORT void DrawCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags) {
-	DrawScaledCharacterF(game, character, tint, 1, 1, flags);
-}
-
-SYMBOL_EXPORT void DrawScaledCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags) {
-	if (character->dead) { return; }
-	int spritesheetX = al_get_bitmap_width(character->bitmap) * (character->pos % character->spritesheet->cols);
-	int spritesheetY = al_get_bitmap_height(character->bitmap) * (character->pos / character->spritesheet->cols);
-	al_draw_tinted_scaled_rotated_bitmap_region(character->spritesheet->bitmap, spritesheetX, spritesheetY, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap), tint, al_get_bitmap_width(character->bitmap) * character->pivotX, al_get_bitmap_height(character->bitmap) * character->pivotY, (int)(GetCharacterX(game, character) + al_get_bitmap_width(character->bitmap) * scalex * character->pivotX), (int)(GetCharacterY(game, character) + al_get_bitmap_height(character->bitmap) * scaley * character->pivotY), scalex, scaley, character->angle, flags);
-}
-
-SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags) {
-	if (character->spritesheet->flip) {
-		flags = flags | ALLEGRO_FLIP_HORIZONTAL | ALLEGRO_FLIP_VERTICAL;
-	}
-	al_draw_bitmap(character->bitmap, GetCharacterX(game, character), GetCharacterY(game, character), flags);
-	//	DrawScaledCharacter(game, character, tint, 1, 1, flags);
+SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
+	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
+	al_draw_tinted_scaled_rotated_bitmap(character->bitmap, character->tint,
+	  w * character->pivotX, h * character->pivotY,
+	  GetCharacterX(game, character) + w * character->pivotX, GetCharacterY(game, character) + h * character->pivotY,
+	  character->scaleX, character->scaleY, character->angle,
+	  (character->flipX ? ALLEGRO_FLIP_HORIZONTAL : 0) | (character->flipY ? ALLEGRO_FLIP_VERTICAL : 0));
 }
 
 SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
@@ -285,27 +260,32 @@ SYMBOL_EXPORT int GetCharacterConfineY(struct Game* game, struct Character* char
 	return (character->confineY >= 0) ? character->confineY : game->viewport.height;
 }
 
-SYMBOL_EXPORT int GetCharacterX(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT float GetCharacterX(struct Game* game, struct Character* character) {
 	return character->x * GetCharacterConfineX(game, character);
 }
 
-SYMBOL_EXPORT int GetCharacterY(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT float GetCharacterY(struct Game* game, struct Character* character) {
 	return character->y * GetCharacterConfineY(game, character);
-}
-
-SYMBOL_EXPORT float GetCharacterAngle(struct Game* game, struct Character* character) {
-	return character->angle;
 }
 
 SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y, bool pixelperfect) {
 	int x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
-	int x2 = x1 + al_get_bitmap_width(character->bitmap), y2 = y1 + al_get_bitmap_height(character->bitmap);
+	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
+	int x2 = x1 + w, y2 = y1 + h;
 
 	bool test = ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
 
 	if (test && pixelperfect) {
-		// TODO: handle being flipped
-		ALLEGRO_COLOR color = al_get_pixel(character->bitmap, x - x1, y - y1);
+		// TODO: handle scale and rotation
+		x -= x1;
+		y -= y1;
+		if (character->flipX) {
+			x = w - x;
+		}
+		if (character->flipY) {
+			y = w - y;
+		}
+		ALLEGRO_COLOR color = al_get_pixel(character->bitmap, x, y);
 		return (color.a > 0.0);
 	}
 
