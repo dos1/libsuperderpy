@@ -22,7 +22,7 @@
 #include <allegro5/allegro.h>
 
 SYMBOL_EXPORT void InitConfig(struct Game* game) {
-	const ALLEGRO_FILE_INTERFACE* interface = al_get_new_file_interface();
+	const ALLEGRO_FILE_INTERFACE* iface = al_get_new_file_interface();
 	al_set_standard_file_interface();
 	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
 	ALLEGRO_PATH* data = al_create_path("SuperDerpy.ini");
@@ -33,7 +33,7 @@ SYMBOL_EXPORT void InitConfig(struct Game* game) {
 	}
 	al_destroy_path(path);
 	al_destroy_path(data);
-	al_set_new_file_interface(interface);
+	al_set_new_file_interface(iface);
 }
 
 SYMBOL_EXPORT void SetConfigOption(struct Game* game, char* section, char* name, char* value) {
@@ -53,7 +53,7 @@ SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game* game, char* sectio
 }
 
 SYMBOL_EXPORT void DeinitConfig(struct Game* game) {
-	const ALLEGRO_FILE_INTERFACE* interface = al_get_new_file_interface();
+	const ALLEGRO_FILE_INTERFACE* iface = al_get_new_file_interface();
 	al_set_standard_file_interface();
 	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
 	ALLEGRO_PATH* data = al_create_path("SuperDerpy.ini");
@@ -63,5 +63,5 @@ SYMBOL_EXPORT void DeinitConfig(struct Game* game) {
 	al_destroy_path(path);
 	al_destroy_path(data);
 	al_destroy_config(game->_priv.config);
-	al_set_new_file_interface(interface);
+	al_set_new_file_interface(iface);
 }
