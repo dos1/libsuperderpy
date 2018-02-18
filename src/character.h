@@ -29,45 +29,60 @@
 struct Spritesheet {
 	char* name; /*!< Name of the spritesheet (used in file paths). */
 	ALLEGRO_BITMAP* bitmap; /*!< Spritesheet bitmap. */
+	// TODO: bitmap file
 	int rows; /*!< Number of rows in the spritesheet. */
 	int cols; /*!< Number of columns in the spritesheet. */
 	int blanks; /*!< Number of blank frames at the end of the spritesheet. */
 	int width;
 	int height;
 	int delay;
-	bool kill;
-	int repeat;
-	float scale; /*!< Scale modifier of the frame. */
+	int repeats; /*!< Number of repeats to make before the spritesheet is changed to its successor. */
 	char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
 	struct Spritesheet* next; /*!< Next spritesheet in the queue. */
+	// TODO: loopmode
+	// TODO: playmode
+
+	// TODO: missing docs
 };
 
 /*! \brief Structure representing one visible character. */
 struct Character {
 	char* name; /*!< Name of the character (used in file paths). */
+	struct Character* parent; /*!< Parent character. NULL is no parent. */
+	ALLEGRO_BITMAP* bitmap; /*!< Subbitmap with character's current frame. */
 	struct Spritesheet* spritesheet; /*!< Current spritesheet used by character. */
 	struct Spritesheet* spritesheets; /*!< List of all spritesheets registered to character. */
-	char* successor;
-	ALLEGRO_BITMAP* bitmap;
 	int pos; /*!< Current spritesheet position. */
-	int pos_tmp; /*!< A counter used to slow down spritesheet animation. */
+	int pos_tmp; /*!< A counter used internally to slow down spritesheet animation. */ // TODO: change to delta
+	char* successor; /*!< Name of the next spritesheet to be played when the current one finishes. */
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
-	float angle; /*!< Characters display angle (radians). */
-	float pivotX, pivotY; /*!< Pivot point, relative of character's size. */
-	int confineX, confineY; /*!< Size of the canvas being drawn to, for correct position calculation; when -1, uses viewport size */
+	ALLEGRO_COLOR tint; /*!< Color with which the character's pixels will be multiplied (tinted). White for no effect. */
+	float pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
+	float pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
+	float scaleX; /*!< Scale factor for X axis. */
+	float scaleY; /*!< Scale factor for Y axis. */
+	float angle; /*!< Character's rotation angle (radians). */
+	int confineX; /*!< Width of the canvas being drawn to, for correct position calculation; when -1, uses parent's confines or viewport size */
+	int confineY; /*!< Height of the canvas being drawn to, for correct position calculation; when -1, uses parent's confines or viewport size */
+	bool flipX; /*!< Flips the character's sprite vertically. */
+	bool flipY; /*!< Flips the character's sprite horizontally. */
+	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
+	int repeats; /*!< Number of repeats left before the spritesheet is changed to its successor. */
 	void* data; /*!< Additional, custom character data (HP etc.). */
-	int repeat;
-	bool shared;
-	bool dead;
+	// TODO: add a callback for when the animation finishes
+	// TODO: playmode
+
+	// TODO: parents
 };
 
+// TODO: document functions
+
 void SelectSpritesheet(struct Game* game, struct Character* character, char* name);
-void ChangeSpritesheet(struct Game* game, struct Character* character, char* name);
+void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name);
 void RegisterSpritesheet(struct Game* game, struct Character* character, char* name);
 
-void DrawCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags);
-void DrawCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, int flags);
+void DrawCharacter(struct Game* game, struct Character* character);
 void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
 void DrawScaledCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
 
@@ -77,7 +92,7 @@ void DestroyCharacter(struct Game* game, struct Character* character);
 void LoadSpritesheets(struct Game* game, struct Character* character);
 void UnloadSpritesheets(struct Game* game, struct Character* character);
 
-void AnimateCharacter(struct Game* game, struct Character* character, float speed_modifier);
+void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier);
 void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle);
 void MoveCharacterF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle);
@@ -85,12 +100,11 @@ void SetCharacterPositionF(struct Game* game, struct Character* character, float
 void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y);
 void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y);
 
-int GetCharacterX(struct Game* game, struct Character* character);
-int GetCharacterY(struct Game* game, struct Character* character);
-float GetCharacterAngle(struct Game* game, struct Character* character);
+float GetCharacterX(struct Game* game, struct Character* character);
+float GetCharacterY(struct Game* game, struct Character* character);
 int GetCharacterConfineX(struct Game* game, struct Character* character);
 int GetCharacterConfineY(struct Game* game, struct Character* character);
 
-bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y);
+bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect);
 
 #endif
