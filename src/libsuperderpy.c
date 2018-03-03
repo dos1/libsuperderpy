@@ -199,12 +199,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	if (!al_get_display_option(game->display, ALLEGRO_RENDER_METHOD)) {
-		FatalError(game, true, "Failed to create hardware accelerated display.");
-		al_destroy_display(game->display);
-		return NULL;
-	}
-
 	PrintConsole(game, "Viewport %dx%d", game->viewport.width, game->viewport.height);
 
 	ALLEGRO_BITMAP* icon = al_load_bitmap(GetDataFilePath(game, GetGameName(game, "icons/%s.png")));
