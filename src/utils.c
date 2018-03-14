@@ -190,6 +190,7 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 }
 
 SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
+	// TODO: interrupt and take over loading thread when it happens
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
 	va_list vl;
@@ -294,7 +295,7 @@ SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	al_use_transform(&game->projection);
 }
 
-static void TestPath(char* filename, char* subpath, char** result) {
+static void TestPath(const char* filename, const char* subpath, char** result) {
 	if (*result) { return; } //already found
 	ALLEGRO_PATH* tail = al_create_path(filename);
 	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
@@ -310,7 +311,7 @@ static void TestPath(char* filename, char* subpath, char** result) {
 	al_destroy_path(path);
 }
 
-SYMBOL_EXPORT char* GetGameName(struct Game* game, char* format) {
+SYMBOL_EXPORT char* GetGameName(struct Game* game, const char* format) {
 	char* result = malloc(sizeof(char) * 255);
 	SUPPRESS_WARNING("-Wformat-nonliteral")
 	snprintf(result, 255, format, game->name);
@@ -318,7 +319,7 @@ SYMBOL_EXPORT char* GetGameName(struct Game* game, char* format) {
 	return AddGarbage(game, result);
 }
 
-static char* TestDataFilePath(struct Game* game, char* filename) {
+static char* TestDataFilePath(struct Game* game, const char* filename) {
 	char* result = NULL;
 
 	TestPath(filename, "data/", &result);
@@ -344,7 +345,7 @@ static char* TestDataFilePath(struct Game* game, char* filename) {
 	return NULL;
 }
 
-SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, char* filename) {
+SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 	char* result = 0;
 
 #ifdef ALLEGRO_ANDROID

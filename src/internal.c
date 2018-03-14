@@ -243,7 +243,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	float progress = ((game->_priv.loading.progress / progressCount) / (float)game->_priv.loading.toLoad) + (game->_priv.loading.loaded / (float)game->_priv.loading.toLoad);
 	game->loading_progress = progress;
 	if (game->config.debug) {
-		PrintConsole(game, "[%s] Progress: %d% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, *(tmp->api->Gamestate_ProgressCount));
+		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, *(tmp->api->Gamestate_ProgressCount));
 	}
 #ifdef LIBSUPERDERPY_SINGLE_THREAD
 	DrawGamestates(game);
@@ -368,6 +368,7 @@ SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_l
 	return NULL;
 }
 
+// TODO: maybe make external?
 SYMBOL_INTERNAL void* AddGarbage(struct Game* game, void* data) {
 	game->_priv.garbage = AddToList(game->_priv.garbage, data);
 	return data;

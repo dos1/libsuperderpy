@@ -105,6 +105,6 @@ float GetCharacterY(struct Game* game, struct Character* character);
 int GetCharacterConfineX(struct Game* game, struct Character* character);
 int GetCharacterConfineY(struct Game* game, struct Character* character);
 
-bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y, bool pixelperfect);
+bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect);
 
 #endif

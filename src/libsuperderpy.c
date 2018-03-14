@@ -459,7 +459,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			game->_priv.timestamp += delta;
 			delta /= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
 			LogicGamestates(game, delta);
-			redraw = true;
+			//redraw = true;
 
 			DrawGamestates(game);
 			DrawConsole(game);

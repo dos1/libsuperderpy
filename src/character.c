@@ -238,6 +238,7 @@ SYMBOL_EXPORT void SetCharacterPivotPoint(struct Game* game, struct Character* c
 	character->pivotY = y;
 }
 
+// TODO: coords are centered (pivot-related) or top left?
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
 	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
 	al_draw_tinted_scaled_rotated_bitmap(character->bitmap, character->tint,
@@ -268,23 +269,48 @@ SYMBOL_EXPORT float GetCharacterY(struct Game* game, struct Character* character
 	return character->y * GetCharacterConfineY(game, character);
 }
 
-SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, int x, int y, bool pixelperfect) {
-	int x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
-	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
-	int x2 = x1 + w, y2 = y1 + h;
+/*
+static void SortTwoFloats(float* v1, float* v2) {
+	float pom = *v1;
+	if (v1 > v2) {
+		*v1 = *v2;
+		*v2 = pom;
+	}
+}
+*/
 
+SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect) {
+	// TODO: fucking rework
+
+	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
+	float x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
+	float x2 = x1 + w, y2 = y1 + h;
+
+	/*	float scalex = character->scaleX;
+	float scaley = character->scaleY;
+	if (character->flipX) {
+		scalex *= -1;
+	}
+	if (character->flipY) {
+		scaley *= -1;
+	}
+	ALLEGRO_TRANSFORM transform;
+	al_identity_transform(&transform);
+	al_translate_transform(&transform, -character->pivotX * w, -character->pivotY * h);
+	al_scale_transform(&transform, scalex, scaley);
+	al_translate_transform(&transform, character->pivotX * w, character->pivotY * h);
+	al_transform_coordinates(&transform, &x1, &y1);
+	al_transform_coordinates(&transform, &x2, &y2);
+	SortTwoFloats(&x1, &x2);
+	SortTwoFloats(&y1, &y2);
+*/
 	bool test = ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
 
+	//al_transform_coordinates(&transform, &x, &y);
+
 	if (test && pixelperfect) {
-		// TODO: handle scale and rotation
 		x -= x1;
 		y -= y1;
-		if (character->flipX) {
-			x = w - x;
-		}
-		if (character->flipY) {
-			y = w - y;
-		}
 		ALLEGRO_COLOR color = al_get_pixel(character->bitmap, x, y);
 		return (color.a > 0.0);
 	}
