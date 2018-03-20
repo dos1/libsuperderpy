@@ -117,6 +117,36 @@ SYMBOL_EXPORT int DrawWrappedTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR co
 	return DrawWrappedText(font, color, x, y, width, flags, text);
 }
 
+SYMBOL_EXPORT void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags) {
+	al_draw_bitmap(bitmap, x - al_get_bitmap_width(bitmap) / 2.0, y - al_get_bitmap_height(bitmap) / 2.0, flags);
+}
+
+SYMBOL_EXPORT double DotProduct(const double v[], const double u[], int n) {
+	float result = 0.0;
+	for (int i = 0; i < n; i++) {
+		result += v[i] * u[i];
+	}
+	return result;
+}
+
+SYMBOL_EXPORT double VectorLength(double x, double y, double z) {
+	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+}
+
+SYMBOL_EXPORT double Clip(double left, double right, double val) {
+	if (val > right) {
+		return right;
+	}
+	if (val < left) {
+		return left;
+	}
+	return val;
+}
+
+SYMBOL_EXPORT double Lerp(double left, double right, double pos) {
+	return left + (right - left) * pos;
+}
+
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),

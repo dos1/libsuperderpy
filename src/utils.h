@@ -52,6 +52,13 @@ void DrawTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float 
 int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
 int DrawWrappedTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
 
+void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags);
+
+double DotProduct(const double v[], const double u[], int n);
+double VectorLength(double x, double y, double z);
+double Clip(double left, double right, double val);
+double Lerp(double left, double right, double pos);
+
 ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac);
 void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 
