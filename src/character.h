@@ -25,22 +25,41 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 
+struct SpritesheetFrame {
+	char* file;
+	ALLEGRO_BITMAP* bitmap;
+	double duration;
+	int row;
+	int col;
+	int x;
+	int y;
+	bool flipX;
+	bool flipY;
+};
+
 /*! \brief Structure representing one spritesheet for character animation. */
 struct Spritesheet {
 	char* name; /*!< Name of the spritesheet (used in file paths). */
 	ALLEGRO_BITMAP* bitmap; /*!< Spritesheet bitmap. */
-	// TODO: bitmap file
+	int frameCount;
 	int rows; /*!< Number of rows in the spritesheet. */
 	int cols; /*!< Number of columns in the spritesheet. */
-	int blanks; /*!< Number of blank frames at the end of the spritesheet. */
-	int width;
-	int height;
-	int delay;
+	double duration;
+	char* file;
 	int repeats; /*!< Number of repeats to make before the spritesheet is changed to its successor. */
 	char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
+	bool bidir;
+	bool reversed;
+	double pivotX;
+	double pivotY;
+	bool flipX;
+	bool flipY;
+	struct SpritesheetFrame* frames;
+
+	int width;
+	int height;
+
 	struct Spritesheet* next; /*!< Next spritesheet in the queue. */
-	// TODO: loopmode
-	// TODO: playmode
 
 	// TODO: missing docs
 };
@@ -49,17 +68,18 @@ struct Spritesheet {
 struct Character {
 	char* name; /*!< Name of the character (used in file paths). */
 	struct Character* parent; /*!< Parent character. NULL is no parent. */
-	ALLEGRO_BITMAP* bitmap; /*!< Subbitmap with character's current frame. */
+	//ALLEGRO_BITMAP* bitmap; /*!< Subbitmap with character's current frame. */
+	struct SpritesheetFrame* frame; /*!< Current frame. */
 	struct Spritesheet* spritesheet; /*!< Current spritesheet used by character. */
 	struct Spritesheet* spritesheets; /*!< List of all spritesheets registered to character. */
 	int pos; /*!< Current spritesheet position. */
-	int pos_tmp; /*!< A counter used internally to slow down spritesheet animation. */ // TODO: change to delta
+	double delta; /*!< A counter used internally to slow down spritesheet animation. */ // TODO: change to delta
 	char* successor; /*!< Name of the next spritesheet to be played when the current one finishes. */
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
 	ALLEGRO_COLOR tint; /*!< Color with which the character's pixels will be multiplied (tinted). White for no effect. */
-	float pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
-	float pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
+	//float pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
+	//float pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
 	float scaleX; /*!< Scale factor for X axis. */
 	float scaleY; /*!< Scale factor for Y axis. */
 	float angle; /*!< Character's rotation angle (radians). */
@@ -67,11 +87,13 @@ struct Character {
 	int confineY; /*!< Height of the canvas being drawn to, for correct position calculation; when -1, uses parent's confines or viewport size */
 	bool flipX; /*!< Flips the character's sprite vertically. */
 	bool flipY; /*!< Flips the character's sprite horizontally. */
-	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 	int repeats; /*!< Number of repeats left before the spritesheet is changed to its successor. */
+	bool reversing;
+	bool hidden;
 	void* data; /*!< Additional, custom character data (HP etc.). */
-	// TODO: add a callback for when the animation finishes
-	// TODO: playmode
+	void (*callback)(struct Game*, struct Character*, char* newAnim, char* oldAnim, void*);
+	void* callbackData;
+	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 
 	// TODO: parents
 };
@@ -106,5 +128,7 @@ int GetCharacterConfineX(struct Game* game, struct Character* character);
 int GetCharacterConfineY(struct Game* game, struct Character* character);
 
 bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect);
+void ShowCharacter(struct Game* game, struct Character* character);
+void HideCharacter(struct Game* game, struct Character* character);
 
 #endif

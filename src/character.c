@@ -45,13 +45,11 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 				character->successor = NULL;
 			}
 			character->repeats = tmp->repeats;
+			character->reversing = tmp->reversed;
 			character->pos = 0;
-			if (character->bitmap) {
-				al_reparent_bitmap(character->bitmap, tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
-			} else {
-				character->bitmap = al_create_sub_bitmap(tmp->bitmap, 0, 0, tmp->width / tmp->cols, tmp->height / tmp->rows);
-			}
-			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, al_get_bitmap_width(character->bitmap), al_get_bitmap_height(character->bitmap));
+			character->frame = &tmp->frames[character->pos];
+			//character->bitmap = tmp->frames[character->pos].bitmap;
+			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, character->spritesheet->width, character->spritesheet->height);
 			return;
 		}
 		tmp = tmp->next;
@@ -70,14 +68,35 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
-		if (!tmp->bitmap) {
+		if ((!tmp->bitmap) && (tmp->file)) {
 			char filename[255] = {0};
-			snprintf(filename, 255, "sprites/%s/%s.png", character->name, tmp->name);
+			snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
 			tmp->bitmap = al_load_bitmap(GetDataFilePath(game, filename));
-			tmp->width = al_get_bitmap_width(tmp->bitmap);
-			tmp->height = al_get_bitmap_height(tmp->bitmap);
+			tmp->width = al_get_bitmap_width(tmp->bitmap) / tmp->cols;
+			tmp->height = al_get_bitmap_height(tmp->bitmap) / tmp->rows;
+		}
+		for (int i = 0; i < tmp->frameCount; i++) {
+			if ((!tmp->frames[i].bitmap) && (tmp->frames[i].file)) {
+				char filename[255] = {0};
+				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
+				tmp->frames[i].bitmap = al_load_bitmap(GetDataFilePath(game, filename));
+				int width = al_get_bitmap_width(tmp->frames[i].bitmap);
+				if (width > tmp->width) {
+					tmp->width = width;
+				}
+				int height = al_get_bitmap_height(tmp->frames[i].bitmap);
+				if (height > tmp->height) {
+					tmp->height = height;
+				}
+			} else if (!tmp->frames[i].bitmap) {
+				tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width, tmp->frames[i].row * tmp->height, tmp->width, tmp->height);
+			}
 		}
 		tmp = tmp->next;
+	}
+
+	if ((!character->spritesheet) && (character->spritesheets)) {
+		SelectSpritesheet(game, character, character->spritesheets->name);
 	}
 }
 
@@ -85,12 +104,31 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 	PrintConsole(game, "Unloading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
+		for (int i = 0; i < tmp->frameCount; i++) {
+			if (tmp->frames[i].bitmap) {
+				al_destroy_bitmap(tmp->frames[i].bitmap);
+			}
+		}
 		if (tmp->bitmap) {
 			al_destroy_bitmap(tmp->bitmap);
 		}
 		tmp->bitmap = NULL;
 		tmp = tmp->next;
 	}
+}
+
+static long strtolnull(const char* _nptr, long val) {
+	if (_nptr == NULL) {
+		return val;
+	}
+	return strtol(_nptr, NULL, 10);
+}
+
+static double strtodnull(const char* _nptr, double val) {
+	if (_nptr == NULL) {
+		return val;
+	}
+	return strtod(_nptr, NULL);
 }
 
 SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* character, char* name) {
@@ -109,24 +147,86 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s = malloc(sizeof(struct Spritesheet));
 	s->name = strdup(name);
 	s->bitmap = NULL;
-	s->rows = strtol(al_get_config_value(config, "", "rows"), NULL, 10);
-	s->cols = strtol(al_get_config_value(config, "", "cols"), NULL, 10);
-	s->blanks = strtol(al_get_config_value(config, "", "blanks"), NULL, 10);
-	s->delay = strtod(al_get_config_value(config, "", "delay"), NULL);
+	s->frameCount = strtolnull(al_get_config_value(config, "animation", "frames"), 0);
+	s->rows = strtolnull(al_get_config_value(config, "animation", "rows"), 0);
+	s->cols = strtolnull(al_get_config_value(config, "animation", "cols"), 0);
+	s->flipX = strtolnull(al_get_config_value(config, "animation", "flipX"), 0);
+	s->flipY = strtolnull(al_get_config_value(config, "animation", "flipY"), 0);
+	int blanks = strtolnull(al_get_config_value(config, "animation", "blanks"), 0);
+	if (s->frameCount == 0) {
+		s->frameCount = s->rows * s->cols - blanks;
+	} else {
+		s->rows = floor(sqrt(s->frameCount));
+		s->cols = ceil(s->frameCount / s->rows);
+	}
+
+	s->bidir = strtolnull(al_get_config_value(config, "animation", "bidir"), 0);
+	s->reversed = strtolnull(al_get_config_value(config, "animation", "reversed"), 0);
+
+	s->duration = strtodnull(al_get_config_value(config, "animation", "duration"), 16.66);
+
 	s->width = 0;
 	s->height = 0;
-	const char* val = al_get_config_value(config, "", "repeats");
-	if (val) {
-		s->repeats = strtod(val, NULL);
-	} else {
-		s->repeats = 0;
-	}
+
+	s->repeats = strtolnull(al_get_config_value(config, "animation", "repeats"), 0);
+
 	s->successor = NULL;
-	const char* successor = al_get_config_value(config, "", "successor");
+	const char* successor = al_get_config_value(config, "animation", "successor");
 	if (successor) {
-		s->successor = malloc(255 * sizeof(char));
-		strncpy(s->successor, successor, 255);
+		int len = strlen(successor) + 1;
+		s->successor = malloc(len * sizeof(char));
+		strncpy(s->successor, successor, len);
 	}
+
+	{
+		s->file = NULL;
+		const char* file = al_get_config_value(config, "animation", "file");
+		if (file) {
+			int len = strlen(file) + 1;
+			s->file = malloc(len * sizeof(char));
+			strncpy(s->file, file, len);
+		}
+	}
+
+	s->pivotX = strtodnull(al_get_config_value(config, "pivot", "x"), 0.5);
+	s->pivotY = strtodnull(al_get_config_value(config, "pivot", "y"), 0.5);
+
+	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frameCount);
+
+	for (int i = 0; i < s->frameCount; i++) {
+		char framename[255];
+		snprintf(framename, 255, "frame%d", i);
+		s->frames[i].duration = strtodnull(al_get_config_value(config, framename, "duration"), s->duration);
+
+		s->frames[i].bitmap = NULL;
+		s->frames[i].x = strtolnull(al_get_config_value(config, framename, "x"), 0);
+		s->frames[i].y = strtolnull(al_get_config_value(config, framename, "y"), 0);
+		s->frames[i].flipX = strtolnull(al_get_config_value(config, framename, "flipX"), 0);
+		s->frames[i].flipY = strtolnull(al_get_config_value(config, framename, "flipY"), 0);
+
+		s->frames[i].file = NULL;
+		const char* file = al_get_config_value(config, framename, "file");
+		if (file) {
+			int len = strlen(file) + 1;
+			s->frames[i].file = malloc(len * sizeof(char));
+			strncpy(s->frames[i].file, file, len);
+		}
+
+		if (!file) {
+			s->frames[i].col = i % s->cols;
+			s->frames[i].row = i / s->rows;
+
+			const char* col_str = al_get_config_value(config, filename, "col");
+			if (col_str) {
+				s->frames[i].col = strtol(col_str, NULL, 10);
+			}
+			const char* row_str = al_get_config_value(config, filename, "row");
+			if (row_str) {
+				s->frames[i].row = strtol(row_str, NULL, 10);
+			}
+		}
+	}
+
 	s->next = character->spritesheets;
 	character->spritesheets = s;
 	al_destroy_config(config);
@@ -136,17 +236,17 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	PrintConsole(game, "Creating character %s...", name);
 	struct Character* character = malloc(sizeof(struct Character));
 	character->name = strdup(name);
-	character->bitmap = NULL;
+	character->frame = NULL;
 	character->spritesheet = NULL;
 	character->spritesheets = NULL;
 	character->pos = 0;
-	character->pos_tmp = 0;
+	character->delta = 0.0;
 	character->successor = NULL;
 	character->x = -1;
 	character->y = -1;
 	character->tint = al_map_rgb(255, 255, 255);
-	character->pivotX = 0.5;
-	character->pivotY = 0.5;
+	//character->pivotX = 0.5;
+	//character->pivotY = 0.5;
 	character->scaleX = 1.0;
 	character->scaleY = 1.0;
 	character->angle = 0;
@@ -156,8 +256,12 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->flipY = false;
 	character->shared = false;
 	character->repeats = 0;
+	character->reversing = false;
 	character->parent = NULL;
+	character->hidden = false;
 	character->data = NULL;
+	character->callback = NULL;
+	character->callbackData = NULL;
 
 	return character;
 }
@@ -169,20 +273,32 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 		while (s) {
 			tmp = s;
 			s = s->next;
-			if (tmp->bitmap) {
-				al_destroy_bitmap(tmp->bitmap);
-			}
 			if (tmp->successor) {
 				free(tmp->successor);
 			}
+			if (tmp->file) {
+				free(tmp->file);
+			}
+			for (int i = 0; i < tmp->frameCount; i++) {
+				if (tmp->frames[i].bitmap) {
+					al_destroy_bitmap(tmp->frames[i].bitmap);
+				}
+				if (tmp->frames[i].file) {
+					free(tmp->frames[i].file);
+				}
+			}
+			if (tmp->bitmap) {
+				al_destroy_bitmap(tmp->bitmap);
+			}
+			free(tmp->frames);
 			free(tmp->name);
 			free(tmp);
 		}
 	}
 
-	if (character->bitmap) {
-		al_destroy_bitmap(character->bitmap);
-	}
+	//if (character->bitmap) {
+	//	al_destroy_bitmap(character->bitmap);
+	//}
 	if (character->successor) {
 		free(character->successor);
 	}
@@ -191,26 +307,53 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 }
 
 SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier) {
-	speed_modifier *= delta / (1 / 60.f); // TODO: proper delta handling
-	if (speed_modifier) {
-		character->pos_tmp++;
-		if (character->pos_tmp >= character->spritesheet->delay / speed_modifier) {
-			character->pos_tmp = 0;
+	delta *= speed_modifier;
+	character->delta += delta * 1000;
+
+	while (character->delta >= character->spritesheet->duration) {
+		bool reachedEnd = false;
+		character->delta -= character->spritesheet->duration;
+		if (character->reversing) {
+			character->pos--;
+		} else {
 			character->pos++;
 		}
-		if (character->pos >= character->spritesheet->cols * character->spritesheet->rows - character->spritesheet->blanks) {
-			character->pos = 0;
-			if (character->repeats) {
-				character->repeats--;
-			} else if (character->successor) {
-				SelectSpritesheet(game, character, character->successor);
+		if (character->pos >= character->spritesheet->frameCount) {
+			if (character->spritesheet->bidir) {
+				character->pos -= 2;
+				character->reversing = true;
+			} else {
+				character->pos = 0;
+				reachedEnd = true;
 			}
 		}
+		if (character->pos < 0) {
+			character->pos += 2;
+			character->reversing = false;
+			reachedEnd = true;
+		}
 
-		al_reparent_bitmap(character->bitmap, character->spritesheet->bitmap,
-		  (character->pos % character->spritesheet->cols) * (character->spritesheet->width / character->spritesheet->cols), (character->pos / character->spritesheet->cols) * (character->spritesheet->height / character->spritesheet->rows),
-		  character->spritesheet->width / character->spritesheet->cols, character->spritesheet->height / character->spritesheet->rows);
+		if (character->spritesheet->frameCount == 1) {
+			character->pos = 0;
+		}
+
+		if (reachedEnd) {
+			if (character->repeats) {
+				character->repeats--;
+				if (character->callback) {
+					character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
+				}
+			} else if (character->successor) {
+				char* old = character->spritesheet->name;
+				SelectSpritesheet(game, character, character->successor);
+				if (character->callback) {
+					character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+				}
+			}
+		}
 	}
+
+	character->frame = &character->spritesheet->frames[character->pos];
 }
 
 SYMBOL_EXPORT void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle) {
@@ -233,19 +376,28 @@ SYMBOL_EXPORT void SetCharacterPosition(struct Game* game, struct Character* cha
 	SetCharacterPositionF(game, character, x / (float)GetCharacterConfineX(game, character), y / (float)GetCharacterConfineY(game, character), angle);
 }
 
-SYMBOL_EXPORT void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y) {
-	character->pivotX = x;
-	character->pivotY = y;
-}
-
-// TODO: coords are centered (pivot-related) or top left?
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
-	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
-	al_draw_tinted_scaled_rotated_bitmap(character->bitmap, character->tint,
-	  w * character->pivotX, h * character->pivotY,
-	  GetCharacterX(game, character) + w * character->pivotX, GetCharacterY(game, character) + h * character->pivotY,
-	  character->scaleX, character->scaleY, character->angle,
-	  (character->flipX ? ALLEGRO_FLIP_HORIZONTAL : 0) | (character->flipY ? ALLEGRO_FLIP_VERTICAL : 0));
+	if (character->hidden) {
+		return;
+	}
+	int w = character->spritesheet->width, h = character->spritesheet->height;
+
+	ALLEGRO_TRANSFORM current = *al_get_current_transform();
+	ALLEGRO_TRANSFORM transform;
+	// TODO: move to function, use in IsOnCharacter etc.
+	al_identity_transform(&transform);
+	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
+	al_translate_transform(&transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
+	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
+	al_scale_transform(&transform, character->scaleX, character->scaleY);
+	al_rotate_transform(&transform, character->angle);
+
+	al_compose_transform(&transform, &current);
+	al_use_transform(&transform);
+
+	al_draw_tinted_bitmap(character->frame->bitmap, character->tint, GetCharacterX(game, character), GetCharacterY(game, character), 0);
+
+	al_use_transform(&current);
 }
 
 SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
@@ -281,8 +433,11 @@ static void SortTwoFloats(float* v1, float* v2) {
 
 SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect) {
 	// TODO: fucking rework
+	if (character->hidden) {
+		return false;
+	}
 
-	int w = al_get_bitmap_width(character->bitmap), h = al_get_bitmap_height(character->bitmap);
+	int w = character->spritesheet->width, h = character->spritesheet->height;
 	float x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
 	float x2 = x1 + w, y2 = y1 + h;
 
@@ -311,9 +466,16 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		x -= x1;
 		y -= y1;
-		ALLEGRO_COLOR color = al_get_pixel(character->bitmap, x, y);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x, y);
 		return (color.a > 0.0);
 	}
 
 	return test;
+}
+
+void ShowCharacter(struct Game* game, struct Character* character) {
+	character->hidden = false;
+}
+void HideCharacter(struct Game* game, struct Character* character) {
+	character->hidden = true;
 }
