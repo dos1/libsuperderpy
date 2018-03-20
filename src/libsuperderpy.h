@@ -101,7 +101,7 @@ struct Game {
 		ALLEGRO_BITMAP* fb; /*!< Default framebuffer. */
 
 		struct {
-			double old_time, fps;
+			double old_time, fps, time;
 			int frames_done;
 		} fps_count; /*!< Used for counting the effective FPS. */
 

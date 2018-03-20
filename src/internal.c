@@ -150,6 +150,7 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
+	double game_time = al_get_time();
 	if (game->_priv.showconsole) {
 		al_set_target_backbuffer(game->display);
 		ALLEGRO_TRANSFORM trans;
@@ -177,9 +178,11 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 			cur++;
 		}
 
-		char sfps[6] = {0};
+		char sfps[16] = {0};
 		snprintf(sfps, 6, "%.0f", game->_priv.fps_count.fps);
 		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), clipX + clipWidth, clipY, ALLEGRO_ALIGN_RIGHT, sfps);
+		snprintf(sfps, 16, "%.2f ms", 1000 * (game_time - game->_priv.fps_count.time));
+		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), clipX + clipWidth, clipY + al_get_font_line_height(game->_priv.font_console), ALLEGRO_ALIGN_RIGHT, sfps);
 
 		al_use_transform(&game->projection);
 
@@ -187,12 +190,12 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 	}
 	al_hold_bitmap_drawing(false);
 
-	double game_time = al_get_time();
 	if (game_time - game->_priv.fps_count.old_time >= 1.0) {
 		game->_priv.fps_count.fps = game->_priv.fps_count.frames_done / (game_time - game->_priv.fps_count.old_time);
 		game->_priv.fps_count.frames_done = 0;
 		game->_priv.fps_count.old_time = game_time;
 	}
+	game->_priv.fps_count.time = game_time;
 	game->_priv.fps_count.frames_done++;
 }
 
