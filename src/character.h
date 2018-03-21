@@ -97,6 +97,7 @@ struct Character {
 	void (*callback)(struct Game*, struct Character*, char* newAnim, char* oldAnim, void*);
 	void* callbackData;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
+	ALLEGRO_TRANSFORM transform;
 
 	// TODO: parents
 };
