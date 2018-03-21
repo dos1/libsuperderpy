@@ -48,6 +48,7 @@ struct Spritesheet {
 	char* file;
 	int repeats; /*!< Number of repeats to make before the spritesheet is changed to its successor. */
 	char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
+	char* predecessor;
 	bool bidir;
 	bool reversed;
 	double pivotX;
@@ -75,6 +76,7 @@ struct Character {
 	int pos; /*!< Current spritesheet position. */
 	double delta; /*!< A counter used internally to slow down spritesheet animation. */ // TODO: change to delta
 	char* successor; /*!< Name of the next spritesheet to be played when the current one finishes. */
+	char* predecessor; /*!< Name of the next spritesheet to be played when the current one finishes when in reverse mode. */
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
 	ALLEGRO_COLOR tint; /*!< Color with which the character's pixels will be multiplied (tinted). White for no effect. */
@@ -88,7 +90,8 @@ struct Character {
 	bool flipX; /*!< Flips the character's sprite vertically. */
 	bool flipY; /*!< Flips the character's sprite horizontally. */
 	int repeats; /*!< Number of repeats left before the spritesheet is changed to its successor. */
-	bool reversing;
+	bool reversing; /*!< Whether the animation is currently played backwards. */
+	bool reversed; /*!< Whether the current animation has been requested as reversed. */
 	bool hidden;
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	void (*callback)(struct Game*, struct Character*, char* newAnim, char* oldAnim, void*);

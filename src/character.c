@@ -28,6 +28,11 @@
 
 SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* character, char* name) {
 	struct Spritesheet* tmp = character->spritesheets;
+	bool reversed = false;
+	if (name[0] == '-') {
+		reversed = true;
+		name++;
+	}
 	PrintConsole(game, "Selecting spritesheet for %s: %s", character->name, name);
 	if (!tmp) {
 		PrintConsole(game, "ERROR: No spritesheets registered for %s!", character->name);
@@ -44,9 +49,18 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			} else {
 				character->successor = NULL;
 			}
+			if (character->predecessor) {
+				free(character->predecessor);
+			}
+			if (tmp->predecessor) {
+				character->predecessor = strdup(tmp->predecessor);
+			} else {
+				character->predecessor = NULL;
+			}
 			character->repeats = tmp->repeats;
-			character->reversing = tmp->reversed;
-			character->pos = 0;
+			character->pos = reversed ? (tmp->frameCount - 1) : 0;
+			character->reversed = reversed;
+			character->reversing = tmp->reversed ^ reversed;
 			character->frame = &tmp->frames[character->pos];
 			//character->bitmap = tmp->frames[character->pos].bitmap;
 			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, character->spritesheet->width, character->spritesheet->height);
@@ -178,6 +192,14 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		strncpy(s->successor, successor, len);
 	}
 
+	s->predecessor = NULL;
+	const char* predecessor = al_get_config_value(config, "animation", "predecessor");
+	if (predecessor) {
+		int len = strlen(predecessor) + 1;
+		s->predecessor = malloc(len * sizeof(char));
+		strncpy(s->predecessor, predecessor, len);
+	}
+
 	{
 		s->file = NULL;
 		const char* file = al_get_config_value(config, "animation", "file");
@@ -242,6 +264,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->pos = 0;
 	character->delta = 0.0;
 	character->successor = NULL;
+	character->predecessor = NULL;
 	character->x = -1;
 	character->y = -1;
 	character->tint = al_map_rgb(255, 255, 255);
@@ -275,6 +298,9 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 			s = s->next;
 			if (tmp->successor) {
 				free(tmp->successor);
+			}
+			if (tmp->predecessor) {
+				free(tmp->predecessor);
 			}
 			if (tmp->file) {
 				free(tmp->file);
@@ -322,15 +348,25 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			if (character->spritesheet->bidir) {
 				character->pos -= 2;
 				character->reversing = true;
+				if (character->reversed) {
+					reachedEnd = true;
+				}
 			} else {
 				character->pos = 0;
 				reachedEnd = true;
 			}
 		}
 		if (character->pos < 0) {
-			character->pos += 2;
-			character->reversing = false;
-			reachedEnd = true;
+			if (character->spritesheet->bidir) {
+				character->pos += 2;
+				character->reversing = false;
+				if (!character->reversed) {
+					reachedEnd = true;
+				}
+			} else {
+				character->pos = character->spritesheet->frameCount - 1;
+				reachedEnd = true;
+			}
 		}
 
 		if (character->spritesheet->frameCount == 1) {
@@ -343,11 +379,20 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 				if (character->callback) {
 					character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
 				}
-			} else if (character->successor) {
-				char* old = character->spritesheet->name;
-				SelectSpritesheet(game, character, character->successor);
-				if (character->callback) {
-					character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+			} else {
+				if ((!character->reversed) && (character->successor)) {
+					char* old = character->spritesheet->name;
+					SelectSpritesheet(game, character, character->successor);
+					if (character->callback) {
+						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+					}
+				}
+				if ((character->reversed) && (character->predecessor)) {
+					char* old = character->spritesheet->name;
+					SelectSpritesheet(game, character, character->predecessor);
+					if (character->callback) {
+						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+					}
 				}
 			}
 		}
