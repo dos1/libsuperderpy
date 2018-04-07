@@ -133,7 +133,11 @@ SYMBOL_EXPORT double VectorLength(double x, double y, double z) {
 	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
-SYMBOL_EXPORT double Clip(double left, double right, double val) {
+SYMBOL_EXPORT double Wrap(double left, double right, double val) {
+	return left + fmod(val - left, right - left);
+}
+
+SYMBOL_EXPORT double Clamp(double left, double right, double val) {
 	if (val > right) {
 		return right;
 	}
