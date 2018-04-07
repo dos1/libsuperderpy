@@ -127,6 +127,11 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
+	if (!al_init_video_addon()) {
+		fprintf(stderr, "failed to initialize the video addon!\n");
+		return NULL;
+	}
+
 	al_init_font_addon();
 
 	if (!al_init_ttf_addon()) {

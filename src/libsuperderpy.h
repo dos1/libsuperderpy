@@ -32,6 +32,7 @@ struct Game;
 #include <allegro5/allegro_opengl.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_video.h>
 #ifdef ALLEGRO_ANDROID
 #include <allegro5/allegro_android.h>
 #endif
