@@ -171,7 +171,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s->frameCount = s->rows * s->cols - blanks;
 	} else {
 		s->rows = floor(sqrt(s->frameCount));
-		s->cols = ceil(s->frameCount / s->rows);
+		s->cols = ceil(s->frameCount / (double)s->rows);
 	}
 
 	s->bidir = strtolnull(al_get_config_value(config, "animation", "bidir"), 0);
@@ -236,7 +236,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 
 		if (!file) {
 			s->frames[i].col = i % s->cols;
-			s->frames[i].row = i / s->rows;
+			s->frames[i].row = i / s->cols;
 
 			const char* col_str = al_get_config_value(config, filename, "col");
 			if (col_str) {
