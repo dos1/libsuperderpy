@@ -464,9 +464,25 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			game->_priv.timestamp += delta;
 			delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
 			LogicGamestates(game, delta);
+			//LogicGamestates(game, 1.0 / 30.0);
 			//redraw = true;
 
 			DrawGamestates(game);
+
+			/*
+			ALLEGRO_BITMAP* bitmap = al_create_bitmap(al_get_display_width(game->display), al_get_display_height(game->display));
+			ALLEGRO_BITMAP* target = al_get_target_bitmap();
+			al_set_target_bitmap(bitmap);
+			al_draw_bitmap(al_get_backbuffer(game->display), 0, 0, 0);
+			al_set_target_bitmap(target);
+			struct ScreenshotThreadData* data = malloc(sizeof(struct ScreenshotThreadData));
+			data->game = game;
+			data->bitmap = bitmap;
+			ScreenshotThread(data);
+			//free(data);
+			//al_destroy_bitmap(bitmap);
+			*/
+
 			DrawConsole(game);
 			//al_wait_for_vsync();
 			al_flip_display();
