@@ -193,23 +193,17 @@ SYMBOL_EXPORT void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 }
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height) {
-	// CORRUPTS MEMORY FOR SOME REASON PLZ LOOK AT IT LATERRRR
-	// PROBABYL GetDataFilePath and Gargabe collecting related
-	// IT'S FUCKING HARD TO DEBUG SO DON'T STUMBLE ON IT AGAIN
-	exit(1);
-
 	bool memoryscale = !strtol(GetConfigOptionDefault(game, "SuperDerpy", "GPU_scaling", "1"), NULL, 10);
 	ALLEGRO_BITMAP *source, *target = al_create_bitmap(width, height);
 	al_set_target_bitmap(target);
 	al_clear_to_color(al_map_rgba(0, 0, 0, 0));
-	char* origfn = GetDataFilePath(game, filename);
 
 	int flags = al_get_new_bitmap_flags();
 	if (memoryscale) {
 		al_add_new_bitmap_flag(ALLEGRO_MEMORY_BITMAP);
 	}
 
-	source = al_load_bitmap(origfn);
+	source = al_load_bitmap(GetDataFilePath(game, filename));
 	if (memoryscale) {
 		al_set_new_bitmap_flags(flags);
 		ScaleBitmap(source, width, height);
@@ -219,7 +213,6 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 
 	al_destroy_bitmap(source);
 
-	free(origfn);
 	return target;
 }
 
