@@ -430,12 +430,15 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	ALLEGRO_TRANSFORM current = *al_get_current_transform();
 	// TODO: move to function, use in IsOnCharacter etc.
 	al_identity_transform(&character->transform);
-	al_translate_transform(&character->transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
+	al_translate_transform(&character->transform, -w / 2, -h / 2);
 	al_scale_transform(&character->transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
+	al_translate_transform(&character->transform, w / 2, h / 2);
+
 	al_translate_transform(&character->transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
 	al_translate_transform(&character->transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
 	al_scale_transform(&character->transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&character->transform, character->angle);
+	al_translate_transform(&character->transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
 
 	ALLEGRO_TRANSFORM transform;
 	al_identity_transform(&transform);
