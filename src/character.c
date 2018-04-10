@@ -489,9 +489,13 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	}
 
 	int w = character->spritesheet->width, h = character->spritesheet->height;
+
 	//float x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
-	float x1 = 0, y1 = 0;
-	float x2 = x1 + w, y2 = y1 + h;
+	//x -= GetCharacterX(game, character);
+	//y -= GetCharacterY(game, character);
+	float x1 = GetCharacterX(game, character) - (w / 2) * fabs(character->scaleX), y1 = GetCharacterY(game, character) - (h / 2) * fabs(character->scaleY);
+	float x2 = x1 + w * fabs(character->scaleX), y2 = y1 + h * fabs(character->scaleY);
+	//PrintConsole(game, "character %s x %f y %f; %fx%f; %fx%f -> %fx%f", character->name, x, y, character->scaleX, character->scaleY, x1, y1, x2, y2);
 
 	/*	float scalex = character->scaleX;
 	float scaley = character->scaleY;
@@ -514,10 +518,17 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	bool test = ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
 
 	//al_transform_coordinates(&transform, &x, &y);
-
 	if (test && pixelperfect) {
 		x -= x1;
 		y -= y1;
+		x /= fabs(character->scaleX);
+		y /= fabs(character->scaleY);
+		if (character->flipX) {
+			x = w - x;
+		}
+		if (character->flipY) {
+			y = h - y;
+		}
 		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x, y);
 		return (color.a > 0.0);
 	}
