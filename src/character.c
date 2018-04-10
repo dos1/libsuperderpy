@@ -290,7 +290,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 }
 
 SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* character) {
-	PrintConsole(game, "Destroying character %s...", character->name);
+	PrintConsole(game, "Destroying %scharacter %s...", character->shared ? "shared " : "", character->name);
 	if (!character->shared) {
 		struct Spritesheet *tmp, *s = character->spritesheets;
 		while (s) {
