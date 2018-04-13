@@ -89,7 +89,7 @@ struct Character {
 	int confineY; /*!< Height of the canvas being drawn to, for correct position calculation; when -1, uses parent's confines or viewport size */
 	bool flipX; /*!< Flips the character's sprite vertically. */
 	bool flipY; /*!< Flips the character's sprite horizontally. */
-	int repeats; /*!< Number of repeats left before the spritesheet is changed to its successor. */
+	int repeats; /*!< Number of repeats left before the spritesheet is changed to its successor or stopped. */
 	bool reversing; /*!< Whether the animation is currently played backwards. */
 	bool reversed; /*!< Whether the current animation has been requested as reversed. */
 	bool hidden;

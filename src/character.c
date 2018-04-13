@@ -182,7 +182,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->width = 0;
 	s->height = 0;
 
-	s->repeats = strtolnull(al_get_config_value(config, "animation", "repeats"), 0);
+	s->repeats = strtolnull(al_get_config_value(config, "animation", "repeats"), -1);
 
 	s->successor = NULL;
 	const char* successor = al_get_config_value(config, "animation", "successor");
@@ -278,7 +278,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->flipX = false;
 	character->flipY = false;
 	character->shared = false;
-	character->repeats = 0;
+	character->repeats = -1;
 	character->reversing = false;
 	character->parent = NULL;
 	character->hidden = false;
@@ -369,12 +369,8 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			}
 		}
 
-		if (character->spritesheet->frameCount == 1) {
-			character->pos = 0;
-		}
-
 		if (reachedEnd) {
-			if (character->repeats) {
+			if (character->repeats > 0) {
 				character->repeats--;
 				if (character->callback) {
 					character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
@@ -386,15 +382,29 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 					if (character->callback) {
 						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
 					}
-				}
-				if ((character->reversed) && (character->predecessor)) {
+				} else if ((character->reversed) && (character->predecessor)) {
 					char* old = character->spritesheet->name;
 					SelectSpritesheet(game, character, character->predecessor);
 					if (character->callback) {
 						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
 					}
+				} else {
+					if (character->repeats == 0) {
+						if (character->reversed) {
+							character->pos = 1;
+						} else {
+							character->pos = character->spritesheet->frameCount - 1;
+						}
+						if (character->callback) {
+							character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
+						}
+					}
 				}
 			}
+		}
+
+		if (character->spritesheet->frameCount == 1) {
+			character->pos = 0;
 		}
 	}
 
