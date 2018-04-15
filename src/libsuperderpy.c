@@ -74,6 +74,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.garbage = NULL;
 	game->_priv.timelines = NULL;
 
+	game->_priv.paused = false;
+
 	game->handlers.event = NULL;
 	game->handlers.destroy = NULL;
 	game->handlers.compositor = NULL;
@@ -463,10 +465,12 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			double delta = al_get_time() - game->_priv.timestamp;
 			game->_priv.timestamp += delta;
 			delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
-			LogicGamestates(game, delta);
+			if (!game->_priv.paused) {
+				LogicGamestates(game, delta);
+				DrawGamestates(game);
+			}
 			//redraw = true;
 
-			DrawGamestates(game);
 			DrawConsole(game);
 			//al_wait_for_vsync();
 			al_flip_display();
@@ -516,6 +520,10 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
 				ResizeGamestates(game);
+			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
+				PauseExecution(game);
+			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {
+				ResumeExecution(game);
 			}
 #ifdef ALLEGRO_ANDROID
 			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_MENU) || (ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
@@ -529,10 +537,16 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
 				int i;
 				for (i = 0; i < 512; i++) {
-					LogicGamestates(game, ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)));
+					LogicGamestates(game, 1.0 / 60.0);
 				}
 				game->_priv.showconsole = true;
 				PrintConsole(game, "DEBUG: 512 frames skipped...");
+			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F9)) {
+				if (game->_priv.paused) {
+					PauseExecution(game);
+				} else {
+					ResumeExecution(game);
+				}
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F10)) {
 				double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
 				speed -= 10;

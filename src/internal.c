@@ -267,6 +267,11 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 		FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror()); // TODO: move out
 		return false;
 	}
+	if (game->handlers.compositor) {
+		gamestate->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	} else {
+		gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	}
 	return true;
 }
 
@@ -312,11 +317,6 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->pending_unload = false;
 	tmp->next = NULL;
 	tmp->api = NULL;
-	if (game->handlers.compositor) {
-		tmp->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
-	} else {
-		tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
-	}
 	return tmp;
 }
 
@@ -488,4 +488,24 @@ SYMBOL_INTERNAL char* GetLibraryPath(struct Game* game, char* filename) {
 	}
 	al_destroy_path(path);
 	return result;
+}
+
+SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
+	game->_priv.paused = true;
+	PrintConsole(game, "DEBUG: game execution paused.");
+}
+
+SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
+	PrintConsole(game, "DEBUG: reloading the gamestates...");
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
+		char* name = strdup(tmp->name);
+		CloseGamestate(game, tmp);
+		tmp->name = name;
+		OpenGamestate(game, tmp);
+		LinkGamestate(game, tmp);
+		tmp = tmp->next;
+	}
+	game->_priv.paused = false;
+	PrintConsole(game, "DEBUG: game execution resumed.");
 }

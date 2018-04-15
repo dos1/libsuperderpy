@@ -89,5 +89,7 @@ bool LinkGamestate(struct Game* game, struct Gamestate* gamestate);
 void CloseGamestate(struct Game* game, struct Gamestate* gamestate);
 struct Gamestate* AllocateGamestate(struct Game* game, const char* name);
 char* GetLibraryPath(struct Game* game, char* filename);
+void PauseExecution(struct Game* game);
+void ResumeExecution(struct Game* game);
 
 #endif

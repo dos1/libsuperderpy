@@ -132,6 +132,8 @@ struct Game {
 			int w, h;
 		} clip_rect;
 
+		bool paused;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif
