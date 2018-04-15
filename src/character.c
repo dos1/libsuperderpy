@@ -333,6 +333,10 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 }
 
 SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier) {
+	if (character->hidden) {
+		return;
+	}
+
 	delta *= speed_modifier;
 	character->delta += delta * 1000;
 
