@@ -94,7 +94,7 @@ struct Character {
 	bool reversed; /*!< Whether the current animation has been requested as reversed. */
 	bool hidden;
 	void* data; /*!< Additional, custom character data (HP etc.). */
-	void (*callback)(struct Game*, struct Character*, char* newAnim, char* oldAnim, void*);
+	void (*callback)(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
 	void* callbackData;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 	ALLEGRO_TRANSFORM transform;

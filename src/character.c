@@ -388,20 +388,20 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			if (character->repeats > 0) {
 				character->repeats--;
 				if (character->callback) {
-					character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
+					character->callback(game, character, NULL, character->spritesheet, character->callbackData);
 				}
 			} else {
 				if ((!character->reversed) && (character->successor)) {
-					char* old = character->spritesheet->name;
+					struct Spritesheet* old = character->spritesheet;
 					SelectSpritesheet(game, character, character->successor);
 					if (character->callback) {
-						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+						character->callback(game, character, character->spritesheet, old, character->callbackData);
 					}
 				} else if ((character->reversed) && (character->predecessor)) {
-					char* old = character->spritesheet->name;
+					struct Spritesheet* old = character->spritesheet;
 					SelectSpritesheet(game, character, character->predecessor);
 					if (character->callback) {
-						character->callback(game, character, character->spritesheet->name, old, character->callbackData);
+						character->callback(game, character, character->spritesheet, old, character->callbackData);
 					}
 				} else {
 					if (character->repeats == 0) {
@@ -411,7 +411,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 							character->pos = character->spritesheet->frameCount - 1;
 						}
 						if (character->callback) {
-							character->callback(game, character, NULL, character->spritesheet->name, character->callbackData);
+							character->callback(game, character, NULL, character->spritesheet, character->callbackData);
 						}
 					}
 				}
