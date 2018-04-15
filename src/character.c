@@ -78,6 +78,17 @@ SYMBOL_EXPORT void EnqueueSpritesheet(struct Game* game, struct Character* chara
 	character->successor = strdup(name);
 }
 
+SYMBOL_EXPORT struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name) {
+	struct Spritesheet* tmp = character->spritesheets;
+	while (tmp) {
+		if (!strcmp(tmp->name, name)) {
+			return tmp;
+		}
+		tmp = tmp->next;
+	}
+	return NULL;
+}
+
 SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* character) {
 	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;

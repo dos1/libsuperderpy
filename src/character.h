@@ -107,6 +107,7 @@ struct Character {
 void SelectSpritesheet(struct Game* game, struct Character* character, char* name);
 void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name);
 void RegisterSpritesheet(struct Game* game, struct Character* character, char* name);
+struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
 
 void DrawCharacter(struct Game* game, struct Character* character);
 void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
@@ -123,7 +124,6 @@ void MoveCharacter(struct Game* game, struct Character* character, float x, floa
 void MoveCharacterF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle);
-void SetCharacterPivotPoint(struct Game* game, struct Character* character, float x, float y);
 void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y);
 
 float GetCharacterX(struct Game* game, struct Character* character);
