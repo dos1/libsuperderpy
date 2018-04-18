@@ -190,8 +190,8 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 
 	s->duration = strtodnull(al_get_config_value(config, "animation", "duration"), 16.66);
 
-	s->width = 0;
-	s->height = 0;
+	s->width = strtodnull(al_get_config_value(config, "animation", "width"), 0);
+	s->height = strtodnull(al_get_config_value(config, "animation", "height"), 0);
 
 	s->repeats = strtolnull(al_get_config_value(config, "animation", "repeats"), -1);
 
