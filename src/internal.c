@@ -502,8 +502,9 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 		char* name = strdup(tmp->name);
 		CloseGamestate(game, tmp);
 		tmp->name = name;
-		OpenGamestate(game, tmp);
-		LinkGamestate(game, tmp);
+		if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp)) {
+			tmp->api->Gamestate_Reload(game, tmp->data);
+		}
 		tmp = tmp->next;
 	}
 	game->_priv.paused = false;
