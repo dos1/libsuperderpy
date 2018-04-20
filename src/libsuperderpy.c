@@ -401,12 +401,16 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 						al_run_detached_thread(GamestateLoadingThread, &data);
+						double time = al_get_time();
 						while (game->_priv.loading.inProgress) {
 							DrawGamestates(game);
 							al_set_target_backbuffer(game->display);
+							double delta = al_get_time() - time;
 							if (tmp->showLoading) {
+								(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 							}
+							time += delta;
 							DrawConsole(game);
 							al_flip_display();
 						}
