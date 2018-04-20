@@ -250,9 +250,12 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	}
 #ifdef LIBSUPERDERPY_SINGLE_THREAD
 	DrawGamestates(game);
+	double delta = al_get_time() - game->_priv.loading.time;
 	if (tmp->showLoading) {
+		(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 		(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 	}
+	game->_priv.loading.time += delta;
 	DrawConsole(game);
 	al_flip_display();
 #endif

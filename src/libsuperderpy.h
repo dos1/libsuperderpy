@@ -117,6 +117,7 @@ struct Game {
 			int progress;
 			int loaded, toLoad;
 			bool inProgress;
+			double time;
 		} loading;
 
 		struct Gamestate* current_gamestate;

@@ -398,19 +398,19 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags()};
 						game->_priv.loading.inProgress = true;
+						game->_priv.loading.time = al_get_time();
 
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 						al_run_detached_thread(GamestateLoadingThread, &data);
-						double time = al_get_time();
 						while (game->_priv.loading.inProgress) {
 							DrawGamestates(game);
 							al_set_target_backbuffer(game->display);
-							double delta = al_get_time() - time;
+							double delta = al_get_time() - game->_priv.loading.time;
 							if (tmp->showLoading) {
 								(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 							}
-							time += delta;
+							game->_priv.loading.time += delta;
 							DrawConsole(game);
 							al_flip_display();
 						}
