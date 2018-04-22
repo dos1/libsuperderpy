@@ -44,6 +44,7 @@ struct Game;
 #include "config.h"
 #include "gamestate.h"
 #include "timeline.h"
+#include "tween.h"
 #include "utils.h"
 #include <sys/param.h>
 

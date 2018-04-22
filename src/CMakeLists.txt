@@ -6,6 +6,7 @@ SET(SRC_LIST
 		libsuperderpy.c
 		character.c
 		internal.c
+		tween.c
 		)
 if (EMSCRIPTEN)
 	list(APPEND SRC_LIST emscripten-audio-stream.c)
