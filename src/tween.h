@@ -84,5 +84,6 @@ double GetTweenPosition(struct Tween* tween);
 double GetTweenInterpolation(struct Tween* tween);
 double GetTweenValue(struct Tween* tween);
 void UpdateTween(struct Tween* tween, double delta);
+double Interpolate(double pos, TWEEN_STYLE style);
 
 #endif

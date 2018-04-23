@@ -264,9 +264,14 @@ double GetTweenPosition(struct Tween* tween) {
 	return tween->pos / tween->duration;
 }
 
-double GetTweenInterpolation(struct Tween* tween) {
-	double pos = GetTweenPosition(tween);
-	switch (tween->style) {
+double Interpolate(double pos, TWEEN_STYLE style) {
+	if (pos < 0.0) {
+		pos = 0.0;
+	}
+	if (pos > 1.0) {
+		pos = 1.0;
+	}
+	switch (style) {
 		case TWEEN_STYLE_LINEAR:
 			return LinearInterpolation(pos);
 		case TWEEN_STYLE_QUADRATIC_IN:
@@ -330,7 +335,10 @@ double GetTweenInterpolation(struct Tween* tween) {
 		case TWEEN_STYLE_BOUNCE_IN_OUT:
 			return BounceEaseInOut(pos);
 	}
-	return pos;
+}
+
+double GetTweenInterpolation(struct Tween* tween) {
+	return Interpolate(GetTweenPosition(tween), tween->style);
 }
 
 double GetTweenValue(struct Tween* tween) {
