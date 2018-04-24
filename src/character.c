@@ -472,6 +472,12 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_use_transform(&transform);
 
 	al_draw_tinted_bitmap(character->frame->bitmap, character->tint, 0, 0, 0);
+	/*	al_hold_bitmap_drawing(false);
+	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
+		character->spritesheet->height * character->spritesheet->pivotY - 5,
+		character->spritesheet->width * character->spritesheet->pivotX + 5,
+		character->spritesheet->height * character->spritesheet->pivotY + 5,
+		al_map_rgb(255, 255, 0));*/
 
 	al_use_transform(&current);
 }

@@ -121,6 +121,11 @@ SYMBOL_EXPORT void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags)
 	al_draw_bitmap(bitmap, x - al_get_bitmap_width(bitmap) / 2.0, y - al_get_bitmap_height(bitmap) / 2.0, flags);
 }
 
+SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags) {
+	al_draw_scaled_rotated_bitmap(bitmap, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
+	  x, y, sx, sy, 0, flags);
+}
+
 SYMBOL_EXPORT double DotProduct(const double v[], const double u[], int n) {
 	float result = 0.0;
 	for (int i = 0; i < n; i++) {
