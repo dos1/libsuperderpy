@@ -122,7 +122,11 @@ SYMBOL_EXPORT void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags)
 }
 
 SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags) {
-	al_draw_scaled_rotated_bitmap(bitmap, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
+	DrawCenteredTintedScaled(bitmap, al_map_rgb(255, 255, 255), x, y, sx, sy, flags);
+}
+
+SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags) {
+	al_draw_tinted_scaled_rotated_bitmap(bitmap, tint, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
 	  x, y, sx, sy, 0, flags);
 }
 
