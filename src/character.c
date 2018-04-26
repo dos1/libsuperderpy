@@ -71,6 +71,15 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 	PrintConsole(game, "ERROR: No spritesheets registered for %s with given name: %s", character->name, name);
 }
 
+SYMBOL_EXPORT void SwitchSpritesheet(struct Game* game, struct Character* character, char* name) {
+	int pos = character->pos;
+	SelectSpritesheet(game, character, name);
+	if (pos < character->spritesheets->frameCount) {
+		character->pos = pos;
+		character->frame = &character->spritesheet->frames[character->pos];
+	}
+}
+
 SYMBOL_EXPORT void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name) {
 	if (character->successor) {
 		free(character->successor);
