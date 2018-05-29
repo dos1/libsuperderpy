@@ -335,6 +335,7 @@ double Interpolate(double pos, TWEEN_STYLE style) {
 		case TWEEN_STYLE_BOUNCE_IN_OUT:
 			return BounceEaseInOut(pos);
 	}
+	return pos;
 }
 
 double GetTweenInterpolation(struct Tween* tween) {

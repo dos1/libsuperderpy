@@ -34,7 +34,8 @@ SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, char* name) {
 	return timeline;
 }
 
-SYMBOL_EXPORT void TM_Process(struct Timeline* timeline) {
+SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
+	// TODO: handle delta
 	/* process first element from queue
 		 if returns true, delete it
 		 and repeat for the next one */

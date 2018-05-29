@@ -68,7 +68,7 @@ struct TM_Action {
 /*! \brief Init timeline. */
 struct Timeline* TM_Init(struct Game* game, char* name);
 /*! \brief Process current timeline actions. */
-void TM_Process(struct Timeline*);
+void TM_Process(struct Timeline*, double delta);
 /*! \brief Ask current timeline actions to draw. */
 void TM_Draw(struct Timeline*);
 /*! \brief Pauses the timeline. */
