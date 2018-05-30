@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <string.h>
 
+// TODO: split to separate files
+
 SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
 	  {.x = x, .y = y, .z = 0, .color = top},

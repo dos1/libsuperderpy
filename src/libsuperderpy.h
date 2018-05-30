@@ -43,6 +43,7 @@ struct Game;
 #include "character.h"
 #include "config.h"
 #include "gamestate.h"
+#include "shader.h"
 #include "timeline.h"
 #include "tween.h"
 #include "utils.h"
@@ -123,7 +124,7 @@ struct Game {
 
 		struct Gamestate* current_gamestate;
 
-		struct libsuperderpy_list *garbage, *timelines;
+		struct libsuperderpy_list *garbage, *timelines, *shaders;
 
 		bool draw;
 

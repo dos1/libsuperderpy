@@ -351,9 +351,16 @@ SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list* 
 	return list;
 }
 
-SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data) {
+static bool Identity(struct libsuperderpy_list* elem, void* data) {
+	return elem->data == data;
+}
+
+SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
 	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start;
 	void* d = NULL;
+	if (!identity) {
+		identity = Identity;
+	}
 	while (tmp) {
 		if (identity(tmp, data)) {
 			if (prev) {

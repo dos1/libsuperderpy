@@ -7,6 +7,7 @@ SET(SRC_LIST
 		character.c
 		internal.c
 		tween.c
+		shader.c
 		)
 if (EMSCRIPTEN)
 	list(APPEND SRC_LIST emscripten-audio-stream.c)

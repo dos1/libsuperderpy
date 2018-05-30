@@ -73,6 +73,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->_priv.garbage = NULL;
 	game->_priv.timelines = NULL;
+	game->_priv.shaders = NULL;
 
 	game->_priv.paused = false;
 

@@ -80,7 +80,7 @@ void* AddGarbage(struct Game* game, void* data);
 void ClearGarbage(struct Game* game);
 void ClearScreen(struct Game* game);
 struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data);
-struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, bool (*identity)(struct libsuperderpy_list* elem, void* data), void* data);
+struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
 void AddTimeline(struct Game* game, struct Timeline* timeline);
 void RemoveTimeline(struct Game* game, struct Timeline* timeline);
 void DrawTimelines(struct Game* game);
