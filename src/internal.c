@@ -94,6 +94,7 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 
 SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+	ReloadShaders(game, true);
 	while (tmp) {
 		if (tmp->loaded) {
 			game->_priv.current_gamestate = tmp;
@@ -355,7 +356,21 @@ static bool Identity(struct libsuperderpy_list* elem, void* data) {
 	return elem->data == data;
 }
 
-SYMBOL_INTERNAL struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
+SYMBOL_INTERNAL struct libsuperderpy_list* FindInList(struct libsuperderpy_list* list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
+	struct libsuperderpy_list* tmp = list;
+	if (!identity) {
+		identity = Identity;
+	}
+	while (tmp) {
+		if (identity(tmp, data)) {
+			return tmp;
+		}
+		tmp = tmp->next;
+	}
+	return NULL;
+}
+
+SYMBOL_INTERNAL void* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
 	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start;
 	void* d = NULL;
 	if (!identity) {
@@ -506,6 +521,7 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
+	ReloadShaders(game, true);
 	PrintConsole(game, "DEBUG: reloading the gamestates...");
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {

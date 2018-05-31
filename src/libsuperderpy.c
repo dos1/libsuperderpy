@@ -420,8 +420,8 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 #endif
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
-						// TODO: compile shaders
 						al_convert_memory_bitmaps();
+						ReloadShaders(game, false);
 						game->_priv.loading.loaded++;
 
 						tmp->loaded = true;
@@ -631,6 +631,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	if (game->handlers.destroy) {
 		(*game->handlers.destroy)(game);
 	}
+	DestroyShaders(game);
 
 	ClearScreen(game);
 #ifdef __EMSCRIPTEN__

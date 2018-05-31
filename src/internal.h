@@ -80,7 +80,8 @@ void* AddGarbage(struct Game* game, void* data);
 void ClearGarbage(struct Game* game);
 void ClearScreen(struct Game* game);
 struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data);
-struct libsuperderpy_list* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
+struct libsuperderpy_list* FindInList(struct libsuperderpy_list* list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
+void* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
 void AddTimeline(struct Game* game, struct Timeline* timeline);
 void RemoveTimeline(struct Game* game, struct Timeline* timeline);
 void DrawTimelines(struct Game* game);
@@ -91,5 +92,7 @@ struct Gamestate* AllocateGamestate(struct Game* game, const char* name);
 char* GetLibraryPath(struct Game* game, char* filename);
 void PauseExecution(struct Game* game);
 void ResumeExecution(struct Game* game);
+void ReloadShaders(struct Game* game, bool force);
+void DestroyShaders(struct Game* game);
 
 #endif
