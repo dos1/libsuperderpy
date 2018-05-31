@@ -243,7 +243,7 @@ static double BounceEaseInOut(double p) {
 
 // ------------------------------------------------------------------------------
 
-struct Tween Tween(struct Game* game, double start, double stop, double duration, TWEEN_STYLE style) {
+SYMBOL_EXPORT struct Tween Tween(struct Game* game, double start, double stop, double duration, TWEEN_STYLE style) {
 	return (struct Tween){
 		.start = start,
 		.stop = stop,
@@ -257,14 +257,14 @@ struct Tween Tween(struct Game* game, double start, double stop, double duration
 		.data = NULL};
 }
 
-double GetTweenPosition(struct Tween* tween) {
+SYMBOL_EXPORT double GetTweenPosition(struct Tween* tween) {
 	if (tween->duration == 0.0) {
 		return 1.0;
 	}
 	return tween->pos / tween->duration;
 }
 
-double Interpolate(double pos, TWEEN_STYLE style) {
+SYMBOL_EXPORT double Interpolate(double pos, TWEEN_STYLE style) {
 	if (pos < 0.0) {
 		pos = 0.0;
 	}
@@ -338,15 +338,15 @@ double Interpolate(double pos, TWEEN_STYLE style) {
 	return pos;
 }
 
-double GetTweenInterpolation(struct Tween* tween) {
+SYMBOL_EXPORT double GetTweenInterpolation(struct Tween* tween) {
 	return Interpolate(GetTweenPosition(tween), tween->style);
 }
 
-double GetTweenValue(struct Tween* tween) {
+SYMBOL_EXPORT double GetTweenValue(struct Tween* tween) {
 	return tween->start + GetTweenInterpolation(tween) * (tween->stop - tween->start);
 }
 
-void UpdateTween(struct Tween* tween, double delta) {
+SYMBOL_EXPORT void UpdateTween(struct Tween* tween, double delta) {
 	if (tween->paused) { return; }
 	tween->pos += delta;
 	if (tween->pos > tween->duration) {
