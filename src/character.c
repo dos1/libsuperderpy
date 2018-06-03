@@ -114,11 +114,11 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 				char filename[255] = {0};
 				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
 				tmp->frames[i].bitmap = al_load_bitmap(GetDataFilePath(game, filename));
-				int width = al_get_bitmap_width(tmp->frames[i].bitmap);
+				int width = al_get_bitmap_width(tmp->frames[i].bitmap) + tmp->frames[i].x;
 				if (width > tmp->width) {
 					tmp->width = width;
 				}
-				int height = al_get_bitmap_height(tmp->frames[i].bitmap);
+				int height = al_get_bitmap_height(tmp->frames[i].bitmap) + tmp->frames[i].y;
 				if (height > tmp->height) {
 					tmp->height = height;
 				}
