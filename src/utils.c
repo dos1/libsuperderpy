@@ -468,7 +468,7 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 	al_set_target_backbuffer(game->display);
 	al_identity_transform(&game->projection);
 	al_use_transform(&game->projection);
-	al_set_clipping_rectangle(0, 0, al_get_display_width(game->display), al_get_display_height(game->display));
+	al_reset_clipping_rectangle();
 
 	float resolution = al_get_display_height(game->display) / (float)game->viewport.height;
 	if (al_get_display_width(game->display) / (float)game->viewport.width < resolution) {
