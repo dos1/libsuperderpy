@@ -455,32 +455,35 @@ SYMBOL_EXPORT void SetCharacterPosition(struct Game* game, struct Character* cha
 	SetCharacterPositionF(game, character, x / (float)GetCharacterConfineX(game, character), y / (float)GetCharacterConfineY(game, character), angle);
 }
 
+SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* character) {
+	ALLEGRO_TRANSFORM transform;
+	int w = character->spritesheet->width, h = character->spritesheet->height;
+	al_identity_transform(&transform);
+	al_translate_transform(&transform, -w / 2, -h / 2);
+	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
+	al_translate_transform(&transform, w / 2, h / 2);
+
+	al_translate_transform(&transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
+	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
+	al_scale_transform(&transform, character->scaleX, character->scaleY);
+	al_rotate_transform(&transform, character->angle);
+	al_translate_transform(&transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
+	return transform;
+}
+
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
 	if (character->hidden) {
 		return;
 	}
-	int w = character->spritesheet->width, h = character->spritesheet->height;
 
 	ALLEGRO_TRANSFORM current = *al_get_current_transform();
-	// TODO: move to function, use in IsOnCharacter etc.
-	al_identity_transform(&character->transform);
-	al_translate_transform(&character->transform, -w / 2, -h / 2);
-	al_scale_transform(&character->transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
-	al_translate_transform(&character->transform, w / 2, h / 2);
 
-	al_translate_transform(&character->transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
-	al_translate_transform(&character->transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
-	al_scale_transform(&character->transform, character->scaleX, character->scaleY);
-	al_rotate_transform(&character->transform, character->angle);
-	al_translate_transform(&character->transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
-
-	ALLEGRO_TRANSFORM transform;
-	al_identity_transform(&transform);
-	al_compose_transform(&transform, &character->transform);
+	ALLEGRO_TRANSFORM transform = GetCharacterTransform(game, character);
 	al_compose_transform(&transform, &current);
 	al_use_transform(&transform);
 
 	al_draw_tinted_bitmap(character->frame->bitmap, character->tint, 0, 0, 0);
+
 	/*	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
 		character->spritesheet->height * character->spritesheet->pivotY - 5,
@@ -512,63 +515,33 @@ SYMBOL_EXPORT float GetCharacterY(struct Game* game, struct Character* character
 	return character->y * GetCharacterConfineY(game, character);
 }
 
-/*
 static void SortTwoFloats(float* v1, float* v2) {
 	float pom = *v1;
-	if (v1 > v2) {
+	if (*v1 > *v2) {
 		*v1 = *v2;
 		*v2 = pom;
 	}
 }
-*/
 
 SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect) {
-	// TODO: fucking rework
 	if (character->hidden) {
 		return false;
 	}
 
-	int w = character->spritesheet->width, h = character->spritesheet->height;
+	float x1 = 0.0, y1 = 0.0;
+	float x2 = character->spritesheet->width, y2 = character->spritesheet->height;
 
-	//float x1 = GetCharacterX(game, character), y1 = GetCharacterY(game, character);
-	//x -= GetCharacterX(game, character);
-	//y -= GetCharacterY(game, character);
-	float x1 = GetCharacterX(game, character) - (w / 2) * fabs(character->scaleX), y1 = GetCharacterY(game, character) - (h / 2) * fabs(character->scaleY);
-	float x2 = x1 + w * fabs(character->scaleX), y2 = y1 + h * fabs(character->scaleY);
-	//PrintConsole(game, "character %s x %f y %f; %fx%f; %fx%f -> %fx%f", character->name, x, y, character->scaleX, character->scaleY, x1, y1, x2, y2);
-
-	/*	float scalex = character->scaleX;
-	float scaley = character->scaleY;
-	if (character->flipX) {
-		scalex *= -1;
-	}
-	if (character->flipY) {
-		scaley *= -1;
-	}
-	ALLEGRO_TRANSFORM transform;
-	al_identity_transform(&transform);
-	al_translate_transform(&transform, -character->pivotX * w, -character->pivotY * h);
-	al_scale_transform(&transform, scalex, scaley);
-	al_translate_transform(&transform, character->pivotX * w, character->pivotY * h);
+	ALLEGRO_TRANSFORM transform = GetCharacterTransform(game, character);
 	al_transform_coordinates(&transform, &x1, &y1);
 	al_transform_coordinates(&transform, &x2, &y2);
 	SortTwoFloats(&x1, &x2);
 	SortTwoFloats(&y1, &y2);
-*/
+
 	bool test = ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
 
-	//al_transform_coordinates(&transform, &x, &y);
 	if (test && pixelperfect) {
-		x -= x1;
-		y -= y1;
-		x /= fabs(character->scaleX);
-		y /= fabs(character->scaleY);
-		if (character->flipX) {
-			x = w - x;
-		}
-		if (character->flipY) {
-			y = h - y;
-		}
+		al_invert_transform(&transform);
+		al_transform_coordinates(&transform, &x, &y);
 		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x, y);
 		return (color.a > 0.0);
 	}

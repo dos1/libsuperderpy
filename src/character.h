@@ -97,7 +97,6 @@ struct Character {
 	void (*callback)(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
 	void* callbackData;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
-	ALLEGRO_TRANSFORM transform;
 
 	// TODO: parents
 };
@@ -109,6 +108,8 @@ void SwitchSpritesheet(struct Game* game, struct Character* character, char* nam
 void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name);
 void RegisterSpritesheet(struct Game* game, struct Character* character, char* name);
 struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
+
+ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* character);
 
 void DrawCharacter(struct Game* game, struct Character* character);
 void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
