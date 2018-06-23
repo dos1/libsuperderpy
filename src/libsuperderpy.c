@@ -85,6 +85,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->handlers.predraw = NULL;
 	game->handlers.postdraw = NULL;
 
+	game->_priv.texture_sync = false;
+	game->_priv.texture_sync_cond = al_create_cond();
+	game->_priv.texture_sync_mutex = al_create_mutex();
+
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
@@ -412,15 +416,20 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 							}
 							game->_priv.loading.time += delta;
+							if (game->_priv.texture_sync) {
+								al_convert_memory_bitmaps();
+								game->_priv.texture_sync = false;
+								al_signal_cond(game->_priv.texture_sync_cond);
+							}
 							DrawConsole(game);
 							al_flip_display();
 						}
 #else
 						GamestateLoadingThread(&data);
+						al_convert_memory_bitmaps();
 #endif
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
-						al_convert_memory_bitmaps();
 						ReloadShaders(game, false);
 						game->_priv.loading.loaded++;
 
@@ -666,6 +675,8 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_mixer(game->audio.music);
 	al_destroy_mixer(game->audio.mixer);
 	al_destroy_voice(game->audio.v);
+	al_destroy_cond(game->_priv.texture_sync_cond);
+	al_destroy_mutex(game->_priv.texture_sync_mutex);
 	al_uninstall_audio();
 	DeinitConfig(game);
 #ifndef __EMSCRIPTEN__

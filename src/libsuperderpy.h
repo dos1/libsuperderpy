@@ -137,6 +137,10 @@ struct Game {
 
 		bool paused;
 
+		volatile bool texture_sync;
+		ALLEGRO_MUTEX* texture_sync_mutex;
+		ALLEGRO_COND* texture_sync_cond;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif

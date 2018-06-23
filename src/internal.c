@@ -249,6 +249,14 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	if (game->config.debug) {
 		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, *(tmp->api->Gamestate_ProgressCount));
 	}
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+	al_lock_mutex(game->_priv.texture_sync_mutex);
+	game->_priv.texture_sync = true;
+	while (game->_priv.texture_sync) {
+		al_wait_cond(game->_priv.texture_sync_cond, game->_priv.texture_sync_mutex);
+	}
+	al_unlock_mutex(game->_priv.texture_sync_mutex);
+#endif
 #ifdef LIBSUPERDERPY_SINGLE_THREAD
 	DrawGamestates(game);
 	double delta = al_get_time() - game->_priv.loading.time;
