@@ -280,7 +280,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline
 }
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
-static bool runinbackground(struct Game* game, struct TM_Action* action, enum TM_ActionState state) {
+static TM_Action(RunInBackground) {
 	int* delay = (int*)TM_GetArg(action->arguments, 1);
 	char* name = (char*)TM_GetArg(action->arguments, 2);
 	struct Timeline* timeline = (struct Timeline*)TM_GetArg(action->arguments, 3);
@@ -305,7 +305,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* ti
 	TM_WrapArg(int, del, delay);
 	TM_WrapArg(bool, used, false);
 	struct TM_Arguments* arguments = TM_AddToArgs(NULL, 6, (void*)func, del, strdup(name), (void*)timeline, args, used);
-	return TM_AddAction(timeline, runinbackground, arguments, "TM_BackgroundAction");
+	return TM_AddAction(timeline, RunInBackground, arguments, "TM_BackgroundAction");
 }
 
 SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {

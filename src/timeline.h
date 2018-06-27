@@ -40,6 +40,7 @@ enum TM_ActionState {
 
 struct TM_Action;
 typedef bool TM_ActionCallback(struct Game*, struct TM_Action*, enum TM_ActionState);
+#define TM_Action(x) bool x(struct Game* game, struct TM_Action* action, enum TM_ActionState state)
 
 /*! \brief Timeline structure. */
 struct Timeline {
