@@ -35,13 +35,13 @@ SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, char* name) {
 }
 
 SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
-	// TODO: handle delta
 	/* process first element from queue
 		 if returns true, delete it
 		 and repeat for the next one */
 	bool next = true;
 	while (next) {
 		if (timeline->queue) {
+			timeline->queue->delta = delta;
 			if (*timeline->queue->function) {
 				if (!timeline->queue->active) {
 					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: run action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
@@ -84,6 +84,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 	tmp = NULL;
 	while (pom != NULL) {
 		bool destroy = false;
+		pom->delta = delta;
 		if (pom->active) {
 			if (*pom->function) {
 				if ((*pom->function)(timeline->game, pom, TM_ACTIONSTATE_RUNNING)) {
@@ -217,7 +218,7 @@ SYMBOL_EXPORT void TM_HandleEvent(struct Timeline* timeline, ALLEGRO_EVENT* ev) 
 	}
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
 	if (timeline->queue) {
 		struct TM_Action* pom = timeline->queue;
@@ -243,7 +244,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, bool (*f
 	return action;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
 	if (timeline->background) {
 		struct TM_Action* pom = timeline->background;
@@ -300,7 +301,7 @@ static bool runinbackground(struct Game* game, struct TM_Action* action, enum TM
 	return true;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* timeline, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
 	TM_WrapArg(int, del, delay);
 	TM_WrapArg(bool, used, false);
 	struct TM_Arguments* arguments = TM_AddToArgs(NULL, 6, (void*)func, del, strdup(name), (void*)timeline, args, used);

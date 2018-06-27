@@ -38,6 +38,9 @@ enum TM_ActionState {
 	TM_ACTIONSTATE_RESUME
 };
 
+struct TM_Action;
+typedef bool TM_ActionCallback(struct Game*, struct TM_Action*, enum TM_ActionState);
+
 /*! \brief Timeline structure. */
 struct Timeline {
 	struct TM_Action* queue; /*!< Main timeline queue. */
@@ -55,11 +58,12 @@ struct TM_Arguments {
 
 /*! \brief Timeline action. */
 struct TM_Action {
-	bool (*function)(struct Game*, struct TM_Action*, enum TM_ActionState); /*!< Function callback of the action. */
+	TM_ActionCallback* function; /*!< Function callback of the action. */
 	struct TM_Arguments* arguments; /*!< Arguments of the action. */
 	ALLEGRO_TIMER* timer; /*!< Delay timer. */
 	bool active; /*!< If false, then this action is waiting for it's delay to finish. */
 	int delay; /*!< Number of miliseconds to delay before action is started. */
+	double delta; /*!< Number of miliseconds since the last TM_Process invocation. */
 	struct TM_Action* next; /*!< Pointer to next action in queue. */
 	unsigned int id; /*!< ID of the action. */
 	char* name; /*!< "User friendly" name of the action. */
@@ -78,11 +82,11 @@ void TM_Resume(struct Timeline*);
 /*! \brief Handle timer events. */
 void TM_HandleEvent(struct Timeline*, ALLEGRO_EVENT* ev);
 /*! \brief Add new action to main queue. */
-struct TM_Action* TM_AddAction(struct Timeline*, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, char* name);
+struct TM_Action* TM_AddAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, char* name);
 /*! \brief Add new action to background queue. */
-struct TM_Action* TM_AddBackgroundAction(struct Timeline*, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name);
+struct TM_Action* TM_AddBackgroundAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
 /*! \brief Add new action to main queue, which adds specified action into background queue. */
-struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline*, bool (*func)(struct Game*, struct TM_Action*, enum TM_ActionState), struct TM_Arguments* args, int delay, char* name);
+struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
 /*! \brief Add delay to main queue. */
 void TM_AddDelay(struct Timeline*, int delay);
 /*! \brief Remove all actions from main queue. */
