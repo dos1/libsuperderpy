@@ -65,6 +65,10 @@ struct Spritesheet {
 	// TODO: missing docs
 };
 
+struct Character;
+typedef void CharacterCallback(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
+#define CharacterCallback(x) void x(struct Game* game, struct Character* character, struct Spritesheet* old, struct Spritesheet* new, void* data)
+
 /*! \brief Structure representing one visible character. */
 struct Character {
 	char* name; /*!< Name of the character (used in file paths). */
@@ -94,7 +98,7 @@ struct Character {
 	bool reversed; /*!< Whether the current animation has been requested as reversed. */
 	bool hidden;
 	void* data; /*!< Additional, custom character data (HP etc.). */
-	void (*callback)(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
+	CharacterCallback* callback;
 	void* callbackData;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 
