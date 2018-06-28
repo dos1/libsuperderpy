@@ -475,12 +475,7 @@ static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int
 }
 
 static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) {
-	al_set_target_backbuffer(game->display);
-	ALLEGRO_TRANSFORM trans;
-	al_identity_transform(&trans);
-	int clipX, clipY, clipWidth, clipHeight;
-	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
-	al_use_transform(&trans);
+	int clipX = game->_priv.clip_rect.x, clipY = game->_priv.clip_rect.y, clipWidth = game->_priv.clip_rect.w, clipHeight = game->_priv.clip_rect.h;
 
 	al_draw_filled_rectangle(clipX, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1), clipX + clipWidth, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * pos, al_map_rgba(0, 0, 0, 92));
 
@@ -488,8 +483,6 @@ static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) 
 
 	DrawQueue(game, timeline->queue, clipX + (25 / 3200.0) * al_get_display_width(game->display), clipY + clipHeight - (220 / 1800.0) * al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * pos);
 	DrawQueue(game, timeline->background, clipX + (25 / 3200.0) * al_get_display_width(game->display), clipY + clipHeight - (100 / 1800.0) * al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * pos);
-
-	al_use_transform(&game->projection);
 }
 
 SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
