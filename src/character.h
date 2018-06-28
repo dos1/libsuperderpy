@@ -67,7 +67,7 @@ struct Spritesheet {
 
 struct Character;
 typedef void CharacterCallback(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
-#define CharacterCallback(x) void x(struct Game* game, struct Character* character, struct Spritesheet* old, struct Spritesheet* new, void* data)
+#define CharacterCallback(x) void x(struct Game* game, struct Character* character, struct Spritesheet* new, struct Spritesheet* old, void* data)
 
 /*! \brief Structure representing one visible character. */
 struct Character {
