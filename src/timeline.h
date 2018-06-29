@@ -27,6 +27,9 @@
 	type* result = malloc(sizeof(type)); \
 	*result = val;
 
+#define TM_RunningOnly \
+	if (state != TM_ACTIONSTATE_RUNNING) return false;
+
 /*! \brief State of the TM_Action. */
 enum TM_ActionState {
 	TM_ACTIONSTATE_INIT,
