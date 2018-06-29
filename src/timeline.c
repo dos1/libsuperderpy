@@ -45,19 +45,22 @@ SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, struct GamestateResour
 }
 
 SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
-	// NOTICE: current implementation has no way to know how much time
-	// an action has "eaten". This means that if you pass a huge delta
-	// that spans across multiple actions, the end result will most likely
-	// differ from what you would get from calling TM_Process repeatively
-	// with smaller deltas that sum up to the first value. Be aware!
+	// NOTICE: if you create background actions from running action,
+	// newly created ones have no way to know how much time has been
+	// "eaten" by the one that created it, which may result in incorrect
+	// result when calling TM_Process with huge delta. This behaviour
+	// may change in the future.
+
+	// TODO: make sure new action STARTS in the same tick as the old one
+	// DESTROYS, but make it RUNNING only in the next tick (or when there's
+	// some remaining delta).
 
 	/* process first element from queue.
 		 if returns true, delete it and repeat for the next one */
-	delta *= 1000;
-	bool next = true;
-	while (next) {
+	double origDelta = delta;
+	while (delta > 0.0) {
 		if (timeline->queue) {
-			timeline->queue->delta = delta / 1000.0;
+			timeline->queue->delta = delta;
 
 			if (timeline->queue->active && timeline->queue->delay > 0.0) {
 				timeline->queue->delay -= delta;
@@ -84,6 +87,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 				timeline->queue->state = TM_ACTIONSTATE_RUNNING;
 				if ((*timeline->queue->function)(timeline->game, timeline->data, timeline->queue)) {
 					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: destroy action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
+					delta -= timeline->queue->delta;
 					struct TM_Action* tmp = timeline->queue;
 					timeline->queue = timeline->queue->next;
 					tmp->state = TM_ACTIONSTATE_DESTROY;
@@ -92,7 +96,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 					free(tmp->name);
 					free(tmp);
 				} else {
-					next = false;
+					delta = 0.0;
 				}
 			} else {
 				/* delay handling */
@@ -103,23 +107,24 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 					free(tmp);
 				} else {
 					if (!timeline->queue->active) {
-						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay started %d ms (%d - %s)", timeline->name, (int)timeline->queue->delay, timeline->queue->id, timeline->queue->name);
+						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay started %d ms (%d - %s)", timeline->name, (int)(timeline->queue->delay * 1000), timeline->queue->id, timeline->queue->name);
 						timeline->queue->active = true;
 					}
-					next = false;
+					delta = 0.0;
 				}
 			}
 		} else {
-			next = false;
+			delta = 0.0;
 		}
 	}
+	delta = origDelta;
 
 	/* process all elements from background queue */
 	struct TM_Action *tmp, *tmp2, *pom = timeline->background;
 	tmp = NULL;
 	while (pom != NULL) {
 		bool destroy = false;
-		pom->delta = delta / 1000.0;
+		pom->delta = delta;
 		if (pom->started) {
 			if (pom->function) {
 				pom->state = TM_ACTIONSTATE_RUNNING;
@@ -221,7 +226,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline
 	action->function = func;
 	action->arguments = args;
 	action->name = strdup(name);
-	action->delay = delay;
+	action->delay = delay / 1000.0;
 	action->id = ++timeline->lastid;
 	action->active = true;
 	action->started = false;
@@ -263,7 +268,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* ti
 SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {
 	struct TM_Action* tmp = TM_AddAction(timeline, NULL, NULL, "TM_Delay");
 	PrintConsole(timeline->game, "Timeline Manager[%s]: queue: adding delay %d ms (%d)", timeline->name, delay, tmp->id);
-	tmp->delay = delay;
+	tmp->delay = delay / 1000.0;
 }
 
 SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {

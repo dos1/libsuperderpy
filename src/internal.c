@@ -462,7 +462,7 @@ static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int
 		al_draw_text(game->_priv.font_console, pom->started ? al_map_rgb(0, 0, 0) : al_map_rgb(255, 255, 255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
 
 		if (pom->delay) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * al_get_display_height(game->display), ALLEGRO_ALIGN_LEFT, "%d", (int)pom->delay);
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * al_get_display_height(game->display), ALLEGRO_ALIGN_LEFT, "%d", (int)(pom->delay * 1000));
 		}
 
 		if (strncmp(pom->name, "TM_BackgroundAction", 19) == 0) {
