@@ -32,10 +32,7 @@ enum TM_ActionState {
 	TM_ACTIONSTATE_INIT,
 	TM_ACTIONSTATE_START,
 	TM_ACTIONSTATE_RUNNING,
-	TM_ACTIONSTATE_DRAW,
-	TM_ACTIONSTATE_DESTROY,
-	TM_ACTIONSTATE_PAUSE,
-	TM_ACTIONSTATE_RESUME
+	TM_ACTIONSTATE_DESTROY
 };
 
 struct TM_Action;
@@ -61,27 +58,19 @@ struct TM_Arguments {
 struct TM_Action {
 	TM_ActionCallback* function; /*!< Function callback of the action. */
 	struct TM_Arguments* arguments; /*!< Arguments of the action. */
-	ALLEGRO_TIMER* timer; /*!< Delay timer. */
-	bool active; /*!< If false, then this action is waiting for it's delay to finish. */
-	int delay; /*!< Number of miliseconds to delay before action is started. */
+	bool active; /*!< Whether this action is being processed by the queue right now. */
+	bool started; /*!< If false, then the action is waiting for its delay to finish. */
+	double delay; /*!< Number of miliseconds to delay before action is started. */
 	double delta; /*!< Number of miliseconds since the last TM_Process invocation. */
-	struct TM_Action* next; /*!< Pointer to next action in queue. */
 	unsigned int id; /*!< ID of the action. */
 	char* name; /*!< "User friendly" name of the action. */
+	struct TM_Action* next; /*!< Pointer to next action in queue. */
 };
 
 /*! \brief Init timeline. */
 struct Timeline* TM_Init(struct Game* game, char* name);
 /*! \brief Process current timeline actions. */
 void TM_Process(struct Timeline*, double delta);
-/*! \brief Ask current timeline actions to draw. */
-void TM_Draw(struct Timeline*);
-/*! \brief Pauses the timeline. */
-void TM_Pause(struct Timeline*);
-/*! \brief Resumes the timeline. */
-void TM_Resume(struct Timeline*);
-/*! \brief Handle timer events. */
-void TM_HandleEvent(struct Timeline*, ALLEGRO_EVENT* ev);
 /*! \brief Add new action to main queue. */
 struct TM_Action* TM_AddAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, char* name);
 /*! \brief Add new action to background queue. */
@@ -94,15 +83,13 @@ void TM_AddDelay(struct Timeline*, int delay);
 void TM_CleanQueue(struct Timeline*);
 /*! \brief Remove all actions from background queue. */
 void TM_CleanBackgroundQueue(struct Timeline*);
-/*! \brief Destroy timeline. */
+/*! \brief Destroy given timeline. */
 void TM_Destroy(struct Timeline*);
-/*! \brief Add data to TM_Arguments queue. */
+/*! \brief Add data to TM_Arguments queue (or create if NULL). */
 struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...);
 /*! \brief Get nth argument from TM_Arguments queue (counted from 0). */
 void* TM_GetArg(struct TM_Arguments* args, int num);
-/*! \brief Destroy TM_Arguments queue. */
-void TM_DestroyArgs(struct TM_Arguments* args);
-/*! \brief Skip delay if it's currently the first action in the queue */
+/*! \brief Skip delay of the first action in the queue */
 void TM_SkipDelay(struct Timeline*);
 /*! \brief Checks if the main queue is empty */
 bool TM_IsEmpty(struct Timeline* timeline);
