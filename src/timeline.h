@@ -23,12 +23,9 @@
 
 #include "libsuperderpy.h"
 
-#define TM_WrapArg(type, result, val)  \
-	type* result = malloc(sizeof(type)); \
-	*result = val;
-
-#define TM_RunningOnly \
-	if (state != TM_ACTIONSTATE_RUNNING) return false;
+struct TM_Action;
+typedef bool TM_ActionCallback(struct Game*, struct GamestateResources*, struct TM_Action*);
+#define TM_NUMARGS(...) (sizeof((void* []){__VA_ARGS__}) / sizeof(void*))
 
 /*! \brief State of the TM_Action. */
 enum TM_ActionState {
@@ -38,10 +35,6 @@ enum TM_ActionState {
 	TM_ACTIONSTATE_DESTROY
 };
 
-struct TM_Action;
-typedef bool TM_ActionCallback(struct Game*, struct TM_Action*, enum TM_ActionState);
-#define TM_Action(x) bool x(struct Game* game, struct TM_Action* action, enum TM_ActionState state)
-
 /*! \brief Timeline structure. */
 struct Timeline {
 	struct TM_Action* queue; /*!< Main timeline queue. */
@@ -49,6 +42,7 @@ struct Timeline {
 	char* name; /*!< Name of the timeline. */
 	unsigned int lastid; /*!< Last ID given to timeline action. */
 	struct Game* game; /*!< Reference to the game object. */
+	struct GamestateResources* data; /*!< User data pointer for use in actions. */
 };
 
 /*! \brief Arguments for TM_Action. */
@@ -67,11 +61,13 @@ struct TM_Action {
 	double delta; /*!< Number of miliseconds since the last TM_Process invocation. */
 	unsigned int id; /*!< ID of the action. */
 	char* name; /*!< "User friendly" name of the action. */
+	struct Timeline* timeline; /*!< A pointer to the timeline where this action is used. */
+	enum TM_ActionState state; /*!< Current state of the action. */
 	struct TM_Action* next; /*!< Pointer to next action in queue. */
 };
 
 /*! \brief Init timeline. */
-struct Timeline* TM_Init(struct Game* game, char* name);
+struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, char* name);
 /*! \brief Process current timeline actions. */
 void TM_Process(struct Timeline*, double delta);
 /*! \brief Add new action to main queue. */
@@ -98,5 +94,18 @@ void TM_SkipDelay(struct Timeline*);
 bool TM_IsEmpty(struct Timeline* timeline);
 /*! \brief Checks if the background queue is empty */
 bool TM_IsBackgroundEmpty(struct Timeline* timeline);
+/*! \brief Allocates memory and sets given value. */
+#define TM_WrapArg(type, result, val)  \
+	type* result = malloc(sizeof(type)); \
+	*result = val;
+/*! \brief Indicates that the action handles only TM_ACTIONSTATE_RUNNING state. */
+#define TM_RunningOnly \
+	if (action->state != TM_ACTIONSTATE_RUNNING) return false;
+/*! \brief Shorthand for creating list of arguments for action. */
+#define TM_Args(...) TM_AddToArgs(NULL, TM_NUMARGS(__VA_ARGS__), __VA_ARGS__)
+/*! \brief Shorthand for accessing the nth argument of current action. */
+#define TM_Arg(n) TM_GetArg(action->arguments, n)
+/*! \brief Macro for easy timeline action definition. */
+#define TM_Action(name) bool name(struct Game* game, struct GamestateResources* data, struct TM_Action* action)
 
 #endif

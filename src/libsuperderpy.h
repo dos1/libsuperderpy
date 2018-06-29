@@ -23,6 +23,11 @@
 #define LIBSUPERDERPY_MAIN_H
 
 struct Game;
+struct GamestateResources;
+
+#ifndef LIBSUPERDERPY_DATA_TYPE
+#define LIBSUPERDERPY_DATA_TYPE void
+#endif
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_acodec.h>
@@ -48,10 +53,6 @@ struct Game;
 #include "tween.h"
 #include "utils.h"
 #include <sys/param.h>
-
-#ifndef LIBSUPERDERPY_DATA_TYPE
-#define LIBSUPERDERPY_DATA_TYPE void
-#endif
 
 struct Gamestate;
 
@@ -176,7 +177,6 @@ struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct 
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 
-struct GamestateResources;
 extern int Gamestate_ProgressCount;
 void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
