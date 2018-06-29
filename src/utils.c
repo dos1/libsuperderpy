@@ -31,19 +31,19 @@
 
 SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
-	  {.x = x, .y = y, .z = 0, .color = top},
-	  {.x = x + w, .y = y, .z = 0, .color = top},
-	  {.x = x, .y = y + h, .z = 0, .color = bottom},
-	  {.x = x + w, .y = y + h, .z = 0, .color = bottom}};
+		{.x = x, .y = y, .z = 0, .color = top},
+		{.x = x + w, .y = y, .z = 0, .color = top},
+		{.x = x, .y = y + h, .z = 0, .color = bottom},
+		{.x = x + w, .y = y + h, .z = 0, .color = bottom}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
 SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR left, ALLEGRO_COLOR right) {
 	ALLEGRO_VERTEX v[] = {
-	  {.x = x, .y = y, .z = 0, .color = left},
-	  {.x = x + w, .y = y, .z = 0, .color = right},
-	  {.x = x, .y = y + h, .z = 0, .color = left},
-	  {.x = x + w, .y = y + h, .z = 0, .color = right}};
+		{.x = x, .y = y, .z = 0, .color = left},
+		{.x = x + w, .y = y, .z = 0, .color = right},
+		{.x = x, .y = y + h, .z = 0, .color = left},
+		{.x = x + w, .y = y + h, .z = 0, .color = right}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
@@ -66,7 +66,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 	int height = al_get_font_line_height(font) + 1;
 
 	// Setup our strings
-	strncpy(stext, text, 1024);
+	strncpy(stext, text, 1023);
 	strncpy(temp, "", 1024);
 	for (int i = 0; i < 40; i += 1) {
 		strncpy(lines[i], "", 1024);
@@ -129,7 +129,7 @@ SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, doub
 
 SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags) {
 	al_draw_tinted_scaled_rotated_bitmap(bitmap, tint, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
-	  x, y, sx, sy, 0, flags);
+		x, y, sx, sy, 0, flags);
 }
 
 SYMBOL_EXPORT double DotProduct(const double v[], const double u[], int n) {
@@ -165,9 +165,9 @@ SYMBOL_EXPORT double Lerp(double left, double right, double pos) {
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
-	  c1.g + frac * (c2.g - c1.g),
-	  c1.b + frac * (c2.b - c1.b),
-	  c1.a + frac * (c2.a - c1.a));
+		c1.g + frac * (c2.g - c1.g),
+		c1.b + frac * (c2.b - c1.b),
+		c1.a + frac * (c2.a - c1.a));
 }
 
 /*! \brief Scales bitmap using software linear filtering method to current target. */
