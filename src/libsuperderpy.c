@@ -362,6 +362,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					(*tmp->api->Gamestate_Stop)(game, tmp->data);
 					tmp->started = false;
 					tmp->pending_stop = false;
+					PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
 				}
 
 				if (tmp->pending_load) { game->_priv.loading.toLoad++; }
@@ -379,6 +380,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					game->_priv.current_gamestate = tmp;
 					(*tmp->api->Gamestate_Unload)(game, tmp->data);
 					al_resume_timer(game->_priv.timer);
+					PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 				}
 				if (tmp->pending_load) {
 					al_stop_timer(game->_priv.timer);
@@ -431,6 +433,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
 						ReloadShaders(game, false);
+						PrintConsole(game, "Gamestate \"%s\" loaded successfully.", tmp->name);
 						game->_priv.loading.loaded++;
 
 						tmp->loaded = true;
@@ -458,6 +461,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					tmp->pending_start = false;
 					(*tmp->api->Gamestate_Start)(game, tmp->data);
 					al_resume_timer(game->_priv.timer);
+					PrintConsole(game, "Gamestate \"%s\" started successfully.", tmp->name);
 				}
 
 				if ((tmp->started) || (tmp->pending_start) || (tmp->pending_load)) {
@@ -620,12 +624,14 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->Gamestate_Stop)(game, tmp->data);
 			tmp->started = false;
+			PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
 		}
 		if (tmp->loaded) {
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->Gamestate_Unload)(game, tmp->data);
 			tmp->loaded = false;
+			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 		}
 		CloseGamestate(game, tmp);
 		pom = tmp->next;
