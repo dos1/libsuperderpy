@@ -68,43 +68,70 @@ struct TM_Action {
 
 /*! \brief Init timeline. */
 struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, char* name);
+
 /*! \brief Process current timeline actions. */
 void TM_Process(struct Timeline*, double delta);
+
+/*! \brief Add new action to main queue, with specified name. */
+struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name);
+
+/*! \brief Add new action to background queue, with specified name. */
+struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+
+/*! \brief Add new action to main queue, which adds specified action into background queue, with specified name. */
+struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+
 /*! \brief Add new action to main queue. */
-struct TM_Action* TM_AddAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, char* name);
+#define TM_AddAction(timeline, func, args) TM_AddNamedAction(timeline, func, args, #func)
+
 /*! \brief Add new action to background queue. */
-struct TM_Action* TM_AddBackgroundAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+#define TM_AddBackgroundAction(timeline, func, args, delay) TM_AddNamedBackgroundAction(timeline, func, args, delay, #func)
+
 /*! \brief Add new action to main queue, which adds specified action into background queue. */
-struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline*, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+#define TM_AddQueuedBackgroundAction(timeline, func, args, delay) TM_AddQueuedNamedBackgroundAction(timeline, func, args, delay, #func)
+
 /*! \brief Add delay to main queue. */
 void TM_AddDelay(struct Timeline*, int delay);
+
 /*! \brief Remove all actions from main queue. */
 void TM_CleanQueue(struct Timeline*);
+
 /*! \brief Remove all actions from background queue. */
 void TM_CleanBackgroundQueue(struct Timeline*);
+
 /*! \brief Destroy given timeline. */
 void TM_Destroy(struct Timeline*);
+
 /*! \brief Add data to TM_Arguments queue (or create if NULL). */
 struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...);
+
 /*! \brief Get nth argument from TM_Arguments queue (counted from 0). */
 void* TM_GetArg(struct TM_Arguments* args, int num);
+
 /*! \brief Skip delay of the first action in the queue */
 void TM_SkipDelay(struct Timeline*);
+
 /*! \brief Checks if the main queue is empty */
 bool TM_IsEmpty(struct Timeline* timeline);
+
 /*! \brief Checks if the background queue is empty */
 bool TM_IsBackgroundEmpty(struct Timeline* timeline);
+
 /*! \brief Allocates memory and sets given value. */
 #define TM_WrapArg(type, result, val)  \
 	type* result = malloc(sizeof(type)); \
 	*result = val;
+
 /*! \brief Indicates that the action handles only TM_ACTIONSTATE_RUNNING state. */
 #define TM_RunningOnly \
 	if (action->state != TM_ACTIONSTATE_RUNNING) return false;
+
 /*! \brief Shorthand for creating list of arguments for action. */
 #define TM_Args(...) TM_AddToArgs(NULL, TM_NUMARGS(__VA_ARGS__), __VA_ARGS__)
+
 /*! \brief Shorthand for accessing the nth argument of current action. */
 #define TM_Arg(n) TM_GetArg(action->arguments, n)
+
 /*! \brief Macro for easy timeline action definition. */
 #define TM_Action(name) bool name(struct Game* game, struct GamestateResources* data, struct TM_Action* action)
 

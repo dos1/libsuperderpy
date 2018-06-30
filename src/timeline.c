@@ -183,7 +183,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 	}
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
 	if (timeline->queue) {
 		struct TM_Action* pom = timeline->queue;
@@ -211,7 +211,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddAction(struct Timeline* timeline, TM_Actio
 	return action;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
 	if (timeline->background) {
 		struct TM_Action* pom = timeline->background;
@@ -238,13 +238,13 @@ SYMBOL_EXPORT struct TM_Action* TM_AddBackgroundAction(struct Timeline* timeline
 }
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
-static TM_Action(RunInBackground) {
+static TM_Action(TM_RunInBackground) {
 	int* delay = TM_Arg(1);
 	char* name = TM_Arg(2);
 	struct TM_Arguments* arguments = TM_Arg(3);
 	bool* used = TM_Arg(4);
 	if (action->state == TM_ACTIONSTATE_START) {
-		TM_AddBackgroundAction(action->timeline, TM_Arg(0), arguments, *delay, name);
+		TM_AddNamedBackgroundAction(action->timeline, TM_Arg(0), arguments, *delay, name);
 		*used = true;
 	}
 	if (action->state == TM_ACTIONSTATE_DESTROY) {
@@ -258,15 +258,15 @@ static TM_Action(RunInBackground) {
 	return true;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddQueuedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
 	TM_WrapArg(int, del, delay);
 	TM_WrapArg(bool, used, false);
 	struct TM_Arguments* arguments = TM_Args(func, del, strdup(name), args, used);
-	return TM_AddAction(timeline, RunInBackground, arguments, "TM_BackgroundAction");
+	return TM_AddAction(timeline, TM_RunInBackground, arguments);
 }
 
 SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {
-	struct TM_Action* tmp = TM_AddAction(timeline, NULL, NULL, "TM_Delay");
+	struct TM_Action* tmp = TM_AddNamedAction(timeline, NULL, NULL, "TM_Delay");
 	PrintConsole(timeline->game, "Timeline Manager[%s]: queue: adding delay %d ms (%d)", timeline->name, delay, tmp->id);
 	tmp->delay = delay / 1000.0;
 }
