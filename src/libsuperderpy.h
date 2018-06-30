@@ -119,7 +119,7 @@ struct Game {
 			struct Gamestate* current;
 			int progress;
 			int loaded, toLoad;
-			bool inProgress;
+			volatile bool inProgress;
 			double time;
 		} loading;
 
