@@ -238,7 +238,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* tim
 }
 
 /*! \brief Predefined action used by TM_AddQueuedBackgroundAction */
-static TM_Action(TM_RunInBackground) {
+static TM_ACTION(TM_RunInBackground) {
 	int* delay = TM_Arg(1);
 	char* name = TM_Arg(2);
 	struct TM_Arguments* arguments = TM_Arg(3);

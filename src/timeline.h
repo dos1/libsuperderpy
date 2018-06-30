@@ -133,6 +133,6 @@ bool TM_IsBackgroundEmpty(struct Timeline* timeline);
 #define TM_Arg(n) TM_GetArg(action->arguments, n)
 
 /*! \brief Macro for easy timeline action definition. */
-#define TM_Action(name) bool name(struct Game* game, struct GamestateResources* data, struct TM_Action* action)
+#define TM_ACTION(name) bool name(struct Game* game, struct GamestateResources* data, struct TM_Action* action)
 
 #endif
