@@ -129,9 +129,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	if (!al_install_mouse()) {
+	game->mouse = al_install_mouse();
+	if (!game->mouse) {
 		fprintf(stderr, "failed to initialize the mouse!\n");
-		return NULL;
 	}
 
 	if (!al_init_video_addon()) {
@@ -139,9 +139,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	al_init_font_addon();
-
-	if (!al_init_ttf_addon()) {
+	if (!al_init_font_addon() || !al_init_ttf_addon()) {
 		fprintf(stderr, "failed to initialize fonts!\n");
 		return NULL;
 	}
@@ -158,7 +156,11 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 #endif
 
-	al_install_joystick();
+	game->joystick = false;
+
+	if (!strtol(GetConfigOptionDefault(game, "SuperDerpy", "disableJoystick", "0"), NULL, 10)) {
+		game->joystick = al_install_joystick();
+	}
 
 	al_set_new_display_flags((game->config.fullscreen ? (ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_FRAMELESS) : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
 #ifdef __EMSCRIPTEN__
@@ -278,9 +280,13 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
-	al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
-	al_register_event_source(game->_priv.event_queue, al_get_joystick_event_source());
+	if (game->mouse) {
+		al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
+	}
+	if (game->joystick) {
+		al_register_event_source(game->_priv.event_queue, al_get_joystick_event_source());
+	}
 	if (game->touch) {
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION

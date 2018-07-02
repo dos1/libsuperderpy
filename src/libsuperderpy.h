@@ -151,6 +151,8 @@ struct Game {
 	bool shutting_down; /*!< If true then shut down of the game is pending. */
 	bool restart; /*!< If true then restart of the game is pending. */
 	bool touch;
+	bool joystick;
+	bool mouse;
 
 	bool show_loading_on_launch;
 
