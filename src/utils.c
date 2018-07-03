@@ -162,6 +162,10 @@ SYMBOL_EXPORT double Lerp(double left, double right, double pos) {
 	return left + (right - left) * pos;
 }
 
+SYMBOL_EXPORT double Sign(double val) {
+	return val / fabs(val);
+}
+
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
