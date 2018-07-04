@@ -17,7 +17,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif(APPLE)
 
 	set(USE_CLANG_TIDY "yes" CACHE STRING "Analyze the code with clang-tidy" )
-	if(USE_CLANG_TIDY)
+	if(USE_CLANG_TIDY AND NOT MINGW)
 		find_program(CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable")
 		if(NOT CLANG_TIDY_EXE)
 			message(STATUS "clang-tidy not found, analysis disabled")
