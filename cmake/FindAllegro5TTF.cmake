@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_TTF_INCLUDE_DIR allegro5/allegro_ttf.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_TTF_NAMES ${ALLEGRO5_TTF_NAMES} allegro_ttf allegro_ttf_static liballegro_ttf liballegro_ttf_static AllegroTTF-5.2 allegro_ttf-debug)
+SET(ALLEGRO5_TTF_NAMES ${ALLEGRO5_TTF_NAMES} allegro_ttf  liballegro_ttf AllegroTTF-5.2 allegro_ttf-debug allegro_ttf-static allegro_ttf_static liballegro_ttf_static)
 FIND_LIBRARY(ALLEGRO5_TTF_LIBRARY NAMES ${ALLEGRO5_TTF_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_TTF_FOUND to TRUE if

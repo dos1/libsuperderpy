@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_IMAGE_INCLUDE_DIR allegro5/allegro_image.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_IMAGE_NAMES ${ALLEGRO5_IMAGE_NAMES} allegro_image allegro_image_static liballegro_image liballegro_image_static AllegroImage-5.2 allegro_image-debug)
+SET(ALLEGRO5_IMAGE_NAMES ${ALLEGRO5_IMAGE_NAMES} allegro_image liballegro_image AllegroImage-5.2 allegro_image-debug allegro_image-static liballegro_image_static allegro_image_static)
 FIND_LIBRARY(ALLEGRO5_IMAGE_LIBRARY NAMES ${ALLEGRO5_IMAGE_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_IMAGE_FOUND to TRUE if

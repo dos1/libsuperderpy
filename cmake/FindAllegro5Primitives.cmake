@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_PRIMITIVES_INCLUDE_DIR allegro5/allegro_primitives.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_PRIMITIVES_NAMES ${ALLEGRO5_PRIMITIVES_NAMES} allegro_primitives allegro_primitives_static liballegro_primitives liballegro_primitives_static AllegroPrimitives-5.2 allegro_primitives-debug)
+SET(ALLEGRO5_PRIMITIVES_NAMES ${ALLEGRO5_PRIMITIVES_NAMES} allegro_primitives liballegro_primitives AllegroPrimitives-5.2 allegro_primitives-debug allegro_primitives-static allegro_primitives_static liballegro_primitives_static)
 FIND_LIBRARY(ALLEGRO5_PRIMITIVES_LIBRARY NAMES ${ALLEGRO5_PRIMITIVES_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_PRIMITIVES_FOUND to TRUE if

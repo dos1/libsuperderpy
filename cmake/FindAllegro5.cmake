@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_INCLUDE_DIR allegro5/allegro.h)
 
-SET(ALLEGRO5_NAMES ${ALLEGRO5_NAMES} allegro allegro_static liballegro liballegro_static Allegro-5.2 allegro-debug)
+SET(ALLEGRO5_NAMES ${ALLEGRO5_NAMES} allegro liballegro Allegro-5.2 allegro-debug allegro-static liballegro_static allegro_static)
 FIND_LIBRARY(ALLEGRO5_LIBRARY NAMES ${ALLEGRO5_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_FOUND to TRUE if

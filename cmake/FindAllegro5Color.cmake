@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_COLOR_INCLUDE_DIR allegro5/allegro_color.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_COLOR_NAMES ${ALLEGRO5_COLOR_NAMES} allegro_color allegro_color_static liballegro_color liballegro_color_static AllegroColor-5.2 allegro_color-debug)
+SET(ALLEGRO5_COLOR_NAMES ${ALLEGRO5_COLOR_NAMES} allegro_color liballegro_color AllegroColor-5.2 allegro_color-debug allegro_color-static allegro_color_static liballegro_color_static)
 FIND_LIBRARY(ALLEGRO5_COLOR_LIBRARY NAMES ${ALLEGRO5_COLOR_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_COLOR_FOUND to TRUE if

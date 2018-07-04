@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_VIDEO_INCLUDE_DIR allegro5/allegro_video.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_VIDEO_NAMES ${ALLEGRO5_VIDEO_NAMES} allegro_video allegro_video_static liballegro_video liballegro_video_static AllegroVideo-5.2 allegro_video-debug)
+SET(ALLEGRO5_VIDEO_NAMES ${ALLEGRO5_VIDEO_NAMES} allegro_video liballegro_video AllegroVideo-5.2 allegro_video-debug allegro_video-static allegro_video_static liballegro_video_static)
 FIND_LIBRARY(ALLEGRO5_VIDEO_LIBRARY NAMES ${ALLEGRO5_VIDEO_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_VIDEO_FOUND to TRUE if

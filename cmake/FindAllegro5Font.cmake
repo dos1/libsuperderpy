@@ -7,7 +7,7 @@
 
 FIND_PATH(ALLEGRO5_FONT_INCLUDE_DIR allegro5/allegro_font.h HINTS ${ALLEGRO5_INCLUDE_DIR})
 
-SET(ALLEGRO5_FONT_NAMES ${ALLEGRO5_FONT_NAMES} allegro_font allegro_font_static liballegro_font liballegro_font_static AllegroFont-5.2 allegro_font-debug)
+SET(ALLEGRO5_FONT_NAMES ${ALLEGRO5_FONT_NAMES} allegro_font liballegro_font AllegroFont-5.2 allegro_font-debug allegro_font_static liballegro_font_static allegro_font-static)
 FIND_LIBRARY(ALLEGRO5_FONT_LIBRARY NAMES ${ALLEGRO5_FONT_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_FONT_FOUND to TRUE if
