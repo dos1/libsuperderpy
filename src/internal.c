@@ -256,8 +256,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 		al_wait_cond(game->_priv.texture_sync_cond, game->_priv.texture_sync_mutex);
 	}
 	al_unlock_mutex(game->_priv.texture_sync_mutex);
-#endif
-#ifdef LIBSUPERDERPY_SINGLE_THREAD
+#else
 	DrawGamestates(game);
 	double delta = al_get_time() - game->_priv.loading.time;
 	if (tmp->showLoading) {

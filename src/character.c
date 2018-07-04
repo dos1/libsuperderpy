@@ -549,9 +549,9 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	return test;
 }
 
-void ShowCharacter(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT void ShowCharacter(struct Game* game, struct Character* character) {
 	character->hidden = false;
 }
-void HideCharacter(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT void HideCharacter(struct Game* game, struct Character* character) {
 	character->hidden = true;
 }
