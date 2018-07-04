@@ -231,15 +231,13 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 	return target;
 }
 
-SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
+__attribute__((__format__(__printf__, 3, 0))) SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
 	// TODO: interrupt and take over loading thread when it happens
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
 	va_list vl;
 	va_start(vl, format);
-	SUPPRESS_WARNING("-Wformat-nonliteral")
 	vsnprintf(text, 1024, format, vl);
-	SUPPRESS_END
 	va_end(vl);
 	fprintf(stderr, "%s\n", text);
 
@@ -430,13 +428,11 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
-SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
+__attribute__((__format__(__printf__, 2, 0))) SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char* text = game->_priv.console[game->_priv.console_pos];
-	SUPPRESS_WARNING("-Wformat-nonliteral")
 	vsnprintf(text, (sizeof(game->_priv.console[0]) / sizeof(game->_priv.console[0][0])), format, vl);
-	SUPPRESS_END
 	va_end(vl);
 
 	SUPPRESS_WARNING("-Wused-but-marked-unused")
