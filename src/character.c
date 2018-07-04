@@ -102,6 +102,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
+		PrintConsole(game, "- %s", tmp->name);
 		if ((!tmp->bitmap) && (tmp->file)) {
 			char filename[255] = {0};
 			snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
@@ -111,6 +112,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 		}
 		for (int i = 0; i < tmp->frameCount; i++) {
 			if ((!tmp->frames[i].bitmap) && (tmp->frames[i].file)) {
+				PrintConsole(game, "  - %s", tmp->frames[i].file);
 				char filename[255] = {0};
 				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
 				tmp->frames[i].bitmap = al_load_bitmap(GetDataFilePath(game, filename));
