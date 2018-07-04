@@ -22,7 +22,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		if(NOT CLANG_TIDY_EXE)
 			message(STATUS "clang-tidy not found, analysis disabled")
 		else()
-			set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-hicpp-no-assembler,-google-readability-todo,-performance-type-promotion-in-math-fn,-misc-unused-parameters,-cert-msc30-c,-cert-msc50-cpp")
+			set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-hicpp-no-assembler,-google-readability-todo,-performance-type-promotion-in-math-fn,-misc-unused-parameters,-cert-msc30-c,-cert-msc50-cpp,-hicpp-signed-bitwise")
 		endif()
 	endif()
 

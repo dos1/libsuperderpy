@@ -478,7 +478,7 @@ static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) 
 
 	al_draw_filled_rectangle(clipX, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1), clipX + clipWidth, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * pos, al_map_rgba(0, 0, 0, 92));
 
-	al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), clipX + clipWidth / 2, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1) + (10 / 1800.0) * al_get_display_height(game->display), ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
+	al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), clipX + clipWidth / 2.0, clipY + clipHeight - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1) + (10 / 1800.0) * al_get_display_height(game->display), ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
 
 	DrawQueue(game, timeline->queue, clipX + (25 / 3200.0) * al_get_display_width(game->display), clipY + clipHeight - (220 / 1800.0) * al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * pos);
 	DrawQueue(game, timeline->background, clipX + (25 / 3200.0) * al_get_display_width(game->display), clipY + clipHeight - (100 / 1800.0) * al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * pos);
