@@ -22,10 +22,37 @@
 #include <allegro5/allegro.h>
 #include <math.h>
 
+static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
+	ALLEGRO_FILE* fp = al_fopen(filename, "r");
+	if (!fp) {
+		FatalError(game, false, "Failed to open shader file %s", filename);
+		return NULL;
+	}
+	ALLEGRO_USTR* str = al_ustr_new(al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? "#version 100\n" : "#version 130\n");
+	while (true) {
+		char buf[512];
+		size_t n;
+		ALLEGRO_USTR_INFO info;
+
+		n = al_fread(fp, buf, sizeof(buf));
+		if (n <= 0) {
+			break;
+		}
+		al_ustr_append(str, al_ref_buffer(&info, buf, n));
+	}
+	al_fclose(fp);
+	return str;
+}
+
 static bool AttachToShader(struct Game* game, ALLEGRO_SHADER* shader, ALLEGRO_SHADER_TYPE type, const char* filename) {
 	bool ret;
 	if (filename) {
-		ret = al_attach_shader_source_file(shader, type, filename);
+		ALLEGRO_USTR* src = GetShaderSource(game, filename);
+		if (!src) {
+			return false;
+		}
+		ret = al_attach_shader_source(shader, type, al_cstr(src));
+		al_ustr_free(src);
 	} else {
 		ret = al_attach_shader_source(shader, type, al_get_default_shader_source(al_get_shader_platform(shader), type));
 	}
@@ -80,6 +107,7 @@ SYMBOL_EXPORT void DestroyShader(struct Game* game, ALLEGRO_SHADER* shader) {
 	if (item->fragment) {
 		free(item->fragment);
 	}
+	free(item);
 }
 
 SYMBOL_INTERNAL void ReloadShaders(struct Game* game, bool force) {
