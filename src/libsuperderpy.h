@@ -184,6 +184,7 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
 void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
+void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data);
 void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
 void Gamestate_Start(struct Game* game, struct GamestateResources* data);
 void Gamestate_Stop(struct Game* game, struct GamestateResources* data);

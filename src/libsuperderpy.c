@@ -444,6 +444,11 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
 
+						if (tmp->api->Gamestate_PostLoad) {
+							PrintConsole(game, "[%s] Post-loading...", tmp->name);
+							tmp->api->Gamestate_PostLoad(game, tmp->data);
+						}
+
 						game->_priv.loading.progress++;
 						CalculateProgress(game);
 						PrintConsole(game, "Gamestate \"%s\" loaded successfully.", tmp->name);

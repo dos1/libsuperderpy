@@ -319,6 +319,7 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 	if (!(gamestate->api->Gamestate_ProcessEvent = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
 
 	// optional
+	gamestate->api->Gamestate_PostLoad = dlsym(gamestate->handle, "Gamestate_PostLoad");
 	gamestate->api->Gamestate_Pause = dlsym(gamestate->handle, "Gamestate_Pause");
 	gamestate->api->Gamestate_Resume = dlsym(gamestate->handle, "Gamestate_Resume");
 	gamestate->api->Gamestate_Reload = dlsym(gamestate->handle, "Gamestate_Reload");
