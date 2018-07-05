@@ -467,6 +467,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					tmp->pending_start = false;
 					(*tmp->api->Gamestate_Start)(game, tmp->data);
 					al_resume_timer(game->_priv.timer);
+					game->_priv.timestamp = al_get_time();
 					PrintConsole(game, "Gamestate \"%s\" started successfully.", tmp->name);
 				}
 
