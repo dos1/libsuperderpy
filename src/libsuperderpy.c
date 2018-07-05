@@ -443,7 +443,6 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 #endif
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
-						ReloadShaders(game, false);
 
 						game->_priv.loading.progress++;
 						CalculateProgress(game);
@@ -461,6 +460,10 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				}
 
 				tmp = tmp->next;
+			}
+
+			if (game->_priv.loading.loaded) {
+				ReloadShaders(game, false);
 			}
 
 			bool gameActive = false;
