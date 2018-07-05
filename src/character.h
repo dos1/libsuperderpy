@@ -68,6 +68,7 @@ struct Spritesheet {
 struct Character;
 typedef void CharacterCallback(struct Game*, struct Character*, struct Spritesheet* newAnim, struct Spritesheet* oldAnim, void*);
 #define CharacterCallback(x) void x(struct Game* game, struct Character* character, struct Spritesheet* new, struct Spritesheet* old, void* data)
+typedef void CharacterDestructor(struct Game*, struct Character*);
 
 /*! \brief Structure representing one visible character. */
 struct Character {
@@ -100,6 +101,7 @@ struct Character {
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	CharacterCallback* callback;
 	void* callbackData;
+	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 
 	// TODO: parents

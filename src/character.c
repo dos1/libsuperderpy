@@ -309,12 +309,18 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->data = NULL;
 	character->callback = NULL;
 	character->callbackData = NULL;
+	character->destructor = NULL;
 
 	return character;
 }
 
 SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* character) {
 	PrintConsole(game, "Destroying %scharacter %s...", character->shared ? "shared " : "", character->name);
+
+	if (character->destructor) {
+		character->destructor(game, character);
+	}
+
 	if (!character->shared) {
 		struct Spritesheet *tmp, *s = character->spritesheets;
 		while (s) {
@@ -346,9 +352,6 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 		}
 	}
 
-	//if (character->bitmap) {
-	//	al_destroy_bitmap(character->bitmap);
-	//}
 	if (character->successor) {
 		free(character->successor);
 	}
