@@ -75,6 +75,9 @@ void TM_Process(struct Timeline*, double delta);
 /*! \brief Add new action to main queue, with specified name. */
 struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name);
 
+/*! \brief Add new action to main queue, with specified name, placed after specified action. */
+struct TM_Action* TM_AddNamedActionAfter(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, struct TM_Action* after, char* name);
+
 /*! \brief Add new action to background queue, with specified name. */
 struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
 
@@ -83,6 +86,9 @@ struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, T
 
 /*! \brief Add new action to main queue. */
 #define TM_AddAction(timeline, func, args) TM_AddNamedAction(timeline, func, args, #func)
+
+/*! \brief Add new action to main queue placed after specified action.. */
+#define TM_AddActionAfter(timeline, func, args, after) TM_AddNamedAction(timeline, func, args, after, #func)
 
 /*! \brief Add new action to background queue. */
 #define TM_AddBackgroundAction(timeline, func, args, delay) TM_AddNamedBackgroundAction(timeline, func, args, delay, #func)

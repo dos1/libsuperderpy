@@ -183,17 +183,8 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 	}
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
+static struct TM_Action* CreateAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
-	if (timeline->queue) {
-		struct TM_Action* pom = timeline->queue;
-		while (pom->next != NULL) {
-			pom = pom->next;
-		}
-		pom->next = action;
-	} else {
-		timeline->queue = action;
-	}
 	action->next = NULL;
 	action->function = func;
 	action->arguments = args;
@@ -208,6 +199,27 @@ SYMBOL_EXPORT struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_
 		action->state = TM_ACTIONSTATE_INIT;
 		action->function(timeline->game, timeline->data, action);
 	}
+	return action;
+}
+
+SYMBOL_EXPORT struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, char* name) {
+	struct TM_Action* action = CreateAction(timeline, func, args, name);
+	if (timeline->queue) {
+		struct TM_Action* pom = timeline->queue;
+		while (pom->next != NULL) {
+			pom = pom->next;
+		}
+		pom->next = action;
+	} else {
+		timeline->queue = action;
+	}
+	return action;
+}
+
+SYMBOL_EXPORT struct TM_Action* TM_AddNamedActionAfter(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, struct TM_Action* after, char* name) {
+	struct TM_Action* action = CreateAction(timeline, func, args, name);
+	action->next = after->next;
+	after->next = action;
 	return action;
 }
 
