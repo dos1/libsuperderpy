@@ -415,7 +415,8 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags()};
 						game->_priv.loading.inProgress = true;
-						game->_priv.loading.time = al_get_time();
+						double time = al_get_time();
+						game->_priv.loading.time = time;
 
 						CalculateProgress(game);
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
@@ -451,7 +452,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						game->_priv.loading.progress++;
 						CalculateProgress(game);
-						PrintConsole(game, "Gamestate \"%s\" loaded successfully.", tmp->name);
+						PrintConsole(game, "Gamestate \"%s\" loaded successfully in %f seconds.", tmp->name, al_get_time() - time);
 						game->_priv.loading.loaded++;
 
 						tmp->loaded = true;
