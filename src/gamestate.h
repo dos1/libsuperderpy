@@ -51,6 +51,7 @@ struct Gamestate {
 	struct Gamestate* next;
 	struct Gamestate_API* api;
 	ALLEGRO_BITMAP* fb;
+	int progressCount;
 	void* data;
 };
 

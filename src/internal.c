@@ -98,7 +98,9 @@ SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 	while (tmp) {
 		if (tmp->loaded) {
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Reload)(game, tmp->data);
+			if (tmp->api->Gamestate_Reload) {
+				(*tmp->api->Gamestate_Reload)(game, tmp->data);
+			}
 		}
 		tmp = tmp->next;
 	}
@@ -219,11 +221,10 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	struct GamestateLoadingThreadData* data = arg;
 	data->game->_priv.loading.inProgress = true;
 	al_set_new_bitmap_flags(data->bitmap_flags);
-	GamestateProgress(data->game);
 	double time = al_get_time();
 	data->gamestate->data = (*data->gamestate->api->Gamestate_Load)(data->game, &GamestateProgress);
 	PrintConsole(data->game, "[%s] Loading took %f seconds.", data->gamestate->name, al_get_time() - time);
-	if (data->game->_priv.loading.progress != *(data->gamestate->api->Gamestate_ProgressCount)) {
+	if (data->game->_priv.loading.progress != data->gamestate->progressCount) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
 		if (data->game->config.debug) {
 			PrintConsole(data->game, "(sleeping for 3 seconds...)");
@@ -250,15 +251,18 @@ SYMBOL_INTERNAL void* ScreenshotThread(void* arg) {
 	return NULL;
 }
 
-SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
+SYMBOL_INTERNAL void CalculateProgress(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.loading.current;
-	game->_priv.loading.progress++;
-	float progressCount = *(tmp->api->Gamestate_ProgressCount) ? (float)*(tmp->api->Gamestate_ProgressCount) : 1;
-	float progress = ((game->_priv.loading.progress / progressCount) / (float)game->_priv.loading.toLoad) + (game->_priv.loading.loaded / (float)game->_priv.loading.toLoad);
-	game->loading_progress = progress;
+	float progress = ((game->_priv.loading.progress / (float)(tmp->progressCount + 1)) / (float)game->_priv.loading.toLoad) + (game->_priv.loading.loaded / (float)game->_priv.loading.toLoad);
 	if (game->config.debug) {
-		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, *(tmp->api->Gamestate_ProgressCount));
+		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, tmp->progressCount + 1);
 	}
+	game->loading_progress = progress;
+}
+
+SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
+	game->_priv.loading.progress++;
+	CalculateProgress(game);
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 	// TODO: debounce thread synchronization to reduce overhead
 	al_lock_mutex(game->_priv.texture_sync_mutex);
@@ -308,18 +312,21 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 
 	if (!(gamestate->api->Gamestate_Draw = dlsym(gamestate->handle, "Gamestate_Draw"))) { GS_ERROR; }
 	if (!(gamestate->api->Gamestate_Logic = dlsym(gamestate->handle, "Gamestate_Logic"))) { GS_ERROR; }
-
 	if (!(gamestate->api->Gamestate_Load = dlsym(gamestate->handle, "Gamestate_Load"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Start = dlsym(gamestate->handle, "Gamestate_Start"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Pause = dlsym(gamestate->handle, "Gamestate_Pause"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Resume = dlsym(gamestate->handle, "Gamestate_Resume"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Stop = dlsym(gamestate->handle, "Gamestate_Stop"))) { GS_ERROR; }
 	if (!(gamestate->api->Gamestate_Unload = dlsym(gamestate->handle, "Gamestate_Unload"))) { GS_ERROR; }
-
+	if (!(gamestate->api->Gamestate_Start = dlsym(gamestate->handle, "Gamestate_Start"))) { GS_ERROR; }
+	if (!(gamestate->api->Gamestate_Stop = dlsym(gamestate->handle, "Gamestate_Stop"))) { GS_ERROR; }
 	if (!(gamestate->api->Gamestate_ProcessEvent = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Reload = dlsym(gamestate->handle, "Gamestate_Reload"))) { GS_ERROR; }
 
-	if (!(gamestate->api->Gamestate_ProgressCount = dlsym(gamestate->handle, "Gamestate_ProgressCount"))) { GS_ERROR; }
+	// optional
+	gamestate->api->Gamestate_Pause = dlsym(gamestate->handle, "Gamestate_Pause");
+	gamestate->api->Gamestate_Resume = dlsym(gamestate->handle, "Gamestate_Resume");
+	gamestate->api->Gamestate_Reload = dlsym(gamestate->handle, "Gamestate_Reload");
+	gamestate->api->Gamestate_ProgressCount = dlsym(gamestate->handle, "Gamestate_ProgressCount");
+
+	if (gamestate->api->Gamestate_ProgressCount) {
+		gamestate->progressCount = *gamestate->api->Gamestate_ProgressCount;
+	}
 
 #undef GS_ERROR
 
@@ -340,6 +347,7 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->pending_unload = false;
 	tmp->next = NULL;
 	tmp->api = NULL;
+	tmp->progressCount = 0;
 	return tmp;
 }
 
@@ -541,7 +549,9 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 		CloseGamestate(game, tmp);
 		tmp->name = name;
 		if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp)) {
-			tmp->api->Gamestate_Reload(game, tmp->data);
+			if (tmp->api->Gamestate_Reload) {
+				tmp->api->Gamestate_Reload(game, tmp->data);
+			}
 		}
 		tmp = tmp->next;
 	}

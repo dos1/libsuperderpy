@@ -408,7 +408,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					}
 					if (tmp->api) {
 						PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
-						game->_priv.loading.progress = -1;
+						game->_priv.loading.progress = 0;
 
 						game->_priv.loading.current = tmp;
 						game->_priv.current_gamestate = tmp;
@@ -417,6 +417,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 						game->_priv.loading.inProgress = true;
 						game->_priv.loading.time = al_get_time();
 
+						CalculateProgress(game);
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 						al_run_detached_thread(GamestateLoadingThread, &data);
 						while (game->_priv.loading.inProgress) {
@@ -443,6 +444,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 
 						al_set_new_bitmap_flags(data.bitmap_flags);
 						ReloadShaders(game, false);
+
+						game->_priv.loading.progress++;
+						CalculateProgress(game);
 						PrintConsole(game, "Gamestate \"%s\" loaded successfully.", tmp->name);
 						game->_priv.loading.loaded++;
 

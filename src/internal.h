@@ -75,6 +75,7 @@ void Console_Load(struct Game* game);
 void Console_Unload(struct Game* game);
 void* GamestateLoadingThread(void* arg);
 void* ScreenshotThread(void* arg);
+void CalculateProgress(struct Game* game);
 void GamestateProgress(struct Game* game);
 void* AddGarbage(struct Game* game, void* data);
 void ClearGarbage(struct Game* game);
