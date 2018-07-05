@@ -220,7 +220,17 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	data->game->_priv.loading.inProgress = true;
 	al_set_new_bitmap_flags(data->bitmap_flags);
 	GamestateProgress(data->game);
+	double time = al_get_time();
 	data->gamestate->data = (*data->gamestate->api->Gamestate_Load)(data->game, &GamestateProgress);
+	PrintConsole(data->game, "[%s] Loading took %f seconds.", data->gamestate->name, al_get_time() - time);
+	if (data->game->_priv.loading.progress != *(data->gamestate->api->Gamestate_ProgressCount)) {
+		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
+		if (data->game->config.debug) {
+			PrintConsole(data->game, "(sleeping for 3 seconds...)");
+			data->game->_priv.showconsole = true;
+			al_rest(3.0);
+		}
+	}
 	data->bitmap_flags = al_get_new_bitmap_flags();
 	data->game->_priv.loading.inProgress = false;
 	return NULL;
