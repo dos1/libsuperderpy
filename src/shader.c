@@ -28,7 +28,14 @@ static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 		FatalError(game, false, "Failed to open shader file %s", filename);
 		return NULL;
 	}
-	ALLEGRO_USTR* str = al_ustr_new(al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? "#version 100\n" : "#version 130\n");
+
+	// Use GLSL 1.20 (GL 2.1) and GLSL ES 1.00 (GLES 2.0)
+	// We need to use 120 for GL because non-core GL profile on macOS is limited to 2.1
+	// Even when ignoring macOS, the highest possible option right now is GLSL 1.30, because
+	// most Mesa drivers implement only OpenGL 3.0 on compatibility profile.
+	// TODO: upgrade to GLSL 1.50 (GL 3.2, highest possible on macOS) once Allegro works on core profiles
+	ALLEGRO_USTR* str = al_ustr_new(al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? "#version 100\n" : "#version 120\n");
+
 	while (true) {
 		char buf[512];
 		size_t n;
