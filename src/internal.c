@@ -250,6 +250,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, *(tmp->api->Gamestate_ProgressCount));
 	}
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
+	// TODO: debounce thread synchronization to reduce overhead
 	al_lock_mutex(game->_priv.texture_sync_mutex);
 	game->_priv.texture_sync = true;
 	while (game->_priv.texture_sync) {
@@ -257,6 +258,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	}
 	al_unlock_mutex(game->_priv.texture_sync_mutex);
 #else
+	al_convert_memory_bitmaps();
 	DrawGamestates(game);
 	double delta = al_get_time() - game->_priv.loading.time;
 	if (tmp->showLoading) {

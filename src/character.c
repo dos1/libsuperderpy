@@ -98,7 +98,7 @@ SYMBOL_EXPORT struct Spritesheet* GetSpritesheet(struct Game* game, struct Chara
 	return NULL;
 }
 
-SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* character, void (*progress)(struct Game*)) {
 	PrintConsole(game, "Loading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
@@ -129,6 +129,9 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 			} else if (!tmp->frames[i].bitmap) {
 				tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width, tmp->frames[i].row * tmp->height, tmp->width, tmp->height);
 			}
+		}
+		if (progress) {
+			progress(game);
 		}
 		tmp = tmp->next;
 	}

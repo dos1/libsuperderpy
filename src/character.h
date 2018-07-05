@@ -124,7 +124,7 @@ void DrawScaledCharacter(struct Game* game, struct Character* character, ALLEGRO
 struct Character* CreateCharacter(struct Game* game, char* name);
 void DestroyCharacter(struct Game* game, struct Character* character);
 
-void LoadSpritesheets(struct Game* game, struct Character* character);
+void LoadSpritesheets(struct Game* game, struct Character* character, void (*progress)(struct Game*));
 void UnloadSpritesheets(struct Game* game, struct Character* character);
 
 void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier);
