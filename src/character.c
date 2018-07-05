@@ -355,6 +355,9 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 	if (character->successor) {
 		free(character->successor);
 	}
+	if (character->predecessor) {
+		free(character->predecessor);
+	}
 	free(character->name);
 	free(character);
 }
