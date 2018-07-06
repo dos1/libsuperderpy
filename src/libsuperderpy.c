@@ -434,6 +434,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 								al_convert_memory_bitmaps();
 								game->_priv.texture_sync = false;
 								al_signal_cond(game->_priv.texture_sync_cond);
+								game->_priv.loading.time = al_get_time();
 							}
 							DrawConsole(game);
 							al_flip_display();
