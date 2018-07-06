@@ -65,8 +65,22 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib/${LIBSUPERDERPY_GAMENAME}:\$ORIGIN/gamestates:\$ORIGIN:\$ORIGIN/../lib:\$ORIGIN/lib:\$ORIGIN/bin")
 
 if(EMSCRIPTEN)
-	  set(CMAKE_EXECUTABLE_SUFFIX ".bc")
+		set(CMAKE_EXECUTABLE_SUFFIX ".bc")
+		set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=1")
 		set(EMSCRIPTEN_USE_FLAGS -s USE_SDL=2 -s USE_FREETYPE=1 -s USE_LIBPNG=1 -s USE_ZLIB=1 -s USE_OGG=1 -s USE_VORBIS=1 -s FULL_ES2=1 -s WASM=0)
+		set(LIBSUPERDERPY_EMSCRIPTEN_MODE "asm.js" CACHE STRING "Emscripten compilation mode (JavaScript or WebAssembly)")
+		set_property(CACHE LIBSUPERDERPY_EMSCRIPTEN_MODE PROPERTY STRINGS "asm.js;wasm")
+		if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
+			# https://github.com/kripken/emscripten/issues/5436
+			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=1")
+			set(EMSCRIPTEN_USE_FLAGS ${EMSCRIPTEN_USE_FLAGS} -s WASM=1)
+			set(CMAKE_SHARED_MODULE_SUFFIX ".wasm")
+		else()
+			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=0")
+			set(EMSCRIPTEN_USE_FLAGS ${EMSCRIPTEN_USE_FLAGS} -s WASM=0)
+			set(CMAKE_SHARED_MODULE_SUFFIX ".js")
+		endif()
 		set(LIBSUPERDERPY_USE_WEBGL2 "no" CACHE STRING "Use WebGL 2 context")
 		if(LIBSUPERDERPY_USE_WEBGL2)
 			set(EMSCRIPTEN_USE_FLAGS ${EMSCRIPTEN_USE_FLAGS} -s USE_WEBGL2=1)
@@ -113,7 +127,7 @@ endif()
 
 	MACRO(register_gamestate name sources)
 
-	  add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" SHARED ${sources})
+		add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" MODULE ${sources})
 
 		set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
@@ -121,7 +135,7 @@ endif()
 
 		if (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 			target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy-${LIBSUPERDERPY_GAMENAME})
-		endif()
+		endif(TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 
 		install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${LIB_INSTALL_DIR})
 
@@ -134,19 +148,14 @@ endif()
 			string(REPLACE " " ";" CFLAGS_L ${CMAKE_C_FLAGS})
 			set(CFLAGS_LIST ${CFLAGS_L} ${${CFLAGS}})
 
-			add_custom_command(TARGET "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" POST_BUILD
-				WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/gamestates"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}.so -s SIDE_MODULE=1 -s WASM=0 -o libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}.js
-				VERBATIM
-			)
-		install(FILES "${CMAKE_BINARY_DIR}/src/gamestates/libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}.js" DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}/gamestates)
-	  endif()
+			install(FILES "${CMAKE_BINARY_DIR}/src/gamestates/libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}${CMAKE_SHARED_MODULE_SUFFIX}" DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}/gamestates)
+		endif()
 
 	ENDMACRO()
 
 	MACRO(libsuperderpy_copy EXECUTABLE)
 
-	  if (NOT APPLE AND NOT ANDROID)
+		if (NOT APPLE AND NOT ANDROID)
 			add_custom_command(TARGET "${EXECUTABLE}" PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libsuperderpy/src/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX}" $<TARGET_FILE_DIR:${EXECUTABLE}>)
 		endif (NOT APPLE AND NOT ANDROID)
 
@@ -183,7 +192,7 @@ endif()
 	endif(ANDROID OR EMSCRIPTEN)
 
 	MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
-	  if(ANDROID)
+		if(ANDROID)
 			set(EXECUTABLE game)
 			add_library(${EXECUTABLE} SHARED ${EXECUTABLE_SRC_LIST})
 
@@ -228,7 +237,7 @@ endif()
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_js
 				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_ogg
 				WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST}  ../${LIBSUPERDERPY_GAMENAME}.bc ../libsuperderpy.so ../libsuperderpy-${LIBSUPERDERPY_GAMENAME}.so ${ALLEGRO_LIBRARY_PATH} ${EMSCRIPTEN_USE_FLAGS} -s MAIN_MODULE=1 -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY_BYTES} -o ${LIBSUPERDERPY_GAMENAME}.html --preload-file data --preload-file gamestates@/
+				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO_LIBRARY_PATH} ${EMSCRIPTEN_USE_FLAGS} -s MAIN_MODULE=1 -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY_BYTES} -o ${LIBSUPERDERPY_GAMENAME}.html --preload-file data --preload-file gamestates@/
 				COMMAND rm -rf data gamestates
 				VERBATIM
 				)
@@ -255,7 +264,7 @@ endif()
 		file(COPY "${CMAKE_SOURCE_DIR}/libsuperderpy/android" DESTINATION "${CMAKE_BINARY_DIR}")
 
 		MACRO(configure_android_file PATH)
-		  configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
+			configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
 			file(REMOVE "${CMAKE_BINARY_DIR}/android/${PATH}.in")
 		ENDMACRO()
 
