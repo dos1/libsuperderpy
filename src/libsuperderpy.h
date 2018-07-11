@@ -52,6 +52,7 @@ struct GamestateResources;
 #include "timeline.h"
 #include "tween.h"
 #include "utils.h"
+#include <math.h>
 #include <sys/param.h>
 
 struct Gamestate;
