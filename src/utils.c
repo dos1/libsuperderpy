@@ -132,40 +132,6 @@ SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLO
 		x, y, sx, sy, 0, flags);
 }
 
-SYMBOL_EXPORT double DotProduct(const double v[], const double u[], int n) {
-	float result = 0.0;
-	for (int i = 0; i < n; i++) {
-		result += v[i] * u[i];
-	}
-	return result;
-}
-
-SYMBOL_EXPORT double VectorLength(double x, double y, double z) {
-	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-}
-
-SYMBOL_EXPORT double Wrap(double left, double right, double val) {
-	return left + fmod(val - left, right - left);
-}
-
-SYMBOL_EXPORT double Clamp(double left, double right, double val) {
-	if (val > right) {
-		return right;
-	}
-	if (val < left) {
-		return left;
-	}
-	return val;
-}
-
-SYMBOL_EXPORT double Lerp(double left, double right, double pos) {
-	return left + (right - left) * pos;
-}
-
-SYMBOL_EXPORT double Sign(double val) {
-	return val / fabs(val);
-}
-
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),

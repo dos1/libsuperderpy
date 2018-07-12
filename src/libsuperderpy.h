@@ -48,6 +48,7 @@ struct GamestateResources;
 #include "character.h"
 #include "config.h"
 #include "gamestate.h"
+#include "maths.h"
 #include "shader.h"
 #include "timeline.h"
 #include "tween.h"

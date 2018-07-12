@@ -58,13 +58,6 @@ void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags);
 void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags);
 void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags);
 
-double DotProduct(const double v[], const double u[], int n);
-double VectorLength(double x, double y, double z);
-double Wrap(double left, double right, double val);
-double Clamp(double left, double right, double val);
-double Lerp(double left, double right, double pos);
-double Sign(double val);
-
 ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac);
 void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 
