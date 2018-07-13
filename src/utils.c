@@ -508,3 +508,16 @@ SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
 	game->handlers.compositor = NULL;
 	ResizeGamestates(game);
 }
+
+SYMBOL_EXPORT char* PunchNumber(struct Game* game, char* txt, char ch, int number) {
+	// TODO: support numbers > 10
+	char* text = strdup(txt);
+	char* tmp = text;
+	while (*tmp) {
+		if (*tmp == ch) {
+			*tmp = '0' + number;
+		}
+		tmp++;
+	}
+	return AddGarbage(game, text);
+}
