@@ -90,4 +90,6 @@ ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates));
 void DisableCompositor(struct Game* game);
 
+char* PunchNumber(struct Game* game, char* text, char ch, int number);
+
 #endif
