@@ -95,5 +95,6 @@ void PauseExecution(struct Game* game);
 void ResumeExecution(struct Game* game);
 void ReloadShaders(struct Game* game, bool force);
 void DestroyShaders(struct Game* game);
+char* GetGameName(struct Game* game, const char* format);
 
 #endif

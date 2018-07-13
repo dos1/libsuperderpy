@@ -557,3 +557,11 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 	game->_priv.paused = false;
 	PrintConsole(game, "DEBUG: game execution resumed.");
 }
+
+SYMBOL_INTERNAL char* GetGameName(struct Game* game, const char* format) {
+	char* result = malloc(sizeof(char) * 255);
+	SUPPRESS_WARNING("-Wformat-nonliteral")
+	snprintf(result, 255, format, game->name);
+	SUPPRESS_END
+	return AddGarbage(game, result);
+}

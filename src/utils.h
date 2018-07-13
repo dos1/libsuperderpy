@@ -67,8 +67,6 @@ ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, i
 /*! \brief Finds path for data file. */
 char* GetDataFilePath(struct Game* game, const char* filename);
 
-char* GetGameName(struct Game* game, const char* format);
-
 /*! \brief Print some message on game console.
  *
  * Draws message on console bitmap, so it'll be displayed when calling DrawConsole.

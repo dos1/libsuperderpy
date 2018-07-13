@@ -317,14 +317,6 @@ static void TestPath(const char* filename, const char* subpath, char** result) {
 	al_destroy_path(path);
 }
 
-SYMBOL_EXPORT char* GetGameName(struct Game* game, const char* format) {
-	char* result = malloc(sizeof(char) * 255);
-	SUPPRESS_WARNING("-Wformat-nonliteral")
-	snprintf(result, 255, format, game->name);
-	SUPPRESS_END
-	return AddGarbage(game, result);
-}
-
 static char* TestDataFilePath(struct Game* game, const char* filename) {
 	char* result = NULL;
 
