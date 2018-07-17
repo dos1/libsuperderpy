@@ -243,7 +243,7 @@ static double BounceEaseInOut(double p) {
 
 // ------------------------------------------------------------------------------
 
-SYMBOL_EXPORT struct Tween Tween(struct Game* game, double start, double stop, double duration, TWEEN_STYLE style) {
+SYMBOL_EXPORT struct Tween Tween(struct Game* game, double start, double stop, TWEEN_STYLE style, double duration) {
 	return (struct Tween){
 		.start = start,
 		.stop = stop,

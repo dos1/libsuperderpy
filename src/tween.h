@@ -79,7 +79,7 @@ struct Tween {
 	void* data;
 };
 
-struct Tween Tween(struct Game* game, double start, double stop, double duration, TWEEN_STYLE style);
+struct Tween Tween(struct Game* game, double start, double stop, TWEEN_STYLE style, double duration);
 double GetTweenPosition(struct Tween* tween);
 double GetTweenInterpolation(struct Tween* tween);
 double GetTweenValue(struct Tween* tween);
