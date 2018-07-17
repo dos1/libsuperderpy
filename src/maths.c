@@ -27,6 +27,14 @@
 #include <stdio.h>
 #include <string.h>
 
+SYMBOL_EXPORT double DotProduct(const double v[], const double u[], int n) {
+	float result = 0.0;
+	for (int i = 0; i < n; i++) {
+		result += v[i] * u[i];
+	}
+	return result;
+}
+
 SYMBOL_EXPORT double VectorLength(double x, double y, double z) {
 	return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
