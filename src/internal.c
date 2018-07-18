@@ -295,7 +295,7 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 }
 
 SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestate) {
-	gamestate->api = malloc(sizeof(struct Gamestate_API));
+	gamestate->api = calloc(1, sizeof(struct Gamestate_API));
 
 #define GS_ERROR                                                                                                            \
 	FatalError(game, false, "Error on resolving gamestate's %s symbol: %s", gamestate->name, dlerror()); /* TODO: move out */ \
@@ -552,8 +552,12 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 				if (tmp->api->Gamestate_Reload) {
 					tmp->api->Gamestate_Reload(game, tmp->data);
 				}
+			} else {
+				// live-reload failed
+				tmp->loaded = false;
 			}
 		}
+
 		if (!tmp->paused && tmp->loaded && tmp->api->Gamestate_Resume) {
 			tmp->api->Gamestate_Resume(game, tmp->data);
 		}
