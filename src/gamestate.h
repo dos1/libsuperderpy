@@ -49,6 +49,7 @@ struct Gamestate {
 	bool frozen;
 	bool showLoading;
 	bool paused;
+	bool fromlib;
 	struct Gamestate* next;
 	struct Gamestate_API* api;
 	ALLEGRO_BITMAP* fb;

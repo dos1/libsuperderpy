@@ -340,6 +340,7 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->pending_unload = false;
 	tmp->next = NULL;
 	tmp->api = NULL;
+	tmp->fromlib = true;
 	tmp->progressCount = 0;
 	return tmp;
 }
@@ -543,16 +544,18 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 	PrintConsole(game, "DEBUG: reloading the gamestates...");
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		char* name = strdup(tmp->name);
-		CloseGamestate(game, tmp);
-		tmp->name = name;
-		if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
-			if (tmp->api->Gamestate_Reload) {
-				tmp->api->Gamestate_Reload(game, tmp->data);
+		if (tmp->fromlib) {
+			char* name = strdup(tmp->name);
+			CloseGamestate(game, tmp);
+			tmp->name = name;
+			if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
+				if (tmp->api->Gamestate_Reload) {
+					tmp->api->Gamestate_Reload(game, tmp->data);
+				}
 			}
-			if (!tmp->paused && tmp->api->Gamestate_Resume) {
-				tmp->api->Gamestate_Resume(game, tmp->data);
-			}
+		}
+		if (!tmp->paused && tmp->loaded && tmp->api->Gamestate_Resume) {
+			tmp->api->Gamestate_Resume(game, tmp->data);
 		}
 		tmp = tmp->next;
 	}

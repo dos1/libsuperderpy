@@ -58,6 +58,7 @@ SYMBOL_EXPORT void RegisterGamestate(struct Game* game, const char* name, struct
 		return;
 	}
 	gs->api = api;
+	gs->fromlib = false;
 	PrintConsole(game, "Gamestate \"%s\" registered.", name);
 }
 
