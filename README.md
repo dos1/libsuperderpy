@@ -31,6 +31,7 @@ Used by such games as:
 - [SUPERSHOD HD](https://github.com/dos1/supershod/tree/remake)
 - [Mouse Sensitivity](https://github.com/dos1/mousesensitivity)
 - [Zenek i Gienek przejmują władzę nad światem](https://github.com/dos1/zenek-i-gienek-przejmuja-wladze-nad-swiatem)
+- [Wakey Wakey](https://github.com/dos1/wakeywakey)
 - Rumina
 
 WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
