@@ -527,6 +527,13 @@ SYMBOL_INTERNAL char* GetLibraryPath(struct Game* game, char* filename) {
 }
 
 SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (!tmp->paused && tmp->loaded && tmp->api->Gamestate_Pause) {
+			tmp->api->Gamestate_Pause(game, tmp->data);
+		}
+		tmp = tmp->next;
+	}
 	game->_priv.paused = true;
 	PrintConsole(game, "DEBUG: game execution paused.");
 }
@@ -542,6 +549,9 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 		if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
 			if (tmp->api->Gamestate_Reload) {
 				tmp->api->Gamestate_Reload(game, tmp->data);
+			}
+			if (!tmp->paused && tmp->api->Gamestate_Resume) {
+				tmp->api->Gamestate_Resume(game, tmp->data);
 			}
 		}
 		tmp = tmp->next;
