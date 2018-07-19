@@ -1,5 +1,5 @@
 # libsuperderpy
-A multiplatform game engine for games written in C and Allegro 5. Supports GNU/Linux, Android, macOS and Windows.
+A multiplatform game engine for games written in C and Allegro 5. Supports GNU/Linux, Android, FreeBSD, macOS, Windows and asm.js
 
 Used by such games as:
 - Rumina
