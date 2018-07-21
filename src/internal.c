@@ -530,7 +530,7 @@ SYMBOL_INTERNAL char* GetLibraryPath(struct Game* game, char* filename) {
 SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (!tmp->paused && tmp->loaded && tmp->api->Gamestate_Pause) {
+		if (!tmp->paused && tmp->loaded && tmp->started && tmp->api->Gamestate_Pause) {
 			tmp->api->Gamestate_Pause(game, tmp->data);
 		}
 		tmp = tmp->next;
@@ -558,7 +558,7 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 			}
 		}
 
-		if (!tmp->paused && tmp->loaded && tmp->api->Gamestate_Resume) {
+		if (!tmp->paused && tmp->loaded && tmp->started && tmp->api->Gamestate_Resume) {
 			tmp->api->Gamestate_Resume(game, tmp->data);
 		}
 		tmp = tmp->next;
