@@ -3,6 +3,7 @@ A multiplatform game engine for games written in C and Allegro 5. Supports GNU/L
 
 Used by such games as:
 - Rumina
+- [Non-Competitive Singing Potatoes](https://github.com/dos1/potatoes)
 - [Wakey Wakey](https://github.com/dos1/wakeywakey)
 - [Zenek i Gienek przejmują władzę nad światem](https://github.com/dos1/zenek-i-gienek-przejmuja-wladze-nad-swiatem)
 - [Mouse Sensitivity](https://github.com/dos1/mousesensitivity)
