@@ -265,7 +265,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mixer_gain(game->audio.fx, game->config.fx / 10.0);
 	al_set_mixer_gain(game->audio.music, game->config.music / 10.0);
 	al_set_mixer_gain(game->audio.voice, game->config.voice / 10.0);
-	al_set_mixer_playing(game->audio.mixer, !game->config.mute);
+	al_set_mixer_gain(game->audio.mixer, game->config.mute ? 0.0 : 1.0);
 
 	setlocale(LC_NUMERIC, "C");
 
