@@ -78,6 +78,7 @@ struct Game {
 		int fx; /*!< Effects volume. */
 		int music; /*!< Music volume. */
 		int voice; /*!< Voice volume. */
+		bool mute; /*!< Whether audio should be muted globally. */
 		bool fullscreen; /*!< Fullscreen toggle. */
 		bool debug; /*!< Toggles debug mode. */
 		int width; /*!< Width of window as being set in configuration. */

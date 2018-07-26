@@ -93,6 +93,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
+	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
 	game->config.debug = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
 	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", "1280"), NULL, 10);
 	if (game->config.width < 320) { game->config.width = 320; }
@@ -264,6 +265,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mixer_gain(game->audio.fx, game->config.fx / 10.0);
 	al_set_mixer_gain(game->audio.music, game->config.music / 10.0);
 	al_set_mixer_gain(game->audio.voice, game->config.voice / 10.0);
+	al_set_mixer_playing(game->audio.mixer, !game->config.mute);
 
 	setlocale(LC_NUMERIC, "C");
 
