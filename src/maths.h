@@ -30,7 +30,7 @@ double VectorLength(double x, double y, double z);
 double Wrap(double left, double right, double val);
 double Clamp(double left, double right, double val);
 double Lerp(double left, double right, double pos);
-double Sign(double val);
+int Sign(double val);
 double Fract(double val);
 
 #endif

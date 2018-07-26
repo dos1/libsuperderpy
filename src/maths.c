@@ -57,7 +57,7 @@ SYMBOL_EXPORT double Lerp(double left, double right, double pos) {
 	return left + (right - left) * pos;
 }
 
-SYMBOL_EXPORT double Sign(double val) {
+SYMBOL_EXPORT int Sign(double val) {
 	return val / fabs(val);
 }
 
