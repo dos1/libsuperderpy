@@ -53,6 +53,8 @@ struct Spritesheet {
 	bool reversed;
 	double pivotX;
 	double pivotY;
+	int offsetX;
+	int offsetY;
 	bool flipX;
 	bool flipY;
 	struct SpritesheetFrame* frames;

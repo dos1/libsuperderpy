@@ -240,6 +240,9 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->pivotX = strtodnull(al_get_config_value(config, "pivot", "x"), 0.5);
 	s->pivotY = strtodnull(al_get_config_value(config, "pivot", "y"), 0.5);
 
+	s->offsetX = strtolnull(al_get_config_value(config, "offset", "x"), 0);
+	s->offsetY = strtolnull(al_get_config_value(config, "offset", "y"), 0);
+
 	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frameCount);
 
 	for (int i = 0; i < s->frameCount; i++) {
@@ -476,7 +479,7 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
 	al_translate_transform(&transform, w / 2.0, h / 2.0);
 
-	al_translate_transform(&transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
+	al_translate_transform(&transform, character->spritesheet->offsetX + character->spritesheet->frames[character->pos].x, character->spritesheet->offsetY + character->spritesheet->frames[character->pos].y); // spritesheet frame offset
 	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
