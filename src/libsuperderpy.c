@@ -221,8 +221,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	PrintConsole(game, "Viewport %dx%d", game->viewport.width, game->viewport.height);
-
 	ALLEGRO_BITMAP* icon = al_load_bitmap(GetDataFilePath(game, GetGameName(game, "icons/%s.png")));
 	al_set_display_icon(game->display, icon);
 	al_destroy_bitmap(icon);
@@ -564,7 +562,6 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
-				ResizeGamestates(game);
 			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
 				PauseExecution(game);
 			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {

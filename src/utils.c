@@ -462,6 +462,9 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 	al_use_transform(&game->projection);
 	Console_Unload(game);
 	Console_Load(game);
+	ResizeGamestates(game);
+
+	PrintConsole(game, "Viewport %dx%d; display %dx%d", game->viewport.width, game->viewport.height, al_get_display_width(game->display), al_get_display_height(game->display));
 }
 
 SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
