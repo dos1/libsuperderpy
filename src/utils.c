@@ -528,3 +528,19 @@ SYMBOL_EXPORT char* PunchNumber(struct Game* game, char* text, char ch, int numb
 	};
 	return AddGarbage(game, txt);
 }
+
+SYMBOL_EXPORT void QuitGame(struct Game* game, bool allow_pausing) {
+#ifdef ALLEGRO_ANDROID
+	if (allow_pausing) {
+		JNIEnv* env = al_android_get_jni_env();
+		jclass class_id = (*env)->GetObjectClass(env, al_android_get_activity());
+		jmethodID method_id = (*env)->GetMethodID(env, class_id, "moveTaskToBack",
+			"(Z)Z");
+		jvalue jdata;
+		jdata.z = JNI_TRUE;
+		(*env)->CallBooleanMethodA(env, al_android_get_activity(), method_id, &jdata);
+		return;
+	}
+#endif
+	UnloadAllGamestates(game);
+}

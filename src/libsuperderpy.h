@@ -39,6 +39,7 @@ struct GamestateResources;
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_video.h>
 #ifdef ALLEGRO_ANDROID
+#define ALLEGRO_UNSTABLE
 #include <allegro5/allegro_android.h>
 #endif
 #ifdef __EMSCRIPTEN__
