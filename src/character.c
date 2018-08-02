@@ -369,7 +369,7 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 }
 
 SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier) {
-	if (character->hidden) {
+	if (IsCharacterHidden(game, character)) {
 		return;
 	}
 
@@ -484,11 +484,15 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
 	al_translate_transform(&transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
+	if (character->parent) {
+		ALLEGRO_TRANSFORM parent = GetCharacterTransform(game, character->parent);
+		al_compose_transform(&transform, &parent);
+	}
 	return transform;
 }
 
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
-	if (character->hidden) {
+	if (IsCharacterHidden(game, character)) {
 		return;
 	}
 
@@ -510,17 +514,21 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_use_transform(&current);
 }
 
+SYMBOL_EXPORT void SetParentCharacter(struct Game* game, struct Character* character, struct Character* parent) {
+	character->parent = parent;
+}
+
 SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
 	character->confineX = x;
 	character->confineY = y;
 }
 
 SYMBOL_EXPORT int GetCharacterConfineX(struct Game* game, struct Character* character) {
-	return (character->confineX >= 0) ? character->confineX : game->viewport.width;
+	return (character->confineX >= 0) ? character->confineX : (character->parent ? GetCharacterConfineX(game, character->parent) : game->viewport.width);
 }
 
 SYMBOL_EXPORT int GetCharacterConfineY(struct Game* game, struct Character* character) {
-	return (character->confineY >= 0) ? character->confineY : game->viewport.height;
+	return (character->confineY >= 0) ? character->confineY : (character->parent ? GetCharacterConfineY(game, character->parent) : game->viewport.height);
 }
 
 SYMBOL_EXPORT float GetCharacterX(struct Game* game, struct Character* character) {
@@ -540,7 +548,7 @@ static void SortTwoFloats(float* v1, float* v2) {
 }
 
 SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect) {
-	if (character->hidden) {
+	if (IsCharacterHidden(game, character)) {
 		return false;
 	}
 
@@ -570,4 +578,13 @@ SYMBOL_EXPORT void ShowCharacter(struct Game* game, struct Character* character)
 }
 SYMBOL_EXPORT void HideCharacter(struct Game* game, struct Character* character) {
 	character->hidden = true;
+}
+SYMBOL_EXPORT bool IsCharacterHidden(struct Game* game, struct Character* character) {
+	if (character->hidden) {
+		return true;
+	}
+	if (character->parent) {
+		return IsCharacterHidden(game, character->parent);
+	}
+	return false;
 }

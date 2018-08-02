@@ -105,8 +105,6 @@ struct Character {
 	void* callbackData;
 	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
-
-	// TODO: parents
 };
 
 // TODO: document functions
@@ -136,6 +134,8 @@ void SetCharacterPosition(struct Game* game, struct Character* character, float 
 void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y);
 
+void SetParentCharacter(struct Game* game, struct Character* character, struct Character* parent);
+
 float GetCharacterX(struct Game* game, struct Character* character);
 float GetCharacterY(struct Game* game, struct Character* character);
 int GetCharacterConfineX(struct Game* game, struct Character* character);
@@ -144,5 +144,6 @@ int GetCharacterConfineY(struct Game* game, struct Character* character);
 bool IsOnCharacter(struct Game* game, struct Character* character, float x, float y, bool pixelperfect);
 void ShowCharacter(struct Game* game, struct Character* character);
 void HideCharacter(struct Game* game, struct Character* character);
+bool IsCharacterHidden(struct Game* game, struct Character* character);
 
 #endif
