@@ -185,7 +185,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_window_position(20, 40); // workaround nasty Windows bug with window being created off-screen
 #endif
 
-	al_set_new_window_title(game->name);
+	al_set_new_window_title(al_get_app_name());
 	game->display = al_create_display(game->config.width, game->config.height);
 	if (!game->display) {
 		fprintf(stderr, "Failed to create display!\n");
