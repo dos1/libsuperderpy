@@ -430,6 +430,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
 							}
 							game->_priv.loading.time += delta;
+							game->time += delta; // TODO: ability to disable passing time during loading
 							if (game->_priv.texture_sync) {
 								al_convert_memory_bitmaps();
 								game->_priv.texture_sync = false;
@@ -508,6 +509,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			double delta = al_get_time() - game->_priv.timestamp;
 			game->_priv.timestamp += delta;
 			delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
+			game->time += delta;
 			if (!game->_priv.paused) {
 				LogicGamestates(game, delta);
 				DrawGamestates(game);

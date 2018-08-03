@@ -77,6 +77,8 @@ struct Game {
 
 	struct Viewport viewport, viewport_config;
 
+	double time; /*!< In-game total passed time in seconds. */
+
 	struct {
 		int fx; /*!< Effects volume. */
 		int music; /*!< Music volume. */
