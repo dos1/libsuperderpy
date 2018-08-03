@@ -27,6 +27,7 @@
 
 struct SpritesheetFrame {
 	char* file;
+	char* filepath;
 	ALLEGRO_BITMAP* bitmap;
 	double duration;
 	int row;
@@ -46,6 +47,7 @@ struct Spritesheet {
 	int cols; /*!< Number of columns in the spritesheet. */
 	double duration;
 	char* file;
+	char* filepath;
 	int repeats; /*!< Number of repeats to make before the spritesheet is changed to its successor. */
 	char* successor; /*!< Name of animation successor. If it's not blank, then animation will be played only once. */
 	char* predecessor;

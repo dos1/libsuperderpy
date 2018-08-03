@@ -46,9 +46,15 @@
 #define SUPPRESS_END
 #endif
 
-struct libsuperderpy_list {
+struct RefCount {
+	int counter;
+	char* id;
 	void* data;
-	struct libsuperderpy_list* next;
+};
+
+struct List {
+	void* data;
+	struct List* next;
 };
 
 struct GamestateLoadingThreadData {
@@ -80,9 +86,9 @@ void GamestateProgress(struct Game* game);
 void* AddGarbage(struct Game* game, void* data);
 void ClearGarbage(struct Game* game);
 void ClearScreen(struct Game* game);
-struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data);
-struct libsuperderpy_list* FindInList(struct libsuperderpy_list* list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
-void* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data));
+struct List* AddToList(struct List* list, void* data);
+struct List* FindInList(struct List* list, void* data, bool (*identity)(struct List* elem, void* data));
+void* RemoveFromList(struct List** list, void* data, bool (*identity)(struct List* elem, void* data));
 void AddTimeline(struct Game* game, struct Timeline* timeline);
 void RemoveTimeline(struct Game* game, struct Timeline* timeline);
 void DrawTimelines(struct Game* game);
@@ -96,5 +102,7 @@ void ResumeExecution(struct Game* game);
 void ReloadShaders(struct Game* game, bool force);
 void DestroyShaders(struct Game* game);
 char* GetGameName(struct Game* game, const char* format);
+ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename);
+void RemoveBitmap(struct Game* game, char* filename);
 
 #endif

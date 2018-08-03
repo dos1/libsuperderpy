@@ -96,7 +96,7 @@ SYMBOL_EXPORT ALLEGRO_SHADER* CreateShader(struct Game* game, const char* vertex
 	return shader;
 }
 
-static bool ShaderIdentity(struct libsuperderpy_list* item, void* shader) {
+static bool ShaderIdentity(struct List* item, void* shader) {
 	return ((struct ShaderListItem*)item->data)->shader == shader;
 }
 
@@ -118,7 +118,7 @@ SYMBOL_EXPORT void DestroyShader(struct Game* game, ALLEGRO_SHADER* shader) {
 }
 
 SYMBOL_INTERNAL void ReloadShaders(struct Game* game, bool force) {
-	struct libsuperderpy_list* list = game->_priv.shaders;
+	struct List* list = game->_priv.shaders;
 	PrintConsole(game, "Reloading shaders...");
 	while (list) {
 		struct ShaderListItem* item = list->data;
@@ -150,7 +150,7 @@ SYMBOL_INTERNAL void DestroyShaders(struct Game* game) {
 		if (item->fragment) {
 			free(item->fragment);
 		}
-		struct libsuperderpy_list* prev = game->_priv.shaders;
+		struct List* prev = game->_priv.shaders;
 		game->_priv.shaders = game->_priv.shaders->next;
 		free(prev);
 	}

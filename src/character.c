@@ -105,8 +105,13 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 		PrintConsole(game, "- %s", tmp->name);
 		if ((!tmp->bitmap) && (tmp->file)) {
 			char filename[255] = {0};
-			snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
-			tmp->bitmap = al_load_bitmap(GetDataFilePath(game, filename));
+			if (strstr(tmp->file, "../") == tmp->file) {
+				snprintf(filename, 255, "sprites/%s", tmp->file + 3);
+			} else {
+				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
+			}
+			tmp->bitmap = AddBitmap(game, filename);
+			tmp->filepath = strdup(filename);
 			tmp->width = al_get_bitmap_width(tmp->bitmap) / tmp->cols;
 			tmp->height = al_get_bitmap_height(tmp->bitmap) / tmp->rows;
 		}
@@ -116,8 +121,13 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 					PrintConsole(game, "  - %s", tmp->frames[i].file);
 				}
 				char filename[255] = {0};
-				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
-				tmp->frames[i].bitmap = al_load_bitmap(GetDataFilePath(game, filename));
+				if (strstr(tmp->frames[i].file, "../") == tmp->frames[i].file) {
+					snprintf(filename, 255, "sprites/%s", tmp->frames[i].file + 3);
+				} else {
+					snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
+				}
+				tmp->frames[i].bitmap = AddBitmap(game, filename);
+				tmp->frames[i].filepath = strdup(filename);
 				int width = al_get_bitmap_width(tmp->frames[i].bitmap) + tmp->frames[i].x;
 				if (width > tmp->width) {
 					tmp->width = width;
@@ -146,12 +156,14 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
 		for (int i = 0; i < tmp->frameCount; i++) {
-			if (tmp->frames[i].bitmap) {
+			if (tmp->frames[i].filepath) {
+				RemoveBitmap(game, tmp->frames[i].filepath);
+			} else {
 				al_destroy_bitmap(tmp->frames[i].bitmap);
 			}
 		}
 		if (tmp->bitmap) {
-			al_destroy_bitmap(tmp->bitmap);
+			RemoveBitmap(game, tmp->filepath);
 		}
 		tmp->bitmap = NULL;
 		tmp = tmp->next;
@@ -227,6 +239,8 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		strncpy(s->predecessor, predecessor, len);
 	}
 
+	s->filepath = NULL;
+
 	{
 		s->file = NULL;
 		const char* file = al_get_config_value(config, "animation", "file");
@@ -263,6 +277,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 			s->frames[i].file = malloc(len * sizeof(char));
 			strncpy(s->frames[i].file, file, len);
 		}
+		s->frames[i].filepath = NULL;
 
 		if (!file) {
 			s->frames[i].col = i % s->cols;
@@ -342,15 +357,23 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 				free(tmp->file);
 			}
 			for (int i = 0; i < tmp->frameCount; i++) {
-				if (tmp->frames[i].bitmap) {
+				if (tmp->frames[i].filepath) {
+					RemoveBitmap(game, tmp->frames[i].filepath);
+				} else {
 					al_destroy_bitmap(tmp->frames[i].bitmap);
 				}
 				if (tmp->frames[i].file) {
 					free(tmp->frames[i].file);
 				}
+				if (tmp->frames[i].filepath) {
+					free(tmp->frames[i].filepath);
+				}
 			}
 			if (tmp->bitmap) {
-				al_destroy_bitmap(tmp->bitmap);
+				RemoveBitmap(game, tmp->filepath);
+			}
+			if (tmp->filepath) {
+				free(tmp->filepath);
 			}
 			free(tmp->frames);
 			free(tmp->name);
@@ -475,6 +498,7 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	ALLEGRO_TRANSFORM transform;
 	int w = character->spritesheet->width, h = character->spritesheet->height;
 	al_identity_transform(&transform);
+
 	al_translate_transform(&transform, -w / 2.0, -h / 2.0);
 	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
 	al_translate_transform(&transform, w / 2.0, h / 2.0);
@@ -483,10 +507,13 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
+
 	al_translate_transform(&transform, GetCharacterX(game, character), GetCharacterY(game, character)); // position
+
 	if (character->parent) {
 		ALLEGRO_TRANSFORM parent = GetCharacterTransform(game, character->parent);
 		al_compose_transform(&transform, &parent);
+		// FIXME: position should be calculated in relation to parents pivot point
 	}
 	return transform;
 }

@@ -359,13 +359,13 @@ SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamesta
 	al_destroy_bitmap(gamestate->fb);
 }
 
-SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list* list, void* data) {
+SYMBOL_INTERNAL struct List* AddToList(struct List* list, void* data) {
 	if (!list) {
-		list = malloc(sizeof(struct libsuperderpy_list));
+		list = malloc(sizeof(struct List));
 		list->data = data;
 		list->next = NULL;
 	} else {
-		struct libsuperderpy_list* elem = malloc(sizeof(struct libsuperderpy_list));
+		struct List* elem = malloc(sizeof(struct List));
 		elem->next = list;
 		elem->data = data;
 		list = elem;
@@ -373,12 +373,12 @@ SYMBOL_INTERNAL struct libsuperderpy_list* AddToList(struct libsuperderpy_list* 
 	return list;
 }
 
-static bool Identity(struct libsuperderpy_list* elem, void* data) {
+static bool Identity(struct List* elem, void* data) {
 	return elem->data == data;
 }
 
-SYMBOL_INTERNAL struct libsuperderpy_list* FindInList(struct libsuperderpy_list* list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
-	struct libsuperderpy_list* tmp = list;
+SYMBOL_INTERNAL struct List* FindInList(struct List* list, void* data, bool (*identity)(struct List* elem, void* data)) {
+	struct List* tmp = list;
 	if (!identity) {
 		identity = Identity;
 	}
@@ -391,8 +391,8 @@ SYMBOL_INTERNAL struct libsuperderpy_list* FindInList(struct libsuperderpy_list*
 	return NULL;
 }
 
-SYMBOL_INTERNAL void* RemoveFromList(struct libsuperderpy_list** list, void* data, bool (*identity)(struct libsuperderpy_list* elem, void* data)) {
-	struct libsuperderpy_list *prev = NULL, *tmp = *list, *start;
+SYMBOL_INTERNAL void* RemoveFromList(struct List** list, void* data, bool (*identity)(struct List* elem, void* data)) {
+	struct List *prev = NULL, *tmp = *list, *start;
 	void* d = NULL;
 	if (!identity) {
 		identity = Identity;
@@ -424,7 +424,7 @@ SYMBOL_INTERNAL void* AddGarbage(struct Game* game, void* data) {
 }
 
 SYMBOL_INTERNAL void ClearGarbage(struct Game* game) {
-	struct libsuperderpy_list* tmp;
+	struct List* tmp;
 	while (game->_priv.garbage) {
 		free(game->_priv.garbage->data);
 		tmp = game->_priv.garbage->next;
@@ -438,16 +438,16 @@ SYMBOL_INTERNAL void AddTimeline(struct Game* game, struct Timeline* timeline) {
 }
 
 SYMBOL_INTERNAL void RemoveTimeline(struct Game* game, struct Timeline* timeline) {
-	struct libsuperderpy_list* tmp = game->_priv.timelines;
+	struct List* tmp = game->_priv.timelines;
 	if (tmp->data == timeline) {
-		struct libsuperderpy_list* next = tmp->next;
+		struct List* next = tmp->next;
 		free(tmp);
 		game->_priv.timelines = next;
 		return;
 	}
 	while (tmp->next) {
 		if (tmp->next->data == timeline) {
-			struct libsuperderpy_list* next = tmp->next->next;
+			struct List* next = tmp->next->next;
 			free(tmp->next);
 			tmp->next = next;
 			return;
@@ -500,7 +500,7 @@ SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
 	if (!game->_priv.showtimeline) {
 		return;
 	}
-	struct libsuperderpy_list* tmp = game->_priv.timelines;
+	struct List* tmp = game->_priv.timelines;
 	int i = 0;
 	while (tmp) {
 		DrawTimeline(game, tmp->data, i);
@@ -573,4 +573,55 @@ SYMBOL_INTERNAL char* GetGameName(struct Game* game, const char* format) {
 	snprintf(result, 255, format, game->name);
 	SUPPRESS_END
 	return AddGarbage(game, result);
+}
+
+static int HashString(struct Game* game, const char* str) {
+	unsigned long hash = 5381;
+	int c;
+
+	while ((c = *str++)) {
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+	}
+
+	//PrintConsole(game, "sum %d, bucket %d", hash, hash % LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS);
+	return hash % LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS;
+}
+
+static bool RefCountIdentity(struct List* elem, void* data) {
+	struct RefCount* item = elem->data;
+	return strcmp(data, item->id) == 0;
+}
+
+SYMBOL_INTERNAL ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename) {
+	int bucket = HashString(game, filename);
+	struct List* item = FindInList(game->_priv.bitmaps[bucket], filename, RefCountIdentity);
+	struct RefCount* rc;
+	if (item) {
+		rc = item->data;
+		rc->counter++;
+	} else {
+		rc = malloc(sizeof(struct RefCount));
+		rc->counter = 1;
+		rc->id = strdup(filename);
+		rc->data = al_load_bitmap(GetDataFilePath(game, filename));
+		game->_priv.bitmaps[bucket] = AddToList(game->_priv.bitmaps[bucket], rc);
+	}
+	return rc->data;
+}
+
+SYMBOL_INTERNAL void RemoveBitmap(struct Game* game, char* filename) {
+	int bucket = HashString(game, filename);
+	struct List* item = FindInList(game->_priv.bitmaps[bucket], filename, RefCountIdentity);
+	if (item) {
+		struct RefCount* rc = item->data;
+		rc->counter--;
+		if (rc->counter == 0) {
+			RemoveFromList(&game->_priv.bitmaps[bucket], filename, RefCountIdentity);
+			al_destroy_bitmap(rc->data);
+			free(rc->id);
+			free(rc);
+		}
+	} else {
+		PrintConsole(game, "Tried to remove non-existent bitmap %s!", filename);
+	}
 }

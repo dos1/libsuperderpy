@@ -57,6 +57,8 @@ struct GamestateResources;
 #include <math.h>
 #include <sys/param.h>
 
+#define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
+
 struct Gamestate;
 
 struct Viewport {
@@ -129,7 +131,7 @@ struct Game {
 
 		struct Gamestate* current_gamestate;
 
-		struct libsuperderpy_list *garbage, *timelines, *shaders;
+		struct List *garbage, *timelines, *shaders, *bitmaps[LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS];
 
 		bool draw;
 
