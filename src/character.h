@@ -30,6 +30,7 @@ struct SpritesheetFrame {
 	char* filepath;
 	ALLEGRO_BITMAP* bitmap;
 	double duration;
+	ALLEGRO_COLOR tint;
 	int row;
 	int col;
 	int x;

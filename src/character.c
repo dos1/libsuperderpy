@@ -270,6 +270,13 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s->frames[i].flipX = strtolnull(al_get_config_value(config, framename, "flipX"), 0);
 		s->frames[i].flipY = strtolnull(al_get_config_value(config, framename, "flipY"), 0);
 
+		double r, g, b, a;
+		r = strtodnull(al_get_config_value(config, framename, "r"), 1);
+		g = strtodnull(al_get_config_value(config, framename, "g"), 1);
+		b = strtodnull(al_get_config_value(config, framename, "b"), 1);
+		a = strtodnull(al_get_config_value(config, framename, "a"), 1);
+		s->frames[i].tint = al_premul_rgba_f(r, g, b, a);
+
 		s->frames[i].file = NULL;
 		const char* file = al_get_config_value(config, framename, "file");
 		if (file) {
@@ -529,7 +536,12 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_compose_transform(&transform, &current);
 	al_use_transform(&transform);
 
-	al_draw_tinted_bitmap(character->frame->bitmap, character->tint, 0, 0, 0);
+	float r, g, b, a, r2, g2, b2, a2;
+	al_unmap_rgba_f(character->tint, &r, &g, &b, &a);
+	al_unmap_rgba_f(character->frame->tint, &r2, &g2, &b2, &a2);
+	ALLEGRO_COLOR tint = al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
+
+	al_draw_tinted_bitmap(character->frame->bitmap, tint, 0, 0, 0);
 
 	/*	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
