@@ -428,6 +428,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 							if (tmp->showLoading) {
 								(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
+								game->handlers.postdraw(game);
 							}
 							game->_priv.loading.time += delta;
 							game->time += delta; // TODO: ability to disable passing time during loading
