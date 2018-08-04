@@ -197,6 +197,15 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_android_set_apk_fs_interface();
 #endif
 
+#if !defined(ALLEGRO_ANDROID) && !defined(ALLEGRO_IPHONE) && !defined(ALLEGRO_SDL)
+	// We're always using OpenGL which already preserves textures on its own, so avoid
+	// excessive RAM usage by not backuping the bitmaps when not necessary.
+	// Android and iOS can threw out the context, so bitmaps need to be preserved there.
+	// SDL2 backend seems to have some workaround for old SDL bug, worth looking into.
+	// This will have to be revisited on mobile GNU/Linux platforms.
+	al_add_new_bitmap_flag(ALLEGRO_NO_PRESERVE_TEXTURE);
+#endif
+
 	PrintConsole(game, "libsuperderpy 2 (rev " LIBSUPERDERPY_GIT_REV ")");
 	PrintConsole(game, "OpenGL%s (%08X)", al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? " ES" : "", al_get_opengl_version());
 
