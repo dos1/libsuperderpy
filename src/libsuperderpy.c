@@ -197,9 +197,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_android_set_apk_fs_interface();
 #endif
 
-	SetupViewport(game, viewport);
-
-	PrintConsole(game, "libsuperderpy 2");
+	PrintConsole(game, "libsuperderpy 2 (rev " LIBSUPERDERPY_GIT_REV ")");
 	PrintConsole(game, "OpenGL%s (%08X)", al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? " ES" : "", al_get_opengl_version());
 
 	PrintConsole(game, "Max bitmap size: %d", al_get_display_option(game->display, ALLEGRO_MAX_BITMAP_SIZE));
@@ -227,6 +225,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	if (game->config.fullscreen) { al_hide_mouse_cursor(game->display); }
 	al_inhibit_screensaver(true);
+
+	SetupViewport(game, viewport);
 
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
