@@ -510,7 +510,6 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1)); // flipping; FIXME: should it be here or later?
 	al_translate_transform(&transform, w / 2.0, h / 2.0);
 
-	al_translate_transform(&transform, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y); // spritesheet frame offset
 	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY); // pivot
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
@@ -542,7 +541,7 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_unmap_rgba_f(character->frame->tint, &r2, &g2, &b2, &a2);
 	ALLEGRO_COLOR tint = al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
 
-	al_draw_tinted_bitmap(character->frame->bitmap, tint, 0, 0, 0);
+	al_draw_tinted_bitmap(character->frame->bitmap, tint, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y, 0);
 
 	/*	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
@@ -606,7 +605,7 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x, y);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x - character->spritesheet->frames[character->pos].x, y - character->spritesheet->frames[character->pos].y);
 		return (color.a > 0.0);
 	}
 
