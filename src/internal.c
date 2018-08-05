@@ -42,7 +42,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	}
 	struct Gamestate* tmp = game->_priv.gamestates;
 	if (game->handlers.predraw) {
-		(*game->handlers.predraw)(game);
+		game->handlers.predraw(game);
 	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
@@ -51,7 +51,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 			if (game->handlers.compositor) { // don't clear when uncomposited
 				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
-			(*tmp->api->Gamestate_Draw)(game, tmp->data);
+			tmp->api->Gamestate_Draw(game, tmp->data);
 			// TODO: save and restore more state for careless gamestating
 		}
 		tmp = tmp->next;
@@ -71,24 +71,37 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		game->handlers.compositor(game, game->_priv.gamestates);
 	}
 	if (game->handlers.postdraw) {
-		(*game->handlers.postdraw)(game);
+		game->handlers.postdraw(game);
 	}
 }
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	if (game->handlers.prelogic) {
-		(*game->handlers.prelogic)(game, delta);
+		game->handlers.prelogic(game, delta);
 	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Logic)(game, tmp->data, delta);
+			tmp->api->Gamestate_Logic(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
 	}
 	if (game->handlers.postlogic) {
-		(*game->handlers.postlogic)(game, delta);
+		game->handlers.postlogic(game, delta);
+	}
+}
+
+SYMBOL_INTERNAL void TickGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
+		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
+			game->_priv.current_gamestate = tmp;
+			if (tmp->api->Gamestate_Tick) {
+				tmp->api->Gamestate_Tick(game, tmp->data);
+			}
+		}
+		tmp = tmp->next;
 	}
 }
 
@@ -99,7 +112,7 @@ SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 		if (tmp->loaded) {
 			game->_priv.current_gamestate = tmp;
 			if (tmp->api->Gamestate_Reload) {
-				(*tmp->api->Gamestate_Reload)(game, tmp->data);
+				tmp->api->Gamestate_Reload(game, tmp->data);
 			}
 		}
 		tmp = tmp->next;
@@ -111,7 +124,7 @@ SYMBOL_INTERNAL void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev) {
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_ProcessEvent)(game, tmp->data, ev);
+			tmp->api->Gamestate_ProcessEvent(game, tmp->data, ev);
 		}
 		tmp = tmp->next;
 	}
@@ -215,7 +228,7 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	struct GamestateLoadingThreadData* data = arg;
 	data->game->_priv.loading.inProgress = true;
 	al_set_new_bitmap_flags(data->bitmap_flags);
-	data->gamestate->data = (*data->gamestate->api->Gamestate_Load)(data->game, &GamestateProgress);
+	data->gamestate->data = data->gamestate->api->Gamestate_Load(data->game, &GamestateProgress);
 	if (data->game->_priv.loading.progress != data->gamestate->progressCount) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
 		if (data->game->config.debug) {
@@ -268,8 +281,8 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	DrawGamestates(game);
 	double delta = al_get_time() - game->_priv.loading.time;
 	if (game->_priv.loading.current->showLoading) {
-		(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
-		(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
+		game->_priv.loading.gamestate->api->Gamestate_Logic(game, game->_priv.loading.gamestate->data, delta);
+		game->_priv.loading.gamestate->api->Gamestate_Draw(game, game->_priv.loading.gamestate->data);
 	}
 	game->_priv.loading.time += delta;
 	DrawConsole(game);
@@ -311,6 +324,7 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 	if (!(gamestate->api->Gamestate_ProcessEvent = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
 
 	// optional
+	gamestate->api->Gamestate_Tick = dlsym(gamestate->handle, "Gamestate_Tick");
 	gamestate->api->Gamestate_PostLoad = dlsym(gamestate->handle, "Gamestate_PostLoad");
 	gamestate->api->Gamestate_Pause = dlsym(gamestate->handle, "Gamestate_Pause");
 	gamestate->api->Gamestate_Resume = dlsym(gamestate->handle, "Gamestate_Resume");

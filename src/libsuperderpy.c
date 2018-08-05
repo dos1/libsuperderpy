@@ -344,8 +344,6 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	return 0;
 }
 
-bool redraw = false;
-
 SYMBOL_INTERNAL void libsuperderpy_mainloop_exit(struct Game* game) {
 	libsuperderpy_destroy(game);
 	free(game);
@@ -355,17 +353,13 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop_exit(struct Game* game) {
 
 SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 	struct Game* game = (struct Game*)g;
-	redraw = true;
-	while (!al_is_event_queue_empty(game->_priv.event_queue) || redraw) {
-#else
-	bool redraw = false;
-	while (1) {
 #endif
+	do {
 		ClearGarbage(game);
 
 		// TODO: split mainloop to functions to make it readable
 		ALLEGRO_EVENT ev;
-		if (game->_priv.draw && (((redraw || true) && al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
+		if (game->_priv.draw && ((al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
 			game->_priv.gamestate_scheduled = false;
 			struct Gamestate* tmp = game->_priv.gamestates;
 
@@ -524,12 +518,13 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				LogicGamestates(game, delta);
 				DrawGamestates(game);
 			}
-			//redraw = true;
 
 			DrawConsole(game);
-			//al_wait_for_vsync();
 			al_flip_display();
-			redraw = false;
+
+#ifdef __EMSCRIPTEN__
+			return;
+#endif
 
 		} else {
 #ifdef __EMSCRIPTEN__
@@ -547,10 +542,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			}
 
 			if ((ev.type == ALLEGRO_EVENT_TIMER) && (ev.timer.source == game->_priv.timer)) {
-				/*double delta = al_get_time() - game->_priv.timestamp;
-				game->_priv.timestamp += delta;
-				LogicGamestates(game, delta);
-				redraw = true;*/
+				TickGamestates(game);
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 #ifdef __EMSCRIPTEN__
 				libsuperderpy_mainloop_exit(game);
@@ -638,7 +630,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			}
 			EventGamestates(game, &ev);
 		}
-	}
+	} while (true);
 
 #ifndef __EMSCRIPTEN__
 	if (game->handlers.destroy) {

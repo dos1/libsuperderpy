@@ -26,6 +26,7 @@
 struct Gamestate_API {
 	void (*Gamestate_Draw)(struct Game* game, void* data);
 	void (*Gamestate_Logic)(struct Game* game, void* data, double delta);
+	void (*Gamestate_Tick)(struct Game* game, void* data);
 
 	void* (*Gamestate_Load)(struct Game* game, void (*progress)(struct Game* game));
 	void (*Gamestate_PostLoad)(struct Game* game, void* data);
