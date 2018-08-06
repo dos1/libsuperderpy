@@ -577,7 +577,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
 #endif
 				game->_priv.showconsole = !game->_priv.showconsole;
-				if (ev.keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) {
+				if ((ev.keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) && (game->config.debug)) {
 					game->_priv.showtimeline = game->_priv.showconsole;
 				}
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
