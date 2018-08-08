@@ -573,6 +573,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
 				PauseExecution(game);
 			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {
+				if (game->_priv.debug.livereload) {
+					ReloadCode(game);
+				}
 				ResumeExecution(game);
 			}
 #ifdef ALLEGRO_ANDROID
@@ -588,6 +591,7 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 				if (!game->_priv.paused) {
 					PauseExecution(game);
 				} else {
+					ReloadCode(game);
 					ResumeExecution(game);
 				}
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F9)) {

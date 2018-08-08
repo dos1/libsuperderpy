@@ -553,12 +553,12 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 	PrintConsole(game, "DEBUG: game execution paused.");
 }
 
-SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
+SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 	ReloadShaders(game, true);
 	PrintConsole(game, "DEBUG: reloading the gamestates...");
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (game->_priv.debug.livereload && tmp->fromlib) {
+		if (tmp->fromlib) {
 			char* name = strdup(tmp->name);
 			CloseGamestate(game, tmp);
 			tmp->name = name;
@@ -571,7 +571,13 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 				tmp->loaded = false;
 			}
 		}
+		tmp = tmp->next;
+	}
+}
 
+SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
 		if (!tmp->paused && tmp->loaded && tmp->started && tmp->api->Gamestate_Resume) {
 			tmp->api->Gamestate_Resume(game, tmp->data);
 		}

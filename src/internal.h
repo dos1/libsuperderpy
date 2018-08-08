@@ -99,6 +99,7 @@ void CloseGamestate(struct Game* game, struct Gamestate* gamestate);
 struct Gamestate* AllocateGamestate(struct Game* game, const char* name);
 char* GetLibraryPath(struct Game* game, char* filename);
 void PauseExecution(struct Game* game);
+void ReloadCode(struct Game* game);
 void ResumeExecution(struct Game* game);
 void ReloadShaders(struct Game* game, bool force);
 void DestroyShaders(struct Game* game);
