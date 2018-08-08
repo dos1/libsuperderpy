@@ -401,7 +401,7 @@ __attribute__((__format__(__printf__, 5, 0))) SYMBOL_EXPORT void PrintConsoleWit
 	if (game->config.debug)
 #endif
 	{
-		if (game->config.verbose) {
+		if (game->_priv.debug.verbose) {
 			printf("%s:%d ", file, line);
 		}
 		printf("[%s] %s\n", func, text);

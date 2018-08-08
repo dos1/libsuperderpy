@@ -558,7 +558,7 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 	PrintConsole(game, "DEBUG: reloading the gamestates...");
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (tmp->fromlib) {
+		if (game->_priv.debug.livereload && tmp->fromlib) {
 			char* name = strdup(tmp->name);
 			CloseGamestate(game, tmp);
 			tmp->name = name;

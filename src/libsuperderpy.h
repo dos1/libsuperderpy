@@ -86,7 +86,6 @@ struct Game {
 		bool mute; /*!< Whether audio should be muted globally. */
 		bool fullscreen; /*!< Fullscreen toggle. */
 		bool debug; /*!< Toggles debug mode. */
-		bool verbose; /*!< Toggles verbose debug. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
 	} config;
@@ -150,6 +149,10 @@ struct Game {
 		volatile bool texture_sync;
 		ALLEGRO_MUTEX* texture_sync_mutex;
 		ALLEGRO_COND* texture_sync_cond;
+
+		struct {
+			bool verbose, livereload, autopause;
+		} debug;
 
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];

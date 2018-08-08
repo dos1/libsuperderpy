@@ -95,11 +95,14 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
 	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
 	game->config.debug = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
-	game->config.verbose = strtol(GetConfigOptionDefault(game, "SuperDerpy", "verbose", "0"), NULL, 10);
 	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", "1280"), NULL, 10);
 	if (game->config.width < 320) { game->config.width = 320; }
 	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", "720"), NULL, 10);
 	if (game->config.height < 180) { game->config.height = 180; }
+
+	game->_priv.debug.verbose = strtol(GetConfigOptionDefault(game, "debug", "verbose", "0"), NULL, 10);
+	game->_priv.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "1"), NULL, 10);
+	game->_priv.debug.autopause = strtol(GetConfigOptionDefault(game, "debug", "autopause", "1"), NULL, 10);
 
 	game->_priv.showconsole = game->config.debug;
 	game->_priv.showtimeline = false;
@@ -567,9 +570,9 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 				al_acknowledge_resize(game->display);
 				SetupViewport(game, game->viewport_config);
-			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
+			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
 				PauseExecution(game);
-			} else if ((game->config.debug) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {
+			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {
 				ResumeExecution(game);
 			}
 #ifdef ALLEGRO_ANDROID
