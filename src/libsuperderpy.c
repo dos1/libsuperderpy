@@ -95,6 +95,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
 	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
 	game->config.debug = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
+	game->config.verbose = strtol(GetConfigOptionDefault(game, "SuperDerpy", "verbose", "0"), NULL, 10);
 	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", "1280"), NULL, 10);
 	if (game->config.width < 320) { game->config.width = 320; }
 	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", "720"), NULL, 10);

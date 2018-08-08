@@ -197,7 +197,7 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 	return target;
 }
 
-__attribute__((__format__(__printf__, 3, 0))) SYMBOL_EXPORT void FatalError(struct Game* game, bool exit, char* format, ...) {
+__attribute__((__format__(__printf__, 6, 0))) SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...) {
 	// TODO: interrupt and take over loading thread when it happens
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
@@ -205,7 +205,7 @@ __attribute__((__format__(__printf__, 3, 0))) SYMBOL_EXPORT void FatalError(stru
 	va_start(vl, format);
 	vsnprintf(text, 1024, format, vl);
 	va_end(vl);
-	fprintf(stderr, "%s\n", text);
+	fprintf(stderr, "%s:%d [%s]\n%s\n", file, line, func, text);
 
 	// TODO: synchronize with loading thread
 
@@ -386,7 +386,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
-__attribute__((__format__(__printf__, 2, 0))) SYMBOL_EXPORT void PrintConsole(struct Game* game, char* format, ...) {
+__attribute__((__format__(__printf__, 5, 0))) SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char* text = game->_priv.console[game->_priv.console_pos];
@@ -401,7 +401,10 @@ __attribute__((__format__(__printf__, 2, 0))) SYMBOL_EXPORT void PrintConsole(st
 	if (game->config.debug)
 #endif
 	{
-		printf("%s\n", text);
+		if (game->config.verbose) {
+			printf("%s:%d ", file, line);
+		}
+		printf("[%s] %s\n", func, text);
 		fflush(stdout);
 	}
 	game->_priv.console_pos++;

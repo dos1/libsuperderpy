@@ -86,6 +86,7 @@ struct Game {
 		bool mute; /*!< Whether audio should be muted globally. */
 		bool fullscreen; /*!< Fullscreen toggle. */
 		bool debug; /*!< Toggles debug mode. */
+		bool verbose; /*!< Toggles verbose debug. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
 	} config;
