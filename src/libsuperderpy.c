@@ -582,18 +582,15 @@ SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
 					game->_priv.showtimeline = game->_priv.showconsole;
 				}
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
-				int i;
-				for (i = 0; i < 512; i++) {
-					LogicGamestates(game, 1.0 / 60.0);
-				}
-				game->_priv.showconsole = true;
-				PrintConsole(game, "DEBUG: 512 frames skipped...");
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F9)) {
-				if (game->_priv.paused) {
+				if (!game->_priv.paused) {
 					PauseExecution(game);
 				} else {
 					ResumeExecution(game);
 				}
+			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F9)) {
+				al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(60.0));
+				game->_priv.showconsole = true;
+				PrintConsole(game, "DEBUG: Gameplay speed: 1.00x");
 			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F10)) {
 				double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
 				speed -= 10;
