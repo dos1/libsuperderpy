@@ -3,6 +3,7 @@ set(CMAKE_SYSTEM_NAME Darwin)
 # replace with your path to OSXCross toolchain
 set(OSXCROSS_PATH "$ENV{LIBSUPERDERPY_OSXCROSS_ROOT}" CACHE PATH "Path to OSXCross toolchain" )
 set(OSXCROSS_SDK_VERSION "$ENV{LIBSUPERDERPY_OSXCROSS_SDK_VERSION}" CACHE STRING "Version of Xcode SDK used to build the toolchain")
+set(CMAKE_OSX_SYSROOT "${OSXCROSS_PATH}/SDK/MacOSX${OSXCROSS_SDK_VERSION}.sdk")
 
 message( STATUS "Selected OSXCross toolchain: ${OSXCROSS_PATH}, SDK version: ${OSXCROSS_SDK_VERSION}" )
 if(NOT EXISTS "${OSXCROSS_PATH}")
