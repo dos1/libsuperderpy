@@ -49,6 +49,7 @@ struct GamestateResources;
 #include "character.h"
 #include "config.h"
 #include "gamestate.h"
+#include "mainloop.h"
 #include "maths.h"
 #include "shader.h"
 #include "timeline.h"
@@ -100,7 +101,6 @@ struct Game {
 
 	struct {
 		struct Gamestate* gamestates; /*!< List of known gamestates. */
-		bool gamestate_scheduled; /*!< Whether there's some gamestate lifecycle management work to do. */
 		ALLEGRO_FONT* font_console; /*!< Font used in game console. */
 		ALLEGRO_FONT* font_bsod; /*!< Font used in Blue Screens of Derp. */
 		char console[5][1024];
@@ -134,8 +134,6 @@ struct Game {
 		struct Gamestate* current_gamestate;
 
 		struct List *garbage, *timelines, *shaders, *bitmaps[LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS];
-
-		bool draw;
 
 		double timestamp;
 
@@ -188,20 +186,8 @@ struct Game {
 };
 
 struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport);
+int libsuperderpy_start(struct Game* game);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
-
-extern int Gamestate_ProgressCount;
-void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
-void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
-void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
-void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
-void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data);
-void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
-void Gamestate_Start(struct Game* game, struct GamestateResources* data);
-void Gamestate_Stop(struct Game* game, struct GamestateResources* data);
-void Gamestate_Reload(struct Game* game, struct GamestateResources* data);
-void Gamestate_Pause(struct Game* game, struct GamestateResources* data);
-void Gamestate_Resume(struct Game* game, struct GamestateResources* data);
 
 #endif

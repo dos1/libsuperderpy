@@ -76,7 +76,6 @@ SYMBOL_EXPORT void LoadGamestate(struct Game* game, const char* name) {
 		gs->showLoading = true;
 	}
 	PrintConsole(game, "Gamestate \"%s\" marked to be LOADED.", name);
-	game->_priv.gamestate_scheduled = true;
 }
 
 SYMBOL_EXPORT void UnloadGamestate(struct Game* game, const char* name) {
@@ -98,7 +97,6 @@ SYMBOL_EXPORT void UnloadGamestate(struct Game* game, const char* name) {
 		PrintConsole(game, "Tried to unload nonexisitent gamestate \"%s\"", name);
 		return;
 	}
-	game->_priv.gamestate_scheduled = true;
 }
 
 SYMBOL_EXPORT void StartGamestate(struct Game* game, const char* name) {
@@ -118,7 +116,6 @@ SYMBOL_EXPORT void StartGamestate(struct Game* game, const char* name) {
 		LoadGamestate(game, name);
 		return StartGamestate(game, name);
 	}
-	game->_priv.gamestate_scheduled = true;
 }
 
 SYMBOL_EXPORT void StopGamestate(struct Game* game, const char* name) {
@@ -139,7 +136,6 @@ SYMBOL_EXPORT void StopGamestate(struct Game* game, const char* name) {
 		PrintConsole(game, "Tried to stop nonexisitent gamestate \"%s\"", name);
 		return;
 	}
-	game->_priv.gamestate_scheduled = true;
 }
 
 SYMBOL_EXPORT void PauseGamestate(struct Game* game, const char* name) {

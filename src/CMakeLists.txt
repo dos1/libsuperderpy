@@ -5,6 +5,7 @@ SET(SRC_LIST
 	timeline.c
 	gamestate.c
 	libsuperderpy.c
+	mainloop.c
 	character.c
 	internal.c
 	tween.c

@@ -167,14 +167,19 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		game->joystick = al_install_joystick();
 	}
 
-	int fullscreen = ALLEGRO_FULLSCREEN_WINDOW;
+	int windowMode = ALLEGRO_FULLSCREEN_WINDOW;
 #ifdef ALLEGRO_ANDROID
-	fullscreen |= ALLEGRO_FRAMELESS;
+	windowMode |= ALLEGRO_FRAMELESS;
 #endif
-	al_set_new_display_flags((game->config.fullscreen ? (fullscreen) : ALLEGRO_WINDOWED) | ALLEGRO_RESIZABLE | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
 #ifdef __EMSCRIPTEN__
-	al_set_new_display_flags((al_get_new_display_flags() | ALLEGRO_WINDOWED) ^ ALLEGRO_FULLSCREEN_WINDOW);
+	windowMode = ALLEGRO_WINDOWED;
 #endif
+	if (!game->config.fullscreen) {
+		windowMode = ALLEGRO_WINDOWED;
+	}
+	windowMode |= ALLEGRO_RESIZABLE;
+
+	al_set_new_display_flags(windowMode | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
 	al_set_new_display_option(ALLEGRO_VSYNC, 2 - strtol(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1"), NULL, 10), ALLEGRO_SUGGEST);
 
 #ifdef LIBSUPERDERPY_ORIENTATION_LANDSCAPE
@@ -244,7 +249,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
 	game->_priv.gamestates = NULL;
-	game->_priv.gamestate_scheduled = false;
 
 	al_init_user_event_source(&(game->event_source));
 
@@ -295,7 +299,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	return game;
 }
 
-SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
+SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
 	if (game->mouse) {
@@ -341,308 +345,32 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	PrintConsole(game, "Loading screen registered.");
 
 	game->_priv.timestamp = al_get_time();
-	game->_priv.draw = true;
-#ifdef __EMSCRIPTEN__
-	void libsuperderpy_mainloop(void* game);
-	emscripten_set_main_loop_arg(libsuperderpy_mainloop, game, 0, true);
+	game->_priv.paused = false;
 	return 0;
 }
 
-SYMBOL_INTERNAL void libsuperderpy_mainloop_exit(struct Game* game) {
-	libsuperderpy_destroy(game);
-	free(game);
-	printf("Halted.\n");
-	emscripten_cancel_main_loop();
-}
-
-SYMBOL_INTERNAL void libsuperderpy_mainloop(void* g) {
-	struct Game* game = (struct Game*)g;
-#endif
-	do {
-		ClearGarbage(game);
-
-		// TODO: split mainloop to functions to make it readable
-		ALLEGRO_EVENT ev;
-		if (game->_priv.draw && ((al_is_event_queue_empty(game->_priv.event_queue)) || (game->_priv.gamestate_scheduled))) {
-			game->_priv.gamestate_scheduled = false;
-			struct Gamestate* tmp = game->_priv.gamestates;
-
-			game->_priv.loading.toLoad = 0;
-			game->_priv.loading.loaded = 0;
-			game->loading_progress = 0;
-
-			// TODO: support gamestate dependences/ordering
-			while (tmp) {
-				if (tmp->pending_stop) {
-					PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
-					game->_priv.current_gamestate = tmp;
-					(*tmp->api->Gamestate_Stop)(game, tmp->data);
-					tmp->started = false;
-					tmp->pending_stop = false;
-					PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
-				}
-
-				if (tmp->pending_load) { game->_priv.loading.toLoad++; }
-				tmp = tmp->next;
-			}
-
-			tmp = game->_priv.gamestates;
-
-			while (tmp) {
-				if (tmp->pending_unload) {
-					PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
-					al_stop_timer(game->_priv.timer);
-					tmp->loaded = false;
-					tmp->pending_unload = false;
-					game->_priv.current_gamestate = tmp;
-					(*tmp->api->Gamestate_Unload)(game, tmp->data);
-					al_resume_timer(game->_priv.timer);
-					PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
-				}
-				if (tmp->pending_load) {
-					al_stop_timer(game->_priv.timer);
-					if (tmp->showLoading) {
-						(*game->_priv.loading.gamestate->api->Gamestate_Start)(game, game->_priv.loading.gamestate->data);
-					}
-
-					if (!tmp->api) {
-						if (!OpenGamestate(game, tmp) || !LinkGamestate(game, tmp)) {
-							tmp->pending_load = false;
-							tmp->pending_start = false;
-							tmp->next = tmp;
-							continue;
-						}
-					}
-					if (tmp->api) {
-						PrintConsole(game, "Loading gamestate \"%s\"...", tmp->name);
-						game->_priv.loading.progress = 0;
-
-						game->_priv.loading.current = tmp;
-						game->_priv.current_gamestate = tmp;
-
-						struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags()};
-						game->_priv.loading.inProgress = true;
-						double time = al_get_time();
-						game->_priv.loading.time = time;
-
-						CalculateProgress(game);
-#ifndef LIBSUPERDERPY_SINGLE_THREAD
-						al_run_detached_thread(GamestateLoadingThread, &data);
-						while (game->_priv.loading.inProgress) {
-							DrawGamestates(game);
-							al_set_target_backbuffer(game->display);
-							double delta = al_get_time() - game->_priv.loading.time;
-							if (tmp->showLoading) {
-								(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
-								(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
-								if (game->handlers.postdraw) {
-									game->handlers.postdraw(game);
-								}
-							}
-							game->_priv.loading.time += delta;
-							game->time += delta; // TODO: ability to disable passing time during loading
-							if (game->_priv.texture_sync) {
-								al_convert_memory_bitmaps();
-								game->_priv.texture_sync = false;
-								al_signal_cond(game->_priv.texture_sync_cond);
-								game->_priv.loading.time = al_get_time();
-							}
-							DrawConsole(game);
-							al_flip_display();
-						}
-#else
-						GamestateLoadingThread(&data);
-						al_convert_memory_bitmaps();
-#endif
-
-						al_set_new_bitmap_flags(data.bitmap_flags);
-
-						if (tmp->api->Gamestate_PostLoad) {
-							PrintConsole(game, "[%s] Post-loading...", tmp->name);
-							tmp->api->Gamestate_PostLoad(game, tmp->data);
-						}
-
-						game->_priv.loading.progress++;
-						CalculateProgress(game);
-						PrintConsole(game, "Gamestate \"%s\" loaded successfully in %f seconds.", tmp->name, al_get_time() - time);
-						game->_priv.loading.loaded++;
-
-						tmp->loaded = true;
-						tmp->pending_load = false;
-					}
-					if (tmp->showLoading) {
-						(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
-					}
-					al_resume_timer(game->_priv.timer);
-					game->_priv.timestamp = al_get_time();
-				}
-
-				tmp = tmp->next;
-			}
-
-			if (game->_priv.loading.loaded) {
-				ReloadShaders(game, false);
-			}
-
-			bool gameActive = false;
-			tmp = game->_priv.gamestates;
-
-			while (tmp) {
-				if ((tmp->pending_start) && (tmp->loaded)) {
-					PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
-					al_stop_timer(game->_priv.timer);
-					game->_priv.current_gamestate = tmp;
-					tmp->started = true;
-					tmp->pending_start = false;
-					(*tmp->api->Gamestate_Start)(game, tmp->data);
-					al_resume_timer(game->_priv.timer);
-					game->_priv.timestamp = al_get_time();
-					PrintConsole(game, "Gamestate \"%s\" started successfully.", tmp->name);
-				}
-
-				if ((tmp->started) || (tmp->pending_start) || (tmp->pending_load)) {
-					gameActive = true;
-				}
-				tmp = tmp->next;
-			}
-
-			if (!gameActive) {
-				PrintConsole(game, "No gamestates left, exiting...");
 #ifdef __EMSCRIPTEN__
-				libsuperderpy_mainloop_exit(game);
-#endif
-				break;
-			}
-
-			al_convert_memory_bitmaps();
-
-			double delta = al_get_time() - game->_priv.timestamp;
-			game->_priv.timestamp += delta;
-			delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
-			game->time += delta;
-			if (!game->_priv.paused) {
-				LogicGamestates(game, delta);
-				DrawGamestates(game);
-			}
-
-			DrawConsole(game);
-			al_flip_display();
-
-#ifdef __EMSCRIPTEN__
-			return;
-#endif
-
-		} else {
-#ifdef __EMSCRIPTEN__
-			if (al_is_event_queue_empty(game->_priv.event_queue)) {
-				return;
-			}
-#endif
-
-			al_wait_for_event(game->_priv.event_queue, &ev);
-
-			if (game->handlers.event) {
-				if ((*game->handlers.event)(game, &ev)) {
-					continue;
-				}
-			}
-
-			if ((ev.type == ALLEGRO_EVENT_TIMER) && (ev.timer.source == game->_priv.timer)) {
-				TickGamestates(game);
-			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-#ifdef __EMSCRIPTEN__
-				libsuperderpy_mainloop_exit(game);
-#endif
-				break;
-			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_HALT_DRAWING) {
-				PrintConsole(game, "Engine halted.");
-				game->_priv.draw = false;
-				al_stop_timer(game->_priv.timer);
-				al_detach_voice(game->audio.v);
-				FreezeGamestates(game);
-				al_acknowledge_drawing_halt(game->display);
-			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING) {
-				game->_priv.draw = true;
-				al_acknowledge_drawing_resume(game->display);
-				PrintConsole(game, "Engine resumed.");
-				ReloadGamestates(game);
-				UnfreezeGamestates(game);
-				al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
-				al_resume_timer(game->_priv.timer);
-			} else if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-				al_acknowledge_resize(game->display);
-				SetupViewport(game, game->viewport_config);
-			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_OUT)) {
-				PauseExecution(game);
-			} else if ((game->config.debug) && (game->_priv.debug.autopause) && (ev.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN)) {
-				if (game->_priv.debug.livereload) {
-					ReloadCode(game);
-				}
-				ResumeExecution(game);
-			}
-#ifdef ALLEGRO_ANDROID
-			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_MENU) || (ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
-#else
-			else if ((ev.type == ALLEGRO_EVENT_KEY_CHAR) && ((ev.keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev.keyboard.keycode == ALLEGRO_KEY_BACKQUOTE))) {
-#endif
-				game->_priv.showconsole = !game->_priv.showconsole;
-				if ((ev.keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) && (game->config.debug)) {
-					game->_priv.showtimeline = game->_priv.showconsole;
-				}
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F1)) {
-				if (!game->_priv.paused) {
-					PauseExecution(game);
-				} else {
-					ReloadCode(game);
-					ResumeExecution(game);
-				}
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F9)) {
-				al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(60.0));
-				game->_priv.showconsole = true;
-				PrintConsole(game, "DEBUG: Gameplay speed: 1.00x");
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F10)) {
-				double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
-				speed -= 10;
-				if (speed < 10) { speed = 10; }
-				al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(speed));
-				game->_priv.showconsole = true;
-				PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (game->config.debug) && (ev.keyboard.keycode == ALLEGRO_KEY_F11)) {
-				double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
-				speed += 10;
-				if (speed > 600) { speed = 600; }
-				al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(speed));
-				game->_priv.showconsole = true;
-				PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
-			} else if ((ev.type == ALLEGRO_EVENT_KEY_DOWN) && (ev.keyboard.keycode == ALLEGRO_KEY_F12)) {
-				DrawGamestates(game);
-				int flags = al_get_new_bitmap_flags();
-				al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
-				ALLEGRO_BITMAP* bitmap = al_create_bitmap(al_get_display_width(game->display), al_get_display_height(game->display));
-				al_set_new_bitmap_flags(flags);
-				ALLEGRO_BITMAP* target = al_get_target_bitmap();
-				al_set_target_bitmap(bitmap);
-				al_draw_bitmap(al_get_backbuffer(game->display), 0, 0, 0);
-				al_set_target_bitmap(target);
-				PrintConsole(game, "Screenshot made! Storing...");
-
-				struct ScreenshotThreadData* data = malloc(sizeof(struct ScreenshotThreadData));
-				data->game = game;
-				data->bitmap = bitmap;
-#ifndef LIBSUPERDERPY_SINGLE_THREAD
-				al_run_detached_thread(ScreenshotThread, data);
-#else
-				ScreenshotThread(data);
-#endif
-			}
-			EventGamestates(game, &ev);
-		}
-	} while (true);
-
-#ifndef __EMSCRIPTEN__
-	if (game->handlers.destroy) {
+SYMBOL_INTERNAL void libsuperderpy_emscripten_mainloop(void* game) {
+	if (!libsuperderpy_mainloop(game)) {
 		libsuperderpy_destroy(game);
+		free(game);
+		printf("Halted.\n");
+		emscripten_cancel_main_loop();
 	}
+}
+#endif
+
+SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
+	int ret = libsuperderpy_start(game);
+	if (ret) {
+		return ret;
+	}
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, true);
+	return 0;
+#else
+	while (libsuperderpy_mainloop(game)) {};
+	libsuperderpy_destroy(game);
 	return 0;
 #endif
 }
@@ -715,7 +443,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_mixer(game->audio.fx);
 	al_destroy_mixer(game->audio.music);
 	al_destroy_mixer(game->audio.mixer);
-	al_destroy_voice(game->audio.v);
+	al_destroy_voice(game->audio.v); // FIXME: doesn't seem to work in Chromium under Emscripten
 	al_destroy_cond(game->_priv.texture_sync_cond);
 	al_destroy_mutex(game->_priv.texture_sync_mutex);
 	al_uninstall_audio();
