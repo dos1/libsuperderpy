@@ -106,7 +106,7 @@ SYMBOL_EXPORT void StartGamestate(struct Game* game, const char* name) {
 			PrintConsole(game, "Gamestate \"%s\" already started.", name);
 			return;
 		}
-		if (!gs->loaded) {
+		if (!gs->loaded && !gs->pending_load) {
 			LoadGamestate(game, name);
 		}
 		gs->pending_start = true;

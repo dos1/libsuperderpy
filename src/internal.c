@@ -304,6 +304,7 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 	} else {
 		gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 	}
+	gamestate->open = true;
 	return true;
 }
 
@@ -356,10 +357,14 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->api = NULL;
 	tmp->fromlib = true;
 	tmp->progressCount = 0;
+	tmp->open = false;
 	return tmp;
 }
 
 SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamestate) {
+	if (!gamestate->open) {
+		return;
+	}
 	if (gamestate->handle && !RUNNING_ON_VALGRIND) {
 #ifndef LEAK_SANITIZER
 		PrintConsole(game, "Closing gamestate \"%s\"...", gamestate->name);
@@ -542,6 +547,9 @@ SYMBOL_INTERNAL char* GetLibraryPath(struct Game* game, char* filename) {
 }
 
 SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
+	if (game->_priv.paused) {
+		return;
+	}
 	game->_priv.paused = true;
 	al_stop_timer(game->_priv.timer);
 	al_detach_voice(game->audio.v);
@@ -551,15 +559,16 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 
 SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 	ReloadShaders(game, true);
-	PrintConsole(game, "DEBUG: reloading the gamestates...");
+	PrintConsole(game, "DEBUG: Reloading the gamestates...");
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (tmp->fromlib) {
+		if (tmp->open && tmp->fromlib) {
 			char* name = strdup(tmp->name);
 			CloseGamestate(game, tmp);
 			tmp->name = name;
 			if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
 				if (tmp->api->Gamestate_Reload) {
+					PrintConsole(game, "[%s] Reloading...", tmp->name);
 					tmp->api->Gamestate_Reload(game, tmp->data);
 				}
 			} else {
@@ -569,9 +578,13 @@ SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
+	PrintConsole(game, "DEBUG: Reloading done.");
 }
 
 SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
+	if (!game->_priv.paused) {
+		return;
+	}
 	UnfreezeGamestates(game);
 	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 	al_resume_timer(game->_priv.timer);
