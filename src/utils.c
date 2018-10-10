@@ -152,10 +152,10 @@ SYMBOL_EXPORT void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 
 	for (y = 0; y < height; y++) {
 		float pixy = ((float)y / height) * ((float)al_get_bitmap_height(source) - 1);
-		float pixy_f = floor(pixy);
+		int pixy_f = (int)floorf(pixy);
 		for (x = 0; x < width; x++) {
 			float pixx = ((float)x / width) * ((float)al_get_bitmap_width(source) - 1);
-			float pixx_f = floor(pixx);
+			int pixx_f = (int)floorf(pixx);
 
 			ALLEGRO_COLOR a = al_get_pixel(source, pixx_f, pixy_f);
 			ALLEGRO_COLOR b = al_get_pixel(source, pixx_f + 1, pixy_f);
@@ -223,7 +223,7 @@ __attribute__((__format__(__printf__, 6, 0))) SYMBOL_EXPORT void FatalErrorWithC
 	al_rest(0.6);
 
 	const int offsetx = al_get_display_width(game->display) / 2;
-	const int offsety = al_get_display_height(game->display) * 0.30;
+	const int offsety = (int)(al_get_display_height(game->display) * 0.30);
 	const int fonth = al_get_font_line_height(game->_priv.font_bsod);
 
 	bool done = false;
@@ -418,10 +418,10 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 
 	if ((game->viewport.width == 0) || (game->viewport.height == 0)) {
 		game->viewport.height = al_get_display_height(game->display);
-		game->viewport.width = game->viewport.aspect * game->viewport.height;
+		game->viewport.width = (int)(game->viewport.aspect * game->viewport.height);
 		if (game->viewport.width > al_get_display_width(game->display)) {
 			game->viewport.width = al_get_display_width(game->display);
-			game->viewport.height = game->viewport.width / game->viewport.aspect;
+			game->viewport.height = (int)(game->viewport.width / game->viewport.aspect);
 		}
 	}
 	game->viewport.aspect = game->viewport.width / (float)game->viewport.height;
@@ -436,8 +436,8 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 		resolution = al_get_display_width(game->display) / (float)game->viewport.width;
 	}
 	if (game->viewport.integer_scaling) {
-		resolution = floor(resolution);
-		if (floor(resolution) == 0) {
+		resolution = floorf(resolution);
+		if (floorf(resolution) == 0) {
 			resolution = 1;
 		}
 	}
@@ -448,8 +448,8 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 		resolution = 1;
 	}
 
-	int clipWidth = game->viewport.width * resolution;
-	int clipHeight = game->viewport.height * resolution;
+	int clipWidth = (int)(game->viewport.width * resolution);
+	int clipHeight = (int)(game->viewport.height * resolution);
 	if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"), NULL, 10)) {
 		int clipX = (al_get_display_width(game->display) - clipWidth) / 2;
 		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
@@ -475,8 +475,8 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
 	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 	*x -= clipX;
 	*y -= clipY;
-	*x /= clipWidth / (float)game->viewport.width;
-	*y /= clipHeight / (float)game->viewport.height;
+	*x /= (int)(clipWidth / (float)game->viewport.width);
+	*y /= (int)(clipHeight / (float)game->viewport.height);
 }
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
@@ -525,7 +525,7 @@ SYMBOL_EXPORT char* PunchNumber(struct Game* game, char* text, char ch, int numb
 	while (tmp != txt) {
 		tmp--;
 		if (*tmp == ch) {
-			*tmp = '0' + (int)floor(number / (float)num) % 10;
+			*tmp = '0' + (int)floorf(number / (float)num) % 10;
 			num *= 10;
 		}
 	};

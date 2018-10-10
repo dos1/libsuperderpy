@@ -218,8 +218,8 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 
 	s->duration = strtodnull(al_get_config_value(config, "animation", "duration"), 16.66);
 
-	s->width = strtodnull(al_get_config_value(config, "animation", "width"), 0);
-	s->height = strtodnull(al_get_config_value(config, "animation", "height"), 0);
+	s->width = strtolnull(al_get_config_value(config, "animation", "width"), 0);
+	s->height = strtolnull(al_get_config_value(config, "animation", "height"), 0);
 
 	s->repeats = strtolnull(al_get_config_value(config, "animation", "repeats"), -1);
 
@@ -605,7 +605,7 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, x - character->spritesheet->frames[character->pos].x, y - character->spritesheet->frames[character->pos].y);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, (int)x - character->spritesheet->frames[character->pos].x, (int)y - character->spritesheet->frames[character->pos].y);
 		return (color.a > 0.0);
 	}
 

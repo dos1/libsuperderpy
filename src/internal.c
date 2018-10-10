@@ -210,11 +210,11 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void Console_Load(struct Game* game) {
-	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), game->_priv.clip_rect.h * 0.025, 0);
+	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->_priv.clip_rect.h * 0.025), 0);
 	if (game->_priv.clip_rect.h * 0.025 >= 16) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"), 16 * ((game->_priv.clip_rect.h > 1080) ? 2 : 1), 0);
 	} else {
-		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), game->_priv.clip_rect.h * 0.025, 0);
+		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->_priv.clip_rect.h * 0.025), 0);
 	}
 }
 
@@ -501,7 +501,7 @@ static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int
 			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * game->_priv.clip_rect.h, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
 		}
 
-		pos += width + (20 / 3200.0) * game->_priv.clip_rect.w;
+		pos += width + (int)((20 / 3200.0) * game->_priv.clip_rect.w);
 		pom = pom->next;
 	}
 }
@@ -511,8 +511,8 @@ static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) 
 
 	al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), game->_priv.clip_rect.x + game->_priv.clip_rect.w / 2.0, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * (pos + 1) + (10 / 1800.0) * game->_priv.clip_rect.h, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
 
-	DrawQueue(game, timeline->queue, game->_priv.clip_rect.x + (25 / 3200.0) * game->_priv.clip_rect.w, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (220 / 1800.0) * game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * pos);
-	DrawQueue(game, timeline->background, game->_priv.clip_rect.x + (25 / 3200.0) * game->_priv.clip_rect.w, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (100 / 1800.0) * game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * pos);
+	DrawQueue(game, timeline->queue, game->_priv.clip_rect.x + (int)((25 / 3200.0) * game->_priv.clip_rect.w), game->_priv.clip_rect.y + game->_priv.clip_rect.h - (int)((220 / 1800.0) * game->_priv.clip_rect.h) - (int)((340 / 1800.0) * game->_priv.clip_rect.h * pos));
+	DrawQueue(game, timeline->background, (int)(game->_priv.clip_rect.x + (25 / 3200.0) * game->_priv.clip_rect.w), game->_priv.clip_rect.y + game->_priv.clip_rect.h - (int)((100 / 1800.0) * game->_priv.clip_rect.h) - (int)((340 / 1800.0) * game->_priv.clip_rect.h * pos));
 }
 
 SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
