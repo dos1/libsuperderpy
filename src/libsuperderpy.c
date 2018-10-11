@@ -346,6 +346,8 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 
 	game->_priv.timestamp = al_get_time();
 	game->_priv.paused = false;
+	ReloadShaders(game, false);
+
 	return 0;
 }
 
