@@ -15,7 +15,12 @@ if (EMSCRIPTEN)
 	list(APPEND SRC_LIST emscripten-audio-stream.c)
 endif()
 
-add_library("libsuperderpy" SHARED ${SRC_LIST})
+if (LIBSUPERDERPY_STATIC)
+	add_library("libsuperderpy" STATIC ${SRC_LIST})
+	set_property(TARGET libsuperderpy PROPERTY POSITION_INDEPENDENT_CODE ON)
+else (LIBSUPERDERPY_STATIC)
+	add_library("libsuperderpy" SHARED ${SRC_LIST})
+endif (LIBSUPERDERPY_STATIC)
 
 SET_TARGET_PROPERTIES("libsuperderpy" PROPERTIES PREFIX "")
 
