@@ -38,6 +38,26 @@
 #include <mach-o/dyld.h>
 #endif
 
+static char* GetDefaultWindowWidth(struct Game* game) {
+	char* buf = malloc(sizeof(char) * 255);
+	double aspect = game->viewport_config.aspect ? game->viewport_config.aspect : (game->viewport_config.width / (double)game->viewport_config.height);
+	if (aspect < 1.0) {
+		aspect = 1.0;
+	}
+	snprintf(buf, 255, "%d", (int)(720 * aspect));
+	return AddGarbage(game, buf);
+}
+
+static char* GetDefaultWindowHeight(struct Game* game) {
+	char* buf = malloc(sizeof(char) * 255);
+	double aspect = game->viewport_config.aspect ? game->viewport_config.aspect : (game->viewport_config.width / (double)game->viewport_config.height);
+	if (aspect > 1.0) {
+		aspect = 1.0;
+	}
+	snprintf(buf, 255, "%d", (int)(720 / aspect));
+	return AddGarbage(game, buf);
+}
+
 SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport) {
 	struct Game* game = calloc(1, sizeof(struct Game));
 
@@ -95,10 +115,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
 	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
 	game->config.debug = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
-	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", "1280"), NULL, 10);
-	if (game->config.width < 320) { game->config.width = 320; }
-	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", "720"), NULL, 10);
-	if (game->config.height < 180) { game->config.height = 180; }
+	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", GetDefaultWindowWidth(game)), NULL, 10);
+	if (game->config.width < 100) { game->config.width = 100; }
+	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", GetDefaultWindowHeight(game)), NULL, 10);
+	if (game->config.height < 100) { game->config.height = 100; }
 
 	game->_priv.debug.verbose = strtol(GetConfigOptionDefault(game, "debug", "verbose", "0"), NULL, 10);
 	game->_priv.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "1"), NULL, 10);
