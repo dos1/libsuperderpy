@@ -1,13 +1,13 @@
-package net.dosowisko.${LIBSUPERDERPY_GAMENAME};
+package net.dosowisko.libsuperderpy;
 
 import org.liballeg.android.AllegroActivity;
 import android.view.View;
 import android.os.Bundle;
 
-public class SuperDerpyActivity extends AllegroActivity {
+public class Activity extends AllegroActivity {
 
    /* Load Allegro and other shared libraries in the lib directory of the apk
-    * bundle.  You must load libraries which are required by later libraries
+    * bundle. You must load libraries which are required by later libraries
     * first.
     */
    static {
@@ -26,7 +26,7 @@ public class SuperDerpyActivity extends AllegroActivity {
     * shared object `libapp.so'.  You can specify another library name by
     * overriding the constructor.
     */
-   public SuperDerpyActivity() {
+   public Activity() {
       super("libgame.so");
    }
 

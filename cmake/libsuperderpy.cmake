@@ -193,6 +193,10 @@ endif()
 		set(LIBSUPERDERPY_RELEASE "1")
 	endif(NOT DEFINED LIBSUPERDERPY_RELEASE)
 
+	if (NOT DEFINED LIBSUPERDERPY_APPID)
+		set(LIBSUPERDERPY_APPID "net.dosowisko.${LIBSUPERDERPY_GAMENAME}")
+	endif(NOT DEFINED LIBSUPERDERPY_APPID)
+
 	if (ANDROID OR EMSCRIPTEN)
 		if (ANDROID)
 			set(FLACTOOGG_DATADIR "${CMAKE_BINARY_DIR}/android/assets/data")
@@ -231,7 +235,7 @@ endif()
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_run_apk
 				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install_apk
 				COMMAND adb -d shell
-				'am start -a android.intent.action.MAIN -n net.dosowisko.${LIBSUPERDERPY_GAMENAME}/.SuperDerpyActivity'
+				'am start -a android.intent.action.MAIN -n ${LIBSUPERDERPY_APPID}/net.dosowisko.libsuperderpy.Activity'
 				)
 
 		else(ANDROID)
@@ -306,10 +310,8 @@ endif()
 		if (ALLEGRO5_LIBRARIES MATCHES "^.*-debug.*$")
 			set(ALLEGRO_DEBUG_SUFFIX "-debug")
 		endif()
-		configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java")
-		file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/SuperDerpyActivity.java.in")
-
-		file(RENAME "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/${LIBSUPERDERPY_GAMENAME}")
+		configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java")
+		file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java.in")
 
 		file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
 		file(COPY "${ANDROID_ALLEGRO_ROOT}/lib/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})

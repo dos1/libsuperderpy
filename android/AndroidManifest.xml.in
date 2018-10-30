@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="net.dosowisko.${LIBSUPERDERPY_GAMENAME}"
+      package="${LIBSUPERDERPY_APPID}"
       android:versionCode="${LIBSUPERDERPY_RELEASE}"
       android:versionName="${LIBSUPERDERPY_VERSION}"
       android:installLocation="auto">
@@ -8,7 +8,7 @@
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true" android:anyDensity="true" android:resizeable="true" />
     <application android:label="@string/app_name" android:debuggable="${LIBSUPERDERPY_ANDROID_DEBUGGABLE}" android:icon="@mipmap/${LIBSUPERDERPY_GAMENAME}">
-        <activity android:name="net.dosowisko.${LIBSUPERDERPY_GAMENAME}.SuperDerpyActivity"
+        <activity android:name="net.dosowisko.libsuperderpy.Activity"
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
                   android:screenOrientation="${LIBSUPERDERPY_ANDROID_ORIENTATION}"
