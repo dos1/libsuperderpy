@@ -85,6 +85,42 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 		default:
 			break;
 	}
+
+#ifdef MAEMO5
+	// on Maemo we get mouse events instead of touch ones, so we'll rewrite them by ourselves
+
+	if ((ev->type == ALLEGRO_EVENT_MOUSE_AXES) || (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) || (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)) {
+		switch (ev->type) {
+			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+				ev->type = ALLEGRO_EVENT_TOUCH_BEGIN;
+				break;
+			case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+				ev->type = ALLEGRO_EVENT_TOUCH_END;
+				break;
+			case ALLEGRO_EVENT_MOUSE_AXES:
+				ev->type = ALLEGRO_EVENT_TOUCH_MOVE;
+				break;
+			default:
+				break;
+		}
+		ALLEGRO_DISPLAY* display = ev->mouse.display;
+		float dx = ev->mouse.dx;
+		float dy = ev->mouse.dy;
+		float x = ev->mouse.x;
+		float y = ev->mouse.y;
+		double timestamp = ev->mouse.timestamp;
+
+		ev->touch.display = display;
+		ev->touch.dx = dx;
+		ev->touch.dy = dy;
+		ev->touch.id = 0;
+		ev->touch.primary = true;
+		ev->touch.source = (ALLEGRO_TOUCH_INPUT*)al_get_touch_input_event_source();
+		ev->touch.timestamp = timestamp;
+		ev->touch.x = x;
+		ev->touch.y = y;
+	}
+#endif
 }
 
 static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
