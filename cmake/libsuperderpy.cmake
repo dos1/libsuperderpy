@@ -6,9 +6,12 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten (MB, must be multiple of 16)" )
 
-	set(CMAKE_C_STANDARD 11)
+	set(CMAKE_C_STANDARD 99)
 	set(CMAKE_C_STANDARD_REQUIRED true)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
+	if(MAEMO)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+	endif(MAEMO)
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=leak -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
 	if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
@@ -34,7 +37,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif(LIBSUPERDERPY_STATIC_DEPS)
 
 	execute_process(
-	  COMMAND git log -1 --format=%h
+	  COMMAND git rev-parse --short HEAD
 	  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libsuperderpy
 	  OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
 	  OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -43,12 +46,16 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	if(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
 		execute_process(
-		  COMMAND git log -1 --format=%h
+		  COMMAND git rev-parse --short HEAD
 		  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			OUTPUT_VARIABLE LIBSUPERDERPY_GAME_GIT_REV
 		  OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
 	endif(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
+
+	if(MAEMO)
+		add_definitions(-D_Noreturn=)
+	endif(MAEMO)
 
 	if(APPLE)
 		if(CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
