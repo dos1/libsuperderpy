@@ -358,6 +358,9 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->fromlib = true;
 	tmp->progressCount = 0;
 	tmp->open = false;
+	tmp->fb = NULL;
+	tmp->showLoading = true;
+	tmp->data = NULL;
 	return tmp;
 }
 
