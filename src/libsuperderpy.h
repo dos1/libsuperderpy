@@ -143,6 +143,7 @@ struct Game {
 		} clip_rect;
 
 		bool paused;
+		bool candraw;
 
 		volatile bool texture_sync;
 		ALLEGRO_MUTEX* texture_sync_mutex;

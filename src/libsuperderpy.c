@@ -96,6 +96,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.shaders = NULL;
 
 	game->_priv.paused = false;
+	game->_priv.candraw = true;
 
 	game->handlers.event = NULL;
 	game->handlers.destroy = NULL;
@@ -301,6 +302,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mixer_gain(game->audio.music, game->config.music / 10.0);
 	al_set_mixer_gain(game->audio.voice, game->config.voice / 10.0);
 	al_set_mixer_gain(game->audio.mixer, game->config.mute ? 0.0 : 1.0);
+	al_set_default_voice(game->audio.v);
 	al_set_default_mixer(game->audio.mixer);
 
 	setlocale(LC_NUMERIC, "C");

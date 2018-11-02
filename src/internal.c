@@ -555,7 +555,11 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 	}
 	game->_priv.paused = true;
 	al_stop_timer(game->_priv.timer);
+        if (game->audio.v) {
 	al_detach_voice(game->audio.v);
+        }
+        al_set_default_voice(NULL);
+        game->audio.v = NULL;
 	FreezeGamestates(game);
 	PrintConsole(game, "Engine halted.");
 }
@@ -589,7 +593,26 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 		return;
 	}
 	UnfreezeGamestates(game);
-	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_FLOAT32;
+#ifdef ALLEGRO_ANDROID
+	depth = ALLEGRO_AUDIO_DEPTH_INT16;
+#endif
+        game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
+	if (!game->audio.v) {
+		// fallback
+		depth = (depth == ALLEGRO_AUDIO_DEPTH_FLOAT32) ? ALLEGRO_AUDIO_DEPTH_INT16 : ALLEGRO_AUDIO_DEPTH_FLOAT32;
+		game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
+	}
+	al_set_default_voice(game->audio.v);
+        if (game->audio.v) {
+            al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+        } else {
+            PrintConsole(game, "AUUUDIOOOOOOO DIDN'T WOOOORK");
+        }
+        //al_set_mixer_playing(game->audio.mixer, true);
+        //al_set_mixer_playing(game->audio.music, true);
+        //al_set_mixer_playing(game->audio.fx, true);
+        //al_set_mixer_playing(game->audio.voice, true);
 	al_resume_timer(game->_priv.timer);
 	game->_priv.paused = false;
 	game->_priv.timestamp = al_get_time();

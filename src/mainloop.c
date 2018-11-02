@@ -32,15 +32,35 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:
-			PauseExecution(game);
+                    PrintConsole(game, "ALLEGRO_EVENT_DISPLAY_HALT_DRAWING");
 			al_acknowledge_drawing_halt(game->display);
+			PauseExecution(game);
+			game->_priv.candraw = false;
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING:
+                    PrintConsole(game, "ALLEGRO_EVENT_DISPLAY_RESUME_DRAWING");
 			al_acknowledge_drawing_resume(game->display);
+			game->_priv.candraw = true;
 			ReloadGamestates(game);
 			ResumeExecution(game);
 			break;
+                        
+#ifdef ALLEGRO_ANDROID
+                        /*
+		case ALLEGRO_EVENT_DISPLAY_SWITCH_OUT:
+                    PrintConsole(game, "ALLEGRO_EVENT_DISPLAY_SWITCH_OUT");
+			PauseExecution(game);
+			break;
+
+		case ALLEGRO_EVENT_DISPLAY_SWITCH_IN:
+                    PrintConsole(game, "ALLEGRO_EVENT_DISPLAY_SWITCH_IN");
+			if (game->_priv.candraw) {
+				ResumeExecution(game);
+			}
+			break;
+                        */
+#endif
 
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 			al_acknowledge_resize(game->display);
@@ -353,10 +373,13 @@ static inline bool MainloopEvents(struct Game* game) {
 
 		if (game->_priv.paused) {
 			// there's no frame flipping when paused, so avoid pointless busylooping
+                    PrintConsole(game, "waiting for events");
 			al_wait_for_event(game->_priv.event_queue, &ev);
 		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
+                    PrintConsole(game, "breaking from events");
 			break;
 		}
+                    PrintConsole(game, "handling an event");
 
 		if (game->handlers.event) {
 			if ((*game->handlers.event)(game, &ev)) {
