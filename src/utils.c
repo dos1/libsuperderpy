@@ -26,6 +26,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef ALLEGRO_ANDROID
+#include <android/log.h>
+#endif
 
 // TODO: split to separate files
 
@@ -397,7 +400,7 @@ __attribute__((__format__(__printf__, 5, 0))) SYMBOL_EXPORT void PrintConsoleWit
 	ALLEGRO_DEBUG("%s\n", text);
 	SUPPRESS_END
 
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(ALLEGRO_ANDROID)
 	if (game->config.debug)
 #endif
 	{
@@ -405,6 +408,9 @@ __attribute__((__format__(__printf__, 5, 0))) SYMBOL_EXPORT void PrintConsoleWit
 			printf("%s:%d ", file, line);
 		}
 		printf("[%s] %s\n", func, text);
+#ifdef ALLEGRO_ANDROID
+		__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "[%s] %s", func, text);
+#endif
 		fflush(stdout);
 	}
 	game->_priv.console_pos++;
