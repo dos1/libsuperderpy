@@ -124,10 +124,10 @@ SYMBOL_INTERNAL void ReloadShaders(struct Game* game, bool force) {
 		struct ShaderListItem* item = list->data;
 		if (!item->loaded || force) {
 			PrintConsole(game, "V:%s, F:%s", item->vertex, item->fragment);
-			AttachToShader(game, item->shader, ALLEGRO_VERTEX_SHADER, item->vertex);
-			AttachToShader(game, item->shader, ALLEGRO_PIXEL_SHADER, item->fragment);
+			bool ret = AttachToShader(game, item->shader, ALLEGRO_VERTEX_SHADER, item->vertex);
+			ret = ret && AttachToShader(game, item->shader, ALLEGRO_PIXEL_SHADER, item->fragment);
 
-			if (!al_build_shader(item->shader)) {
+			if (ret && !al_build_shader(item->shader)) {
 				const char* log = al_get_shader_log(item->shader);
 				if (log) {
 					FatalError(game, false, "%s", log);
