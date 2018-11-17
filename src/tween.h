@@ -71,6 +71,7 @@ typedef enum TWEEN_STYLE {
 struct Tween {
 	double start, stop;
 	double duration, pos;
+	double predelay, postdelay;
 	TWEEN_STYLE style;
 	bool paused;
 	bool done;
@@ -80,6 +81,7 @@ struct Tween {
 };
 
 struct Tween Tween(struct Game* game, double start, double stop, TWEEN_STYLE style, double duration);
+struct Tween StaticTween(struct Game* game, double value);
 double GetTweenPosition(struct Tween* tween);
 double GetTweenInterpolation(struct Tween* tween);
 double GetTweenValue(struct Tween* tween);

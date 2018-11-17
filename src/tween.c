@@ -253,8 +253,14 @@ SYMBOL_EXPORT struct Tween Tween(struct Game* game, double start, double stop, T
 		.paused = false,
 		.game = game,
 		.done = false,
+		.predelay = 0,
+		.postdelay = 0,
 		.callback = NULL,
 		.data = NULL};
+}
+
+SYMBOL_EXPORT struct Tween StaticTween(struct Game* game, double value) {
+	return Tween(game, value, value, TWEEN_STYLE_LINEAR, 0);
 }
 
 SYMBOL_EXPORT double GetTweenPosition(struct Tween* tween) {
@@ -348,10 +354,22 @@ SYMBOL_EXPORT double GetTweenValue(struct Tween* tween) {
 
 SYMBOL_EXPORT void UpdateTween(struct Tween* tween, double delta) {
 	if (tween->paused) { return; }
+	if (tween->predelay) {
+		tween->predelay -= delta;
+		if (tween->predelay > 0) {
+			return;
+		} else if (tween->predelay < 0) {
+			delta = -tween->predelay;
+			tween->predelay = 0;
+		}
+	}
 	tween->pos += delta;
 	if (tween->pos > tween->duration) {
 		tween->pos = tween->duration;
-		if (!tween->done) {
+		if (tween->postdelay) {
+			tween->postdelay -= delta;
+		}
+		if ((tween->postdelay <= 0) && (!tween->done)) {
 			tween->done = true;
 			if (tween->callback) {
 				tween->callback(tween->game, tween, tween->data);
