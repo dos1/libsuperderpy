@@ -364,7 +364,8 @@ SYMBOL_EXPORT void UpdateTween(struct Tween* tween, double delta) {
 		tween->predelay -= delta;
 		if (tween->predelay > 0) {
 			return;
-		} else if (tween->predelay < 0) {
+		}
+		if (tween->predelay < 0) {
 			delta = -tween->predelay;
 			tween->predelay = 0;
 		}
