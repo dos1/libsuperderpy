@@ -65,7 +65,9 @@ typedef enum TWEEN_STYLE {
 	// Exponentially-decaying bounce easing
 	TWEEN_STYLE_BOUNCE_IN,
 	TWEEN_STYLE_BOUNCE_OUT,
-	TWEEN_STYLE_BOUNCE_IN_OUT
+	TWEEN_STYLE_BOUNCE_IN_OUT,
+	// Custom callback
+	TWEEN_STYLE_CUSTOM
 } TWEEN_STYLE; // Cheet sheet at http://easings.net/ :)
 
 struct Tween {
@@ -76,6 +78,7 @@ struct Tween {
 	bool paused;
 	bool done;
 	struct Game* game;
+	double (*func)(double value);
 	void (*callback)(struct Game* game, struct Tween* tween, void* data);
 	void* data;
 };

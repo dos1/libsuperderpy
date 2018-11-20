@@ -256,6 +256,7 @@ SYMBOL_EXPORT struct Tween Tween(struct Game* game, double start, double stop, T
 		.predelay = 0,
 		.postdelay = 0,
 		.callback = NULL,
+		.func = NULL,
 		.data = NULL};
 }
 
@@ -340,11 +341,16 @@ SYMBOL_EXPORT double Interpolate(double pos, TWEEN_STYLE style) {
 			return BounceEaseOut(pos);
 		case TWEEN_STYLE_BOUNCE_IN_OUT:
 			return BounceEaseInOut(pos);
+		default:
+			return pos;
 	}
 	return pos;
 }
 
 SYMBOL_EXPORT double GetTweenInterpolation(struct Tween* tween) {
+	if (tween->style == TWEEN_STYLE_CUSTOM && tween->func) {
+		return tween->func(GetTweenPosition(tween));
+	}
 	return Interpolate(GetTweenPosition(tween), tween->style);
 }
 
