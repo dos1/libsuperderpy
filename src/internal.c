@@ -30,12 +30,12 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* games
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
-			al_draw_bitmap(tmp->fb, 0, 0, 0);
+			al_draw_bitmap(tmp->fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
 		}
 		tmp = tmp->next;
 	}
 	if (game->_priv.loading.inProgress) {
-		al_draw_bitmap(game->loading_fb, 0, 0, 0);
+		al_draw_bitmap(game->loading_fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
 	}
 }
 
@@ -52,6 +52,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 			game->_priv.current_gamestate = tmp;
 			SetFramebufferAsTarget(game);
 			if (game->handlers.compositor) { // don't clear when uncomposited
+				al_reset_clipping_rectangle();
 				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
 			tmp->api->Gamestate_Draw(game, tmp->data);
@@ -65,24 +66,27 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		game->_priv.current_gamestate = NULL;
 		SetFramebufferAsTarget(game);
 		if (game->handlers.compositor) {
+			al_reset_clipping_rectangle();
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 		}
 		game->_priv.loading.gamestate->api->Gamestate_Draw(game, game->_priv.loading.gamestate->data);
 	}
 
+	al_set_target_backbuffer(game->display);
 	if (game->handlers.compositor) {
-		ALLEGRO_TRANSFORM t;
-		al_set_target_backbuffer(game->display);
 		ClearScreen(game);
-		al_identity_transform(&t);
-		/*		double factor = (sin(al_get_time()) / 2.0 + 1.0) * 2;
-		al_translate_transform(&t, -game->_priv.clip_rect.w / factor, -game->_priv.clip_rect.h / factor);
-		al_scale_transform(&t, factor, factor);
-		al_translate_transform(&t, game->_priv.clip_rect.w / factor, game->_priv.clip_rect.h / factor);*/
-		al_translate_transform(&t, game->_priv.clip_rect.x, game->_priv.clip_rect.y);
-		al_use_transform(&t);
+	}
+
+	ALLEGRO_TRANSFORM t;
+	// restore full resolution access to the whole screen
+	al_identity_transform(&t);
+	al_use_transform(&t);
+	al_reset_clipping_rectangle();
+
+	if (game->handlers.compositor) {
 		game->handlers.compositor(game, game->_priv.gamestates);
 	}
+
 	if (game->handlers.postdraw) {
 		game->handlers.postdraw(game);
 	}
@@ -196,22 +200,22 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 
 		int size = sizeof(game->_priv.console) / sizeof(game->_priv.console[0]);
 		for (int i = 0; i < size; i++) {
-			al_draw_filled_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.x + game->_priv.clip_rect.w, game->_priv.clip_rect.y + al_get_font_line_height(game->_priv.font_console) * (size - i), al_map_rgba(0, 0, 0, 80));
+			al_draw_filled_rectangle(0, 0, al_get_display_width(game->display), al_get_font_line_height(game->_priv.font_console) * (size - i), al_map_rgba(0, 0, 0, 80));
 		}
 		int cur = game->_priv.console_pos + size;
 		for (int i = 0; i < size; i++) {
 			if (cur >= size) {
 				cur -= size;
 			}
-			al_draw_text(game->_priv.font_console, al_map_rgb(255, 255, 255), game->_priv.clip_rect.x + (int)(game->viewport.width * 0.005), game->_priv.clip_rect.y + al_get_font_line_height(game->_priv.font_console) * i, ALLEGRO_ALIGN_LEFT, game->_priv.console[cur]);
+			al_draw_text(game->_priv.font_console, al_map_rgb(255, 255, 255), (int)(al_get_display_width(game->display) * 0.005), al_get_font_line_height(game->_priv.font_console) * i, ALLEGRO_ALIGN_LEFT, game->_priv.console[cur]);
 			cur++;
 		}
 
 		char sfps[16] = {0};
 		snprintf(sfps, 6, "%.0f", game->_priv.fps_count.fps);
-		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), game->_priv.clip_rect.x + game->_priv.clip_rect.w, game->_priv.clip_rect.y, ALLEGRO_ALIGN_RIGHT, sfps);
+		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), al_get_display_width(game->display), 0, ALLEGRO_ALIGN_RIGHT, sfps);
 		snprintf(sfps, 16, "%.2f ms", 1000 * (game_time - game->_priv.fps_count.time));
-		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), game->_priv.clip_rect.x + game->_priv.clip_rect.w, game->_priv.clip_rect.y + al_get_font_line_height(game->_priv.font_console), ALLEGRO_ALIGN_RIGHT, sfps);
+		DrawTextWithShadow(game->_priv.font_console, al_map_rgb(255, 255, 255), al_get_display_width(game->display), al_get_font_line_height(game->_priv.font_console), ALLEGRO_ALIGN_RIGHT, sfps);
 
 		DrawTimelines(game);
 
@@ -528,12 +532,12 @@ static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int
 }
 
 static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) {
-	al_draw_filled_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * (pos + 1), game->_priv.clip_rect.x + game->_priv.clip_rect.w, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * pos, al_map_rgba(0, 0, 0, 92));
+	al_draw_filled_rectangle(0, al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1), al_get_display_width(game->display), al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * pos, al_map_rgba(0, 0, 0, 92));
 
-	al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), game->_priv.clip_rect.x + game->_priv.clip_rect.w / 2.0, game->_priv.clip_rect.y + game->_priv.clip_rect.h - (340 / 1800.0) * game->_priv.clip_rect.h * (pos + 1) + (10 / 1800.0) * game->_priv.clip_rect.h, ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
+	al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), al_get_display_width(game->display) / 2.0, al_get_display_height(game->display) - (340 / 1800.0) * al_get_display_height(game->display) * (pos + 1) + (10 / 1800.0) * al_get_display_height(game->display), ALLEGRO_ALIGN_CENTER, "Timeline: %s", timeline->name);
 
-	DrawQueue(game, timeline->queue, game->_priv.clip_rect.x + (int)((25 / 3200.0) * game->_priv.clip_rect.w), game->_priv.clip_rect.y + game->_priv.clip_rect.h - (int)((220 / 1800.0) * game->_priv.clip_rect.h) - (int)((340 / 1800.0) * game->_priv.clip_rect.h * pos));
-	DrawQueue(game, timeline->background, (int)(game->_priv.clip_rect.x + (25 / 3200.0) * game->_priv.clip_rect.w), game->_priv.clip_rect.y + game->_priv.clip_rect.h - (int)((100 / 1800.0) * game->_priv.clip_rect.h) - (int)((340 / 1800.0) * game->_priv.clip_rect.h * pos));
+	DrawQueue(game, timeline->queue, (int)((25 / 3200.0) * al_get_display_width(game->display)), al_get_display_height(game->display) - (int)((220 / 1800.0) * al_get_display_height(game->display)) - (int)((340 / 1800.0) * al_get_display_height(game->display) * pos));
+	DrawQueue(game, timeline->background, (int)((25 / 3200.0) * al_get_display_width(game->display)), al_get_display_height(game->display) - (int)((100 / 1800.0) * al_get_display_height(game->display)) - (int)((340 / 1800.0) * al_get_display_height(game->display) * pos));
 }
 
 SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
