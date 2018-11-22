@@ -345,6 +345,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	}
 	al_register_event_source(game->_priv.event_queue, al_get_timer_event_source(game->_priv.timer));
 
+	ReloadShaders(game, false);
 	al_flip_display();
 	al_start_timer(game->_priv.timer);
 
@@ -365,9 +366,10 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->Gamestate_Load)(game, NULL);
 	PrintConsole(game, "Loading screen registered.");
 
+	ReloadShaders(game, false);
+
 	game->_priv.timestamp = al_get_time();
 	game->_priv.paused = false;
-	ReloadShaders(game, false);
 
 	return 0;
 }
