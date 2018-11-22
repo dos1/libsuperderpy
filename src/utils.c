@@ -486,17 +486,23 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
 }
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
+	if (game->_priv.loading.inProgress) {
+		return al_get_backbuffer(game->display);
+	}
 	return game->_priv.current_gamestate->fb;
 }
 
 SYMBOL_EXPORT void SetFramebufferAsTarget(struct Game* game) {
-	al_set_target_bitmap(GetFramebuffer(game));
-	double x = al_get_bitmap_width(GetFramebuffer(game)) / (double)game->viewport.width;
-	double y = al_get_bitmap_height(GetFramebuffer(game)) / (double)game->viewport.height;
-	ALLEGRO_TRANSFORM t;
-	al_identity_transform(&t);
-	al_scale_transform(&t, x, y);
-	al_use_transform(&t);
+	ALLEGRO_BITMAP* framebuffer = GetFramebuffer(game);
+	al_set_target_bitmap(framebuffer);
+	if (framebuffer != al_get_backbuffer(game->display)) {
+		double x = al_get_bitmap_width(framebuffer) / (double)game->viewport.width;
+		double y = al_get_bitmap_height(framebuffer) / (double)game->viewport.height;
+		ALLEGRO_TRANSFORM t;
+		al_identity_transform(&t);
+		al_scale_transform(&t, x, y);
+		al_use_transform(&t);
+	}
 }
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {

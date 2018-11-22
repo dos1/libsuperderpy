@@ -251,7 +251,8 @@ static inline bool MainloopTick(struct Game* game) {
 				al_run_detached_thread(GamestateLoadingThread, &data);
 				while (game->_priv.loading.inProgress) {
 					DrawGamestates(game);
-					al_set_target_backbuffer(game->display);
+					SetFramebufferAsTarget(game);
+					al_clear_to_color(al_map_rgb(0, 0, 0));
 					double delta = al_get_time() - game->_priv.loading.time;
 					if (tmp->showLoading) {
 						(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);

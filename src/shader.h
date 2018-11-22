@@ -23,7 +23,7 @@
 
 #include "libsuperderpy.h"
 
-ALLEGRO_SHADER *CreateShader(struct Game *game, const char* vertex, const char* fragment);
-void DestroyShader(struct Game *game, ALLEGRO_SHADER *shader);
+ALLEGRO_SHADER* CreateShader(struct Game* game, const char* vertex, const char* fragment);
+void DestroyShader(struct Game* game, ALLEGRO_SHADER* shader);
 
 #endif

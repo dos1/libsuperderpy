@@ -279,6 +279,8 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 #else
 	al_convert_memory_bitmaps();
 	DrawGamestates(game);
+	SetFramebufferAsTarget(game);
+	al_clear_to_color(al_map_rgb(0, 0, 0));
 	double delta = al_get_time() - game->_priv.loading.time;
 	if (game->_priv.loading.current->showLoading) {
 		game->_priv.loading.gamestate->api->Gamestate_Logic(game, game->_priv.loading.gamestate->data, delta);
