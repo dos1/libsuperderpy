@@ -317,6 +317,12 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->loading_progress = 0;
 
+	if (game->handlers.compositor) {
+		game->loading_fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	} else {
+		game->loading_fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	}
+
 	return game;
 }
 

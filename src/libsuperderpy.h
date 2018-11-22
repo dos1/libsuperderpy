@@ -110,8 +110,6 @@ struct Game {
 		bool showconsole; /*!< If true, game console is rendered on screen. */
 		bool showtimeline;
 
-		ALLEGRO_BITMAP* fb; /*!< Default framebuffer. */
-
 		struct {
 			double old_time, fps, time;
 			int frames_done;
@@ -171,6 +169,7 @@ struct Game {
 	ALLEGRO_EVENT_SOURCE event_source;
 
 	float loading_progress;
+	ALLEGRO_BITMAP* loading_fb;
 
 	struct {
 		bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);

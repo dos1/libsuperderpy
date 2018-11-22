@@ -250,16 +250,10 @@ static inline bool MainloopTick(struct Game* game) {
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 				al_run_detached_thread(GamestateLoadingThread, &data);
 				while (game->_priv.loading.inProgress) {
-					DrawGamestates(game);
-					SetFramebufferAsTarget(game);
-					al_clear_to_color(al_map_rgb(0, 0, 0));
 					double delta = al_get_time() - game->_priv.loading.time;
 					if (tmp->showLoading) {
 						(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
-						(*game->_priv.loading.gamestate->api->Gamestate_Draw)(game, game->_priv.loading.gamestate->data);
-						if (game->handlers.postdraw) {
-							game->handlers.postdraw(game);
-						}
+						DrawGamestates(game);
 					}
 					game->_priv.loading.time += delta;
 					game->time += delta; // TODO: ability to disable passing time during loading
@@ -283,6 +277,8 @@ static inline bool MainloopTick(struct Game* game) {
 					PrintConsole(game, "[%s] Post-loading...", tmp->name);
 					tmp->api->Gamestate_PostLoad(game, tmp->data);
 				}
+
+				tmp->showLoading = true;
 
 				game->_priv.loading.progress++;
 				CalculateProgress(game);

@@ -34,6 +34,9 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* games
 		}
 		tmp = tmp->next;
 	}
+	if (game->_priv.loading.inProgress) {
+		al_draw_bitmap(game->loading_fb, 0, 0, 0);
+	}
 }
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
@@ -55,6 +58,16 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 			// TODO: save and restore more state for careless gamestating
 		}
 		tmp = tmp->next;
+	}
+
+	if (game->_priv.loading.inProgress) {
+		// same as above, but for the loading gamestate
+		game->_priv.current_gamestate = NULL;
+		SetFramebufferAsTarget(game);
+		if (game->handlers.compositor) {
+			al_clear_to_color(al_map_rgb(0, 0, 0));
+		}
+		game->_priv.loading.gamestate->api->Gamestate_Draw(game, game->_priv.loading.gamestate->data);
 	}
 
 	if (game->handlers.compositor) {
@@ -162,6 +175,12 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 			tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 		}
 		tmp = tmp->next;
+	}
+	al_destroy_bitmap(game->loading_fb);
+	if (game->handlers.compositor) {
+		game->loading_fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	} else {
+		game->loading_fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
 	}
 }
 
@@ -278,13 +297,10 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	al_unlock_mutex(game->_priv.texture_sync_mutex);
 #else
 	al_convert_memory_bitmaps();
-	DrawGamestates(game);
-	SetFramebufferAsTarget(game);
-	al_clear_to_color(al_map_rgb(0, 0, 0));
 	double delta = al_get_time() - game->_priv.loading.time;
 	if (game->_priv.loading.current->showLoading) {
 		game->_priv.loading.gamestate->api->Gamestate_Logic(game, game->_priv.loading.gamestate->data, delta);
-		game->_priv.loading.gamestate->api->Gamestate_Draw(game, game->_priv.loading.gamestate->data);
+		DrawGamestates(game);
 	}
 	game->_priv.loading.time += delta;
 	DrawConsole(game);
