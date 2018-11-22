@@ -278,8 +278,6 @@ static inline bool MainloopTick(struct Game* game) {
 					tmp->api->Gamestate_PostLoad(game, tmp->data);
 				}
 
-				tmp->showLoading = true;
-
 				game->_priv.loading.progress++;
 				CalculateProgress(game);
 				PrintConsole(game, "Gamestate \"%s\" loaded successfully in %f seconds.", tmp->name, al_get_time() - time);
@@ -291,6 +289,7 @@ static inline bool MainloopTick(struct Game* game) {
 			if (tmp->showLoading) {
 				(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
 			}
+			tmp->showLoading = true;
 			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
 		}
