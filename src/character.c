@@ -412,9 +412,9 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 	delta *= speed_modifier;
 	character->delta += delta * 1000;
 
-	while (character->delta >= character->spritesheet->duration) {
+	while (character->delta >= character->frame->duration) {
 		bool reachedEnd = false;
-		character->delta -= character->spritesheet->duration;
+		character->delta -= character->frame->duration;
 		if (character->reversing) {
 			character->pos--;
 		} else {
