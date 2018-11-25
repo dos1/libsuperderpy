@@ -307,9 +307,11 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 }
 
 SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
-	PrintConsole(game, "Creating character %s...", name);
+	if (name) {
+		PrintConsole(game, "Creating character %s...", name);
+	}
 	struct Character* character = malloc(sizeof(struct Character));
-	character->name = strdup(name);
+	character->name = name ? strdup(name) : NULL;
 	character->frame = NULL;
 	character->spritesheet = NULL;
 	character->spritesheets = NULL;
@@ -396,7 +398,9 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 	if (character->predecessor) {
 		free(character->predecessor);
 	}
-	free(character->name);
+	if (character->name) {
+		free(character->name);
+	}
 	free(character);
 }
 
