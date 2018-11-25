@@ -335,6 +335,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->repeats = -1;
 	character->reversing = false;
 	character->parent = NULL;
+	character->parent_tint = true;
 	character->hidden = false;
 	character->data = NULL;
 	character->callback = NULL;
@@ -531,6 +532,25 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	return transform;
 }
 
+SYMBOL_EXPORT ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character* character) {
+	ALLEGRO_COLOR color;
+	if (character->parent && character->parent_tint) {
+		float r, g, b, a;
+		al_unmap_rgba_f(character->tint, &r, &g, &b, &a);
+		float r2, g2, b2, a2;
+		al_unmap_rgba_f(GetCharacterTint(game, character->parent), &r2, &g2, &b2, &a2);
+
+		color = al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
+	} else {
+		color = character->tint;
+	}
+
+	float r, g, b, a, r2, g2, b2, a2;
+	al_unmap_rgba_f(color, &r, &g, &b, &a);
+	al_unmap_rgba_f(character->frame->tint, &r2, &g2, &b2, &a2);
+	return al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
+}
+
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
 	if (IsCharacterHidden(game, character)) {
 		return;
@@ -542,12 +562,7 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_compose_transform(&transform, &current);
 	al_use_transform(&transform);
 
-	float r, g, b, a, r2, g2, b2, a2;
-	al_unmap_rgba_f(character->tint, &r, &g, &b, &a);
-	al_unmap_rgba_f(character->frame->tint, &r2, &g2, &b2, &a2);
-	ALLEGRO_COLOR tint = al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
-
-	al_draw_tinted_bitmap(character->frame->bitmap, tint, character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y, 0);
+	al_draw_tinted_bitmap(character->frame->bitmap, GetCharacterTint(game, character), character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y, 0);
 
 	/*	al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,

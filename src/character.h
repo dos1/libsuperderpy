@@ -90,6 +90,7 @@ struct Character {
 	float x; /*!< Horizontal position of character. */
 	float y; /*!< Vertical position of character. */
 	ALLEGRO_COLOR tint; /*!< Color with which the character's pixels will be multiplied (tinted). White for no effect. */
+	bool parent_tint; /*!< When true, the character tint is multiplied by its parent tint. */
 	//float pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
 	//float pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
 	float scaleX; /*!< Scale factor for X axis. */
@@ -119,6 +120,7 @@ void RegisterSpritesheet(struct Game* game, struct Character* character, char* n
 struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
 
 ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* character);
+ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character* character);
 
 void DrawCharacter(struct Game* game, struct Character* character);
 void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
