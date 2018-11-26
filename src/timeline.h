@@ -25,7 +25,7 @@
 
 struct TM_Action;
 typedef bool TM_ActionCallback(struct Game*, struct GamestateResources*, struct TM_Action*);
-#define TM_NUMARGS(...) (sizeof((void* []){__VA_ARGS__}) / sizeof(void*))
+#define TM_NUMARGS(...) (sizeof((void*[]){__VA_ARGS__}) / sizeof(void*))
 
 /*! \brief State of the TM_Action. */
 enum TM_ActionState {

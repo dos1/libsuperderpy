@@ -64,6 +64,7 @@ struct GamestateResources;
 #include "gamestate.h"
 #include "mainloop.h"
 #include "maths.h"
+#include "particle.h"
 #include "shader.h"
 #include "timeline.h"
 #include "tween.h"
@@ -73,8 +74,6 @@ struct GamestateResources;
 #endif
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
-
-struct Gamestate;
 
 struct Viewport {
 	int width; /*!< Width of the drawing canvas. */

@@ -6,6 +6,7 @@ SET(SRC_LIST
 	libsuperderpy.c
 	mainloop.c
 	maths.c
+	particle.c
 	shader.c
 	timeline.c
 	tween.c
