@@ -22,8 +22,6 @@
 #define LIBSUPERDERPY_MATHS_H
 
 #include "libsuperderpy.h"
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
 
 double DotProduct(const double v[], const double u[], int n);
 double VectorLength(double x, double y, double z);

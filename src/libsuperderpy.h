@@ -32,20 +32,33 @@ struct GamestateResources;
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_color.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_opengl.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_video.h>
-#ifdef ALLEGRO_ANDROID
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/param.h>
+
+#if defined(ALLEGRO_ANDROID)
 #define ALLEGRO_UNSTABLE
 #include <allegro5/allegro_android.h>
-#endif
-#ifdef __EMSCRIPTEN__
-#include "emscripten-audio-stream.h"
+#elif defined(ALLEGRO_WINDOWS)
+#include <allegro5/allegro_windows.h>
+#elif defined(ALLEGRO_WITH_XWINDOWS)
+#include <allegro5/allegro_x.h>
+#elif defined(ALLEGRO_MACOS)
+#include <allegro5/allegro_osx.h>
+#elif defined(ALLEGRO_IPHONE)
+#include <allegro5/allegro_iphone.h>
+#elif defined(__EMSCRIPTEN__)
 #include <emscripten.h>
 #endif
+
 #include "character.h"
 #include "config.h"
 #include "gamestate.h"
@@ -55,8 +68,9 @@ struct GamestateResources;
 #include "timeline.h"
 #include "tween.h"
 #include "utils.h"
-#include <math.h>
-#include <sys/param.h>
+#ifdef __EMSCRIPTEN__
+#include "emscripten-audio-stream.h"
+#endif
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
 

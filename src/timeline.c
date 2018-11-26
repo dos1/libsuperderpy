@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "timeline.h"
+
 #include "internal.h"
-#include "utils.h"
-#include <allegro5/allegro.h>
 
 static void DestroyArgs(struct TM_Arguments* args) {
 	struct TM_Arguments* pom;

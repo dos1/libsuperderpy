@@ -18,9 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gamestate.h"
 #include "internal.h"
-#include "utils.h"
 
 static struct Gamestate* AddNewGamestate(struct Game* game, const char* name) {
 	struct Gamestate* tmp = game->_priv.gamestates;

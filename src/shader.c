@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "shader.h"
+
 #include "internal.h"
-#include <allegro5/allegro.h>
-#include <math.h>
 
 static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 	ALLEGRO_FILE* fp = al_fopen(filename, "r");

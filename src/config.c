@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "config.h"
+
 #include "internal.h"
-#include <allegro5/allegro.h>
 
 SYMBOL_EXPORT void InitConfig(struct Game* game) {
 	const ALLEGRO_FILE_INTERFACE* iface = al_get_new_file_interface();

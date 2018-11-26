@@ -18,14 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils.h"
-#include "config.h"
 #include "internal.h"
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_ttf.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
 #ifdef ALLEGRO_ANDROID
 #include <android/log.h>
 #endif

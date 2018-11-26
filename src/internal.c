@@ -19,11 +19,7 @@
 
 #include "internal.h"
 #include "3rdparty/valgrind.h"
-#include "libsuperderpy.h"
-#include <allegro5/allegro_ttf.h>
 #include <dlfcn.h>
-#include <math.h>
-#include <stdio.h>
 
 SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates) {
 	struct Gamestate* tmp = gamestates;

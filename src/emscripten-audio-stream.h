@@ -23,7 +23,7 @@
 #ifndef LIBSUPERDERPY_EMSCRIPTEN_H
 #define LIBSUPERDERPY_EMSCRIPTEN_H
 
-#include <allegro5/allegro_audio.h>
+#include "libsuperderpy.h"
 
 typedef struct {
 	ALLEGRO_SAMPLE* sample;

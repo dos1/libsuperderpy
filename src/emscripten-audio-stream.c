@@ -19,7 +19,6 @@
  */
 
 #include "internal.h"
-#include "emscripten.h"
 
 #undef al_create_audio_stream
 #undef al_load_audio_stream

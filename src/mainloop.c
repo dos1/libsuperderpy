@@ -21,7 +21,6 @@
  */
 
 #include "internal.h"
-#include "libsuperderpy.h"
 
 static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {

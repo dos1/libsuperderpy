@@ -21,7 +21,6 @@
 #define LIBSUPERDERPY_GAMESTATE_H
 
 #include "libsuperderpy.h"
-#include <allegro5/allegro.h>
 
 struct Gamestate_API {
 	void (*Gamestate_Draw)(struct Game* game, void* data);

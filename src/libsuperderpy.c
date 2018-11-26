@@ -25,14 +25,10 @@
 #define ALLEGRO_UNSTABLE
 #endif
 
-#include "libsuperderpy.h"
 #include "internal.h"
 #include <dlfcn.h>
 #include <libgen.h>
 #include <locale.h>
-#include <math.h>
-#include <stdio.h>
-#include <sys/param.h>
 #include <unistd.h>
 #ifdef ALLEGRO_MACOSX
 #include <mach-o/dyld.h>

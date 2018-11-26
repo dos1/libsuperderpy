@@ -19,8 +19,6 @@
 #define LIBSUPERDERPY_INTERNAL_H
 
 #include "libsuperderpy.h"
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define SYMBOL_INTERNAL

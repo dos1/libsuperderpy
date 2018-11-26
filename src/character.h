@@ -22,8 +22,6 @@
 #define LIBSUPERDERPY_CHARACTER_H
 
 #include "libsuperderpy.h"
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
 
 struct SpritesheetFrame {
 	char* file;

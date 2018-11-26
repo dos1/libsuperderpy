@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "tween.h"
+
 #include "internal.h"
-#include <allegro5/allegro.h>
-#include <math.h>
 
 // Easing formulas (c) 2011, Auerhaus Development, LLC
 // Originally licensed under WTFPL 2.0

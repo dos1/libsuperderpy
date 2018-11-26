@@ -22,8 +22,6 @@
 #define LIBSUPERDERPY_UTILS_H
 
 #include "libsuperderpy.h"
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
 
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"

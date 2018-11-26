@@ -1,15 +1,15 @@
 SET(SRC_LIST
-	utils.c
-	maths.c
+	character.c
 	config.c
-	timeline.c
 	gamestate.c
+	internal.c
 	libsuperderpy.c
 	mainloop.c
-	character.c
-	internal.c
-	tween.c
+	maths.c
 	shader.c
+	timeline.c
+	tween.c
+	utils.c
 )
 if (EMSCRIPTEN)
 	list(APPEND SRC_LIST emscripten-audio-stream.c)
