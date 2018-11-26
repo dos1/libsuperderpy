@@ -22,7 +22,7 @@
 
 // TODO: think about pre-allocating particle data
 
-struct GravityParticleData* GravityParticleData(double dx, double dy, double gravity, double friction) {
+SYMBOL_EXPORT struct GravityParticleData* GravityParticleData(double dx, double dy, double gravity, double friction) {
 	struct GravityParticleData* data = calloc(1, sizeof(struct GravityParticleData));
 	data->dx = dx;
 	data->dy = dy;
@@ -31,7 +31,7 @@ struct GravityParticleData* GravityParticleData(double dx, double dy, double gra
 	return data;
 }
 
-bool GravityParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
+SYMBOL_EXPORT bool GravityParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
 	struct GravityParticleData* data = d;
 	if (!particle) {
 		free(data);
@@ -44,14 +44,14 @@ bool GravityParticle(struct Game* game, struct ParticleState* particle, double d
 	return true;
 }
 
-struct LinearParticleData* LinearParticleData(double dx, double dy) {
+SYMBOL_EXPORT struct LinearParticleData* LinearParticleData(double dx, double dy) {
 	struct LinearParticleData* data = calloc(1, sizeof(struct LinearParticleData));
 	data->dx = dx;
 	data->dy = dy;
 	return data;
 }
 
-bool LinearParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
+SYMBOL_EXPORT bool LinearParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
 	struct LinearParticleData* data = d;
 	if (!particle) {
 		free(data);
@@ -62,7 +62,7 @@ bool LinearParticle(struct Game* game, struct ParticleState* particle, double de
 	return true;
 }
 
-struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d, void (*destructor)(void*)) {
+SYMBOL_EXPORT struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d, void (*destructor)(void*)) {
 	struct FaderParticleData* data = calloc(1, sizeof(struct FaderParticleData));
 	data->delay = delay;
 	data->data = d;
@@ -74,7 +74,7 @@ struct FaderParticleData* FaderParticleData(double delay, double speed, Particle
 	return data;
 }
 
-void FaderParticleDestructor(void* data) {
+SYMBOL_EXPORT void FaderParticleDestructor(void* data) {
 	struct FaderParticleData* d = data;
 	if (d->destructor) {
 		d->destructor(d->data);
@@ -82,7 +82,7 @@ void FaderParticleDestructor(void* data) {
 	free(d);
 }
 
-bool FaderParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
+SYMBOL_EXPORT bool FaderParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
 	struct FaderParticleData* data = d;
 
 	if (!particle) {
@@ -121,16 +121,16 @@ bool FaderParticle(struct Game* game, struct ParticleState* particle, double del
 	return true;
 }
 
-struct ParticleState SpawnParticleIn(float x, float y) {
+SYMBOL_EXPORT struct ParticleState SpawnParticleIn(float x, float y) {
 	return (struct ParticleState){.x = x, .y = y, .scaleX = 1.0, .scaleY = 1.0, .angle = 0.0, .tint = al_map_rgba(255, 255, 255, 255)};
 }
 
-struct ParticleState SpawnParticleBetween(float x1, float y1, float x2, float y2) {
+SYMBOL_EXPORT struct ParticleState SpawnParticleBetween(float x1, float y1, float x2, float y2) {
 	float x = x1 + (x2 - x1) * rand() / RAND_MAX, y = y1 + (y2 - y1) * rand() / RAND_MAX;
 	return SpawnParticleIn(x, y);
 }
 
-struct ParticleBucket* CreateParticleBucket(struct Game* game, int size, bool growing) {
+SYMBOL_EXPORT struct ParticleBucket* CreateParticleBucket(struct Game* game, int size, bool growing) {
 	struct ParticleBucket* bucket = calloc(1, sizeof(struct ParticleBucket));
 	bucket->growing = growing;
 	bucket->size = size;
@@ -142,7 +142,7 @@ struct ParticleBucket* CreateParticleBucket(struct Game* game, int size, bool gr
 	return bucket;
 }
 
-void UpdateParticles(struct Game* game, struct ParticleBucket* bucket, double delta) {
+SYMBOL_EXPORT void UpdateParticles(struct Game* game, struct ParticleBucket* bucket, double delta) {
 	int actives = 0;
 	for (int i = 0; i < bucket->size; i++) {
 		if (bucket->particles[i].active) {
@@ -165,7 +165,7 @@ void UpdateParticles(struct Game* game, struct ParticleBucket* bucket, double de
 	}
 }
 
-void DrawParticles(struct Game* game, struct ParticleBucket* bucket) {
+SYMBOL_EXPORT void DrawParticles(struct Game* game, struct ParticleBucket* bucket) {
 	bool was_held = al_is_bitmap_drawing_held();
 	al_hold_bitmap_drawing(true);
 	for (int i = 0; i < bucket->size; i++) {
@@ -176,7 +176,7 @@ void DrawParticles(struct Game* game, struct ParticleBucket* bucket) {
 	al_hold_bitmap_drawing(was_held);
 }
 
-void EmitParticle(struct Game* game, struct ParticleBucket* bucket, struct Character* archetype, ParticleFunc* func, struct ParticleState state, void* data) {
+SYMBOL_EXPORT void EmitParticle(struct Game* game, struct ParticleBucket* bucket, struct Character* archetype, ParticleFunc* func, struct ParticleState state, void* data) {
 	if (bucket->size == bucket->active) {
 		if (bucket->growing) {
 			PrintConsole(game, "ERROR: Growing ParticleBucket is not implemented yet! Increase its size (current: %d)", bucket->size);
@@ -209,7 +209,7 @@ void EmitParticle(struct Game* game, struct ParticleBucket* bucket, struct Chara
 	}
 }
 
-void DestroyParticleBucket(struct Game* game, struct ParticleBucket* bucket) {
+SYMBOL_EXPORT void DestroyParticleBucket(struct Game* game, struct ParticleBucket* bucket) {
 	for (int i = 0; i < bucket->size; i++) {
 		if (bucket->particles[i].active) {
 			bucket->particles[i].func(game, NULL, 0.0, bucket->particles[i].data);
