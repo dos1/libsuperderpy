@@ -81,6 +81,7 @@ struct Viewport {
 	float aspect; /*!< When set instead of width/height pair, makes the viewport side fluid; when non-zero, locks its aspect ratio. */
 	bool integer_scaling; /*!< Ensure that the viewport is zoomed only with integer factors. */
 	bool pixel_perfect; /*!< Ensure that the resulting image is really viewport-sized and (potentially) rescaled afterwards, as opposed to default transformation-based scaling. */
+	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 };
 
 /*! \brief Main struct of the game. */
