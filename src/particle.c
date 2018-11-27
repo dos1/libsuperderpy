@@ -197,10 +197,7 @@ SYMBOL_EXPORT void EmitParticle(struct Game* game, struct ParticleBucket* bucket
 	bucket->particles[bucket->last].state = state;
 	bucket->particles[bucket->last].data = data;
 
-	bucket->particles[bucket->last].character->spritesheets = archetype->spritesheets;
-	bucket->particles[bucket->last].character->spritesheet = archetype->spritesheet;
-	// TODO: move more state and avoid SelectSpritesheet; maybe add a function like CopyCharacter?
-	SelectSpritesheet(game, bucket->particles[bucket->last].character, bucket->particles[bucket->last].character->spritesheet->name);
+	CopyCharacter(game, archetype, bucket->particles[bucket->last].character);
 
 	bucket->active++;
 	bucket->last++;

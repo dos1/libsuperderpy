@@ -568,6 +568,25 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_use_transform(&current);
 }
 
+SYMBOL_EXPORT void CopyCharacter(struct Game* game, struct Character* from, struct Character* to) {
+	to->shared = true;
+	if (to->name) {
+		free(to->name);
+	}
+	to->name = from->name ? strdup(from->name) : NULL;
+	to->spritesheets = from->spritesheets;
+	to->spritesheet = from->spritesheet;
+	to->frame = from->frame;
+	to->delta = from->delta;
+	to->pos = from->pos;
+	to->predecessor = from->predecessor ? strdup(from->predecessor) : NULL;
+	to->repeats = from->repeats;
+	to->reversed = from->reversed;
+	to->reversing = from->reversing;
+	to->successor = from->successor ? strdup(from->successor) : NULL;
+	to->frame = &to->spritesheet->frames[to->pos];
+}
+
 SYMBOL_EXPORT void SetParentCharacter(struct Game* game, struct Character* character, struct Character* parent) {
 	character->parent = parent;
 }
@@ -630,9 +649,11 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 SYMBOL_EXPORT void ShowCharacter(struct Game* game, struct Character* character) {
 	character->hidden = false;
 }
+
 SYMBOL_EXPORT void HideCharacter(struct Game* game, struct Character* character) {
 	character->hidden = true;
 }
+
 SYMBOL_EXPORT bool IsCharacterHidden(struct Game* game, struct Character* character) {
 	if (character->hidden) {
 		return true;

@@ -139,6 +139,8 @@ void SetCharacterConfines(struct Game* game, struct Character* character, int x,
 
 void SetParentCharacter(struct Game* game, struct Character* character, struct Character* parent);
 
+void CopyCharacter(struct Game* game, struct Character* from, struct Character* to);
+
 float GetCharacterX(struct Game* game, struct Character* character);
 float GetCharacterY(struct Game* game, struct Character* character);
 int GetCharacterConfineX(struct Game* game, struct Character* character);
