@@ -128,6 +128,19 @@ SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLO
 		x, y, sx, sy, 0, flags);
 }
 
+SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
+	ALLEGRO_BITMAP* target = al_get_target_bitmap();
+	if (GetFramebuffer(game) == target && al_get_parent_bitmap(target) == al_get_backbuffer(game->display)) {
+		al_set_target_backbuffer(game->display);
+	}
+	int x, y, w, h;
+	al_get_clipping_rectangle(&x, &y, &w, &h);
+	al_reset_clipping_rectangle();
+	al_clear_to_color(color);
+	al_set_clipping_rectangle(x, y, w, h);
+	al_set_target_bitmap(target);
+}
+
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),

@@ -56,6 +56,9 @@ void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags);
 void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags);
 void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags);
 
+/*! \brief Clears the current target completely, without taking current clipping rectangle into account. */
+void ClearToColor(struct Game* game, ALLEGRO_COLOR color);
+
 ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac);
 void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 
