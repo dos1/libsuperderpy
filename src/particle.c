@@ -107,6 +107,7 @@ SYMBOL_EXPORT bool FaderParticle(struct Game* game, struct ParticleState* partic
 		data->fade += data->speed * delta / (1 / 60.0);
 	}
 
+	al_unmap_rgba_f(particle->tint, &r, &g, &b, &a);
 	r *= 1.0 - data->fade;
 	g *= 1.0 - data->fade;
 	b *= 1.0 - data->fade;
