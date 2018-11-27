@@ -23,7 +23,7 @@
 
 SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates) {
 	struct Gamestate* tmp = gamestates;
-	al_clear_to_color(al_map_rgb(0, 0, 0));
+	ClearToColor(game, al_map_rgb(0, 0, 0));
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			al_draw_bitmap(tmp->fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
@@ -69,9 +69,6 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	}
 
 	al_set_target_backbuffer(game->display);
-	if (game->handlers.compositor) {
-		ClearScreen(game);
-	}
 
 	ALLEGRO_TRANSFORM t;
 	// restore full resolution access to the whole screen
