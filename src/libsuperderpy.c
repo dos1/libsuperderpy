@@ -377,14 +377,9 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 
 #ifdef LIBSUPERDERPY_IMGUI
 	igCreateContext(NULL);
-	ImGuiIO* io = igGetIO();
-	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-
-	// Setup Platform/Renderer bindings
 	ImGui_ImplAllegro5_Init(game->display);
-
-	// Setup Style
 	igStyleColorsDark(NULL);
+	igGetStyle()->FrameBorderSize = 1.0;
 #endif
 
 	return 0;

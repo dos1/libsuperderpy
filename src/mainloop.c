@@ -383,6 +383,10 @@ static inline bool MainloopEvents(struct Game* game) {
 			case ALLEGRO_EVENT_MOUSE_AXES:
 			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
 			case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+			case ALLEGRO_EVENT_TOUCH_BEGIN:
+			case ALLEGRO_EVENT_TOUCH_CANCEL:
+			case ALLEGRO_EVENT_TOUCH_END:
+			case ALLEGRO_EVENT_TOUCH_MOVE:
 				if (igGetIO()->WantCaptureMouse) {
 					continue;
 				}

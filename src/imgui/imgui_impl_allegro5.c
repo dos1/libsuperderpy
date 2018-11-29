@@ -1,4 +1,5 @@
 // dear imgui: Renderer + Platform Binding for Allegro 5
+// Adapted from C++ to C for libsuperderpy.
 // (Info: Allegro 5 is a cross-platform general purpose library for handling windows, inputs, graphics, etc.)
 
 // Implemented features:
@@ -42,7 +43,6 @@
 static ALLEGRO_DISPLAY* g_Display = NULL;
 static ALLEGRO_BITMAP* g_Texture = NULL;
 static double g_Time = 0.0;
-static ALLEGRO_MOUSE_CURSOR* g_MouseCursorInvisible = NULL;
 static ALLEGRO_VERTEX_DECL* g_VertexDecl = NULL;
 static char* g_ClipboardTextData = NULL;
 
@@ -177,12 +177,6 @@ SYMBOL_EXPORT bool ImGui_ImplAllegro5_CreateDeviceObjects() {
 	io->Fonts->TexID = (void*)cloned_img;
 	g_Texture = cloned_img;
 
-	// Create an invisible mouse cursor
-	// Because al_hide_mouse_cursor() seems to mess up with the actual inputs..
-	ALLEGRO_BITMAP* mouse_cursor = al_create_bitmap(8, 8);
-	g_MouseCursorInvisible = al_create_mouse_cursor(mouse_cursor, 0, 0);
-	al_destroy_bitmap(mouse_cursor);
-
 	return true;
 }
 
@@ -191,10 +185,6 @@ SYMBOL_EXPORT void ImGui_ImplAllegro5_InvalidateDeviceObjects() {
 		al_destroy_bitmap(g_Texture);
 		igGetIO()->Fonts->TexID = NULL;
 		g_Texture = NULL;
-	}
-	if (g_MouseCursorInvisible) {
-		al_destroy_mouse_cursor(g_MouseCursorInvisible);
-		g_MouseCursorInvisible = NULL;
 	}
 }
 
@@ -281,8 +271,46 @@ SYMBOL_EXPORT bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* ev) {
 
 	switch (ev->type) {
 		case ALLEGRO_EVENT_MOUSE_AXES:
-			io->MouseWheel += ev->mouse.dz;
-			io->MouseWheelH += ev->mouse.dw;
+			if (ev->mouse.display == g_Display) {
+				io->MouseWheel += ev->mouse.dz;
+				io->MouseWheelH += ev->mouse.dw;
+				io->MousePos = (ImVec2){.x = ev->mouse.x, .y = ev->mouse.y};
+			}
+			return true;
+		case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+			if (ev->mouse.display == g_Display) {
+				if (ev->mouse.button <= 5) {
+					io->MouseDown[ev->mouse.button - 1] = true;
+				}
+			}
+			return true;
+		case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+			if (ev->mouse.display == g_Display) {
+				if (ev->mouse.button <= 5) {
+					io->MouseDown[ev->mouse.button - 1] = false;
+				}
+			}
+			return true;
+		case ALLEGRO_EVENT_TOUCH_MOVE:
+			if (ev->touch.display == g_Display) {
+				io->MousePos = (ImVec2){.x = ev->touch.x, .y = ev->touch.y};
+			}
+			return true;
+		case ALLEGRO_EVENT_TOUCH_BEGIN:
+			if (ev->touch.display == g_Display) {
+				io->MouseDown[0] = true;
+			}
+			return true;
+		case ALLEGRO_EVENT_TOUCH_END:
+		case ALLEGRO_EVENT_TOUCH_CANCEL:
+			if (ev->touch.display == g_Display) {
+				io->MouseDown[0] = false;
+			}
+			return true;
+		case ALLEGRO_EVENT_MOUSE_LEAVE_DISPLAY:
+			if (ev->mouse.display == g_Display) {
+				io->MousePos = (ImVec2){.x = -FLT_MAX, .y = -FLT_MAX};
+			}
 			return true;
 		case ALLEGRO_EVENT_KEY_CHAR:
 			if (ev->keyboard.display == g_Display) {
@@ -310,8 +338,9 @@ static void ImGui_ImplAllegro5_UpdateMouseCursor() {
 	ImGuiMouseCursor imgui_cursor = igGetMouseCursor();
 	if (io->MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
 		// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-		al_set_mouse_cursor(g_Display, g_MouseCursorInvisible);
+		al_hide_mouse_cursor(g_Display);
 	} else {
+		al_show_mouse_cursor(g_Display);
 		ALLEGRO_SYSTEM_MOUSE_CURSOR cursor_id = ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT;
 		switch (imgui_cursor) {
 			case ImGuiMouseCursor_TextInput:
@@ -362,19 +391,6 @@ SYMBOL_EXPORT void ImGui_ImplAllegro5_NewFrame() {
 	io->KeyShift = al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT);
 	io->KeyAlt = al_key_down(&keys, ALLEGRO_KEY_ALT) || al_key_down(&keys, ALLEGRO_KEY_ALTGR);
 	io->KeySuper = al_key_down(&keys, ALLEGRO_KEY_LWIN) || al_key_down(&keys, ALLEGRO_KEY_RWIN);
-
-	ALLEGRO_MOUSE_STATE mouse;
-	if (keys.display == g_Display) {
-		al_get_mouse_state(&mouse);
-		io->MousePos = (ImVec2){.x = mouse.x, .y = mouse.y};
-	} else {
-		io->MousePos = (ImVec2){.x = -FLT_MAX, .y = -FLT_MAX};
-	}
-
-	al_get_mouse_state(&mouse);
-	io->MouseDown[0] = mouse.buttons & (1 << 0);
-	io->MouseDown[1] = mouse.buttons & (1 << 1);
-	io->MouseDown[2] = mouse.buttons & (1 << 2);
 
 	ImGui_ImplAllegro5_UpdateMouseCursor();
 }
