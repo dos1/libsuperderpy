@@ -1,0 +1,3 @@
+[submodule "src/3rdparty/cimgui"]
+	path = src/3rdparty/cimgui
+	url = https://gitlab.com/dosowisko.net/cimgui.git

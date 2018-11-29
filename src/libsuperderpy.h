@@ -73,6 +73,10 @@ struct GamestateResources;
 #include "emscripten-audio-stream.h"
 #endif
 
+#ifdef LIBSUPERDERPY_IMGUI
+#include "imgui/imgui_impl_allegro5.h"
+#endif
+
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
 
 struct Viewport {

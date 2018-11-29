@@ -375,6 +375,18 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	game->_priv.timestamp = al_get_time();
 	game->_priv.paused = false;
 
+#ifdef LIBSUPERDERPY_IMGUI
+	igCreateContext(NULL);
+	ImGuiIO* io = igGetIO();
+	io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplAllegro5_Init(game->display);
+
+	// Setup Style
+	igStyleColorsDark(NULL);
+#endif
+
 	return 0;
 }
 
@@ -406,6 +418,11 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	game->shutting_down = true;
+
+#ifdef LIBSUPERDERPY_IMGUI
+	ImGui_ImplAllegro5_Shutdown();
+	igDestroyContext(NULL);
+#endif
 
 	ClearGarbage(game);
 

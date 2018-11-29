@@ -42,7 +42,13 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
+#ifdef LIBSUPERDERPY_IMGUI
+			ImGui_ImplAllegro5_InvalidateDeviceObjects();
+#endif
 			al_acknowledge_resize(game->display);
+#ifdef LIBSUPERDERPY_IMGUI
+			ImGui_ImplAllegro5_CreateDeviceObjects();
+#endif
 			SetupViewport(game, game->viewport_config);
 			break;
 
@@ -334,10 +340,21 @@ static inline bool MainloopTick(struct Game* game) {
 	delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
 	game->time += delta;
 
+#ifdef LIBSUPERDERPY_IMGUI
+	ImGui_ImplAllegro5_NewFrame();
+	igNewFrame();
+#endif
+
 	LogicGamestates(game, delta);
 	DrawGamestates(game);
 
+#ifdef LIBSUPERDERPY_IMGUI
+	igRender();
+	ImGui_ImplAllegro5_RenderDrawData(igGetDrawData());
+#endif
+
 	DrawConsole(game);
+
 	al_flip_display();
 	return true;
 }
@@ -352,6 +369,28 @@ static inline bool MainloopEvents(struct Game* game) {
 		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
 			break;
 		}
+
+#ifdef LIBSUPERDERPY_IMGUI
+		ImGui_ImplAllegro5_ProcessEvent(&ev);
+		switch (ev.type) {
+			case ALLEGRO_EVENT_KEY_CHAR:
+			case ALLEGRO_EVENT_KEY_DOWN:
+			case ALLEGRO_EVENT_KEY_UP:
+				if (igGetIO()->WantCaptureKeyboard) {
+					continue;
+				}
+				break;
+			case ALLEGRO_EVENT_MOUSE_AXES:
+			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+			case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+				if (igGetIO()->WantCaptureMouse) {
+					continue;
+				}
+				break;
+			default:
+				break;
+		}
+#endif
 
 		if (game->handlers.event) {
 			if ((*game->handlers.event)(game, &ev)) {

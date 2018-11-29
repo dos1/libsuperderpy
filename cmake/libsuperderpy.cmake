@@ -8,18 +8,29 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(CMAKE_C_STANDARD 99)
 	set(CMAKE_C_STANDARD_REQUIRED true)
+	set(CMAKE_CXX_STANDARD 98)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
+
 	if(MAEMO5)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
 	endif(MAEMO5)
+
+	if(ANDROID)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
+	endif(ANDROID)
+
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=leak -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=leak -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
+
 	if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
 	else(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	endif(APPLE)
 
-	set(USE_CLANG_TIDY "yes" CACHE STRING "Analyze the code with clang-tidy" )
+	option(USE_CLANG_TIDY "Analyze the code with clang-tidy" ON)
 	if(USE_CLANG_TIDY AND NOT MINGW)
 		find_program(CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable")
 		if(NOT CLANG_TIDY_EXE)
@@ -29,12 +40,17 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 	endif()
 
-	set(LIBSUPERDERPY_STATIC "no" CACHE STRING "Compile and link libsuperderpy as a static library." )
+	option(LIBSUPERDERPY_STATIC "Compile and link libsuperderpy as a static library." OFF)
 
-	set(LIBSUPERDERPY_STATIC_DEPS "no" CACHE STRING "Link dependencies (e.g. Allegro) statically." )
+	option(LIBSUPERDERPY_STATIC_DEPS "Link dependencies (e.g. Allegro) statically." OFF)
 	if(LIBSUPERDERPY_STATIC_DEPS)
 		SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a)
 	endif(LIBSUPERDERPY_STATIC_DEPS)
+
+	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
+	if (LIBSUPERDERPY_IMGUI)
+		add_definitions(-DLIBSUPERDERPY_IMGUI)
+	endif (LIBSUPERDERPY_IMGUI)
 
 	execute_process(
 	  COMMAND git rev-parse --short HEAD
@@ -91,7 +107,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib/${LIBSUPERDERPY_GAMENAME}:\$ORIGIN/gamestates:\$ORIGIN:\$ORIGIN/../lib:\$ORIGIN/lib:\$ORIGIN/bin")
 
-if(EMSCRIPTEN)
+	if(EMSCRIPTEN)
 		set(CMAKE_EXECUTABLE_SUFFIX ".bc")
 		set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=1")
@@ -111,7 +127,7 @@ if(EMSCRIPTEN)
 			set(CMAKE_SHARED_MODULE_SUFFIX ".js")
 		endif()
 
-		set(LIBSUPERDERPY_USE_WEBGL2 NO CACHE BOOL "Use WebGL 2 context")
+		option(LIBSUPERDERPY_USE_WEBGL2 "Use WebGL 2 context" OFF)
 		if(LIBSUPERDERPY_USE_WEBGL2)
 			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s USE_WEBGL2=1)
 		endif(LIBSUPERDERPY_USE_WEBGL2)
@@ -123,13 +139,13 @@ if(EMSCRIPTEN)
 		set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 		set(SHARE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
-endif()
+	endif()
 
-if(ANDROID OR EMSCRIPTEN)
-	add_definitions(-DLIBSUPERDERPY_SINGLE_THREAD=1)
-endif()
+	if(ANDROID OR EMSCRIPTEN)
+		add_definitions(-DLIBSUPERDERPY_SINGLE_THREAD)
+	endif()
 
-  find_package(Allegro5 REQUIRED)
+	find_package(Allegro5 REQUIRED)
 	find_package(Allegro5Font REQUIRED)
 	find_package(Allegro5TTF REQUIRED)
 	find_package(Allegro5Primitives REQUIRED)
