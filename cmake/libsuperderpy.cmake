@@ -36,7 +36,13 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		if(NOT CLANG_TIDY_EXE)
 			message(STATUS "clang-tidy not found, analysis disabled")
 		else()
-			set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*,-hicpp-no-assembler,-google-readability-todo,-misc-unused-parameters,-hicpp-signed-bitwise,-hicpp-multiway-paths-covered,-cert-msc30-c,-cert-msc50-cpp,-cert-msc32-c,-cert-msc51-cpp")
+			if (EXISTS "${CMAKE_SOURCE_DIR}/.clang-tidy")
+				file(READ "${CMAKE_SOURCE_DIR}/.clang-tidy" CLANG_TIDY_CONFIG)
+			else (EXISTS "${CMAKE_SOURCE_DIR}/.clang-tidy")
+				file(READ "${CMAKE_SOURCE_DIR}/libsuperderpy/.clang-tidy" CLANG_TIDY_CONFIG)
+			endif (EXISTS "${CMAKE_SOURCE_DIR}/.clang-tidy")
+			string(STRIP "${CLANG_TIDY_CONFIG}" CLANG_TIDY_CONFIG)
+			set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" "-config=${CLANG_TIDY_CONFIG}")
 		endif()
 	endif()
 
@@ -51,23 +57,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	if (LIBSUPERDERPY_IMGUI)
 		add_definitions(-DLIBSUPERDERPY_IMGUI)
 	endif (LIBSUPERDERPY_IMGUI)
-
-	execute_process(
-	  COMMAND git rev-parse --short HEAD
-	  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libsuperderpy
-	  OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
-	  OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
-
-	if(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
-		execute_process(
-		  COMMAND git rev-parse --short HEAD
-		  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			OUTPUT_VARIABLE LIBSUPERDERPY_GAME_GIT_REV
-		  OUTPUT_STRIP_TRAILING_WHITESPACE
-		)
-	endif(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
 
 	if(MAEMO5)
 		add_definitions(-DMAEMO5=1)
@@ -86,7 +75,38 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	endif(APPLE)
 
-	include_directories("libsuperderpy/src")
+	if (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+		execute_process(
+			COMMAND git rev-parse --short HEAD
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libsuperderpy
+			OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+		add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
+
+		if(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
+			execute_process(
+				COMMAND git rev-parse --short HEAD
+				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+				OUTPUT_VARIABLE LIBSUPERDERPY_GAME_GIT_REV
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+			)
+		endif(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
+
+		include_directories("libsuperderpy/src")
+
+	else (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+		execute_process(
+			COMMAND git rev-parse --short HEAD
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+		add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
+
+	endif (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
 
 	if(MINGW)
 		# Guess MINGDIR from the value of CMAKE_C_COMPILER if it's not set.
