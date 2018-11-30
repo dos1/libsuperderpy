@@ -15,5 +15,5 @@ See [the configuration file](.clang-tidy).
 ```
 -Weverything -Wno-missing-field-initializers -Wno-unused-parameter -Wno-padded -Wno-conversion
 -Wno-double-promotion -Wno-bad-function-cast -Wno-pedantic -Wno-unused-macros -Wno-switch-enum
--Wno-disabled-macro-expansion -std=c11 -D__codemodel__
+-Wno-disabled-macro-expansion -D__codemodel__
 ```

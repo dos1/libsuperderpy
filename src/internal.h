@@ -101,7 +101,7 @@ void ReloadCode(struct Game* game);
 void ResumeExecution(struct Game* game);
 void ReloadShaders(struct Game* game, bool force);
 void DestroyShaders(struct Game* game);
-char* GetGameName(struct Game* game, const char* format);
+__attribute__((__format__(__printf__, 2, 0))) char* GetGameName(struct Game* game, const char* format);
 ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename);
 void RemoveBitmap(struct Game* game, char* filename);
 

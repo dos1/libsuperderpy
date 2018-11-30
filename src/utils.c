@@ -70,7 +70,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 	}
 	//-------------------- Code Begins
 
-	char* context;
+	char* context = NULL;
 
 	pch = strtok_r(stext, " ", &context); // Get the first word.
 	do {
@@ -207,7 +207,7 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 	return target;
 }
 
-__attribute__((__format__(__printf__, 6, 0))) SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...) {
+SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...) {
 	// TODO: interrupt and take over loading thread when it happens
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
@@ -396,7 +396,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
-__attribute__((__format__(__printf__, 5, 0))) SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...) {
+SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...) {
 	va_list vl;
 	va_start(vl, format);
 	char* text = game->_priv.console[game->_priv.console_pos];

@@ -68,7 +68,7 @@ ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, i
 /*! \brief Finds path for data file. */
 char* GetDataFilePath(struct Game* game, const char* filename);
 
-void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...);
+__attribute__((__format__(__printf__, 5, 6))) void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...);
 /*! \brief Print some message on game console.
  *
  * Draws message on console bitmap, so it'll be displayed when calling DrawConsole.
@@ -77,7 +77,7 @@ void PrintConsoleWithContext(struct Game* game, int line, const char* file, cons
  */
 #define PrintConsole(game, format, ...) PrintConsoleWithContext(game, __LINE__, __FILE__, __func__, format, ##__VA_ARGS__)
 
-void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...);
+__attribute__((__format__(__printf__, 6, 7))) void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...);
 #define FatalError(game, exit, format, ...) FatalErrorWithContext(game, __LINE__, __FILE__, __func__, exit, format, ##__VA_ARGS__)
 
 void SetupViewport(struct Game* game, struct Viewport config);

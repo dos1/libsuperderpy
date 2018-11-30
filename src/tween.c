@@ -342,7 +342,6 @@ SYMBOL_EXPORT double Interpolate(double pos, TWEEN_STYLE style) {
 		default:
 			return pos;
 	}
-	return pos;
 }
 
 SYMBOL_EXPORT double GetTweenInterpolation(struct Tween* tween) {
