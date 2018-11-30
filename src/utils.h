@@ -93,6 +93,9 @@ ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates));
 void DisableCompositor(struct Game* game);
 
+char* StrToLower(struct Game* game, char* text);
+char* StrToUpper(struct Game* game, char* text);
+
 char* PunchNumber(struct Game* game, char* text, char ch, int number);
 
 /*! \brief Quits the game. On platforms that allow it, brings the game to the background without quiting if <allow_pausing> is true. */
