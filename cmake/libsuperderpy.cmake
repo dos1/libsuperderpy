@@ -10,7 +10,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_C_STANDARD_REQUIRED true)
 	set(CMAKE_CXX_STANDARD 98)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-return-type-c-linkage -ffast-math")
 
 	if(MAEMO5)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
