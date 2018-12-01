@@ -235,7 +235,6 @@ static inline bool MainloopTick(struct Game* game) {
 				if (!OpenGamestate(game, tmp) || !LinkGamestate(game, tmp)) {
 					tmp->pending_load = false;
 					tmp->pending_start = false;
-					tmp->next = tmp;
 					continue;
 				}
 			}
