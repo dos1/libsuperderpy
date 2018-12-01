@@ -217,7 +217,19 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 	va_end(vl);
 	fprintf(stderr, "%s:%d [%s]\n%s\n", file, line, func, text);
 
-	// TODO: synchronize with loading thread
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+	if (game->_priv.loading.inProgress) {
+		al_lock_mutex(game->_priv.bsod_mutex);
+		game->_priv.in_bsod = true;
+		game->_priv.bsod_sync = true;
+		while (game->_priv.bsod_sync) {
+			al_wait_cond(game->_priv.bsod_cond, game->_priv.bsod_mutex);
+		}
+		al_unlock_mutex(game->_priv.bsod_mutex);
+	}
+#endif
+
+	al_set_target_backbuffer(game->display);
 
 	ALLEGRO_TRANSFORM trans;
 	al_identity_transform(&trans);
@@ -227,7 +239,6 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 		game->_priv.font_bsod = al_create_builtin_font();
 	}
 
-	al_set_target_backbuffer(game->display);
 	al_clear_to_color(al_map_rgb(0, 0, 170));
 	al_flip_display();
 	al_rest(0.6);
@@ -309,6 +320,13 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 #endif
 	}
 	al_use_transform(&game->projection);
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+	if (game->_priv.loading.inProgress) {
+		PrintConsole(game, "Resuming the main thread...");
+		game->_priv.in_bsod = false;
+		al_signal_cond(game->_priv.bsod_cond);
+	}
+#endif
 }
 
 static void TestPath(const char* filename, const char* subpath, char** result) {

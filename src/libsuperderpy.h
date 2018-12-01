@@ -164,6 +164,11 @@ struct Game {
 		ALLEGRO_MUTEX* texture_sync_mutex;
 		ALLEGRO_COND* texture_sync_cond;
 
+		volatile bool in_bsod;
+		volatile bool bsod_sync;
+		ALLEGRO_MUTEX* bsod_mutex;
+		ALLEGRO_COND* bsod_cond;
+
 		struct {
 			bool verbose, livereload, autopause;
 		} debug;

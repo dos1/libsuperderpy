@@ -105,6 +105,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.texture_sync_cond = al_create_cond();
 	game->_priv.texture_sync_mutex = al_create_mutex();
 
+	game->_priv.in_bsod = false;
+	game->_priv.bsod_cond = al_create_cond();
+	game->_priv.bsod_mutex = al_create_mutex();
+
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
@@ -488,6 +492,8 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_voice(game->audio.v); // FIXME: doesn't seem to work in Chromium under Emscripten
 	al_destroy_cond(game->_priv.texture_sync_cond);
 	al_destroy_mutex(game->_priv.texture_sync_mutex);
+	al_destroy_cond(game->_priv.bsod_cond);
+	al_destroy_mutex(game->_priv.bsod_mutex);
 	al_uninstall_audio();
 	DeinitConfig(game);
 #ifndef __EMSCRIPTEN__

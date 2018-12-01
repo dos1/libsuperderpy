@@ -269,6 +269,20 @@ static inline bool MainloopTick(struct Game* game) {
 					}
 					DrawConsole(game);
 					al_flip_display();
+
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
+					if (game->_priv.bsod_sync) {
+						al_set_target_bitmap(NULL);
+						game->_priv.bsod_sync = false;
+						al_signal_cond(game->_priv.bsod_cond);
+					}
+
+					al_lock_mutex(game->_priv.bsod_mutex);
+					while (game->_priv.in_bsod) {
+						al_wait_cond(game->_priv.bsod_cond, game->_priv.bsod_mutex);
+					}
+					al_unlock_mutex(game->_priv.bsod_mutex);
+#endif
 				}
 #else
 				GamestateLoadingThread(&data);
