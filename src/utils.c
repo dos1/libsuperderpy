@@ -116,15 +116,15 @@ SYMBOL_EXPORT int DrawWrappedTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR co
 	return DrawWrappedText(font, color, x, y, width, flags, text);
 }
 
-SYMBOL_EXPORT void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags) {
+SYMBOL_EXPORT void DrawCentered(ALLEGRO_BITMAP* bitmap, float x, float y, int flags) {
 	al_draw_bitmap(bitmap, x - al_get_bitmap_width(bitmap) / 2.0, y - al_get_bitmap_height(bitmap) / 2.0, flags);
 }
 
-SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags) {
+SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, float x, float y, double sx, double sy, int flags) {
 	DrawCenteredTintedScaled(bitmap, al_map_rgb(255, 255, 255), x, y, sx, sy, flags);
 }
 
-SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags) {
+SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, float x, float y, double sx, double sy, int flags) {
 	al_draw_tinted_scaled_rotated_bitmap(bitmap, tint, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
 		x, y, sx, sy, 0, flags);
 }

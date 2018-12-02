@@ -52,9 +52,9 @@ void DrawTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float 
 int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
 int DrawWrappedTextWithShadow(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, int width, int flags, char const* text);
 
-void DrawCentered(ALLEGRO_BITMAP* bitmap, int x, int y, int flags);
-void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, int x, int y, double sx, double sy, int flags);
-void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, int x, int y, double sx, double sy, int flags);
+void DrawCentered(ALLEGRO_BITMAP* bitmap, float x, float y, int flags);
+void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, float x, float y, double sx, double sy, int flags);
+void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, float x, float y, double sx, double sy, int flags);
 
 /*! \brief Clears the current target completely, without taking current clipping rectangle into account. */
 void ClearToColor(struct Game* game, ALLEGRO_COLOR color);
