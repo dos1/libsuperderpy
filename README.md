@@ -2,6 +2,9 @@
 A multiplatform game engine for games written in C and Allegro 5. Supports GNU/Linux, Android, FreeBSD, macOS, Windows and asm.js
 
 Used by such games as:
+- [SUPERSMOG](https://github.com/dos1/supershod/tree/supersmog)
+- [Zjedz Trawkę 2](https://gitlab.com/dosowisko.net/zjedztrawke2)
+- [SUPERSHOD: Battle Royale](https://github.com/dos1/supershod/tree/battleroyale)
 - [Animatch](https://gitlab.com/HolyPangolin/animatch)
 - [Spray Cheese](https://gitlab.com/dosowisko.net/spraycheese)
 - [ODLOT](https://gitlab.com/HolyPangolin/odlot)
