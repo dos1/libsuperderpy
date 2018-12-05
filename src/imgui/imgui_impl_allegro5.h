@@ -22,8 +22,7 @@
 #endif
 
 #include "3rdparty/cimgui/cimgui.h"
-#include "libsuperderpy.h"
-#include <stdbool.h>
+#include "internal.h"
 
 bool ImGui_ImplAllegro5_Init(ALLEGRO_DISPLAY* display);
 void ImGui_ImplAllegro5_Shutdown(void);

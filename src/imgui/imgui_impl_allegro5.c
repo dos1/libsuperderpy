@@ -27,7 +27,6 @@
 //  2018-02-06: Inputs: Added mapping for ImGuiKey_Space.
 
 #include "imgui/imgui_impl_allegro5.h"
-#include "internal.h"
 #include <float.h>
 #include <stdint.h> // uint64_t
 #include <string.h> // memcpy
@@ -55,7 +54,7 @@ typedef struct ImDrawVertAllegro ImDrawVertAllegro;
 
 // Render function.
 // (this used to be set in io->RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-SYMBOL_EXPORT void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
+SYMBOL_INTERNAL void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
 	// Backup Allegro state that will be modified
 	ALLEGRO_TRANSFORM last_transform = *al_get_current_transform();
 	ALLEGRO_TRANSFORM last_projection_transform = *al_get_current_projection_transform();
@@ -139,7 +138,7 @@ SYMBOL_EXPORT void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
 	al_use_projection_transform(&last_projection_transform);
 }
 
-SYMBOL_EXPORT bool ImGui_ImplAllegro5_CreateDeviceObjects() {
+SYMBOL_INTERNAL bool ImGui_ImplAllegro5_CreateDeviceObjects() {
 	// Build texture atlas
 	ImGuiIO* io = igGetIO();
 	unsigned char* pixels;
@@ -180,7 +179,7 @@ SYMBOL_EXPORT bool ImGui_ImplAllegro5_CreateDeviceObjects() {
 	return true;
 }
 
-SYMBOL_EXPORT void ImGui_ImplAllegro5_InvalidateDeviceObjects() {
+SYMBOL_INTERNAL void ImGui_ImplAllegro5_InvalidateDeviceObjects() {
 	if (g_Texture) {
 		al_destroy_bitmap(g_Texture);
 		igGetIO()->Fonts->TexID = NULL;
@@ -202,7 +201,7 @@ static void ImGui_ImplAllegro5_SetClipboardText(void* data, const char* text) {
 }
 #endif
 
-SYMBOL_EXPORT bool ImGui_ImplAllegro5_Init(ALLEGRO_DISPLAY* display) {
+SYMBOL_INTERNAL bool ImGui_ImplAllegro5_Init(ALLEGRO_DISPLAY* display) {
 	g_Display = display;
 
 	// Setup back-end capabilities flags
@@ -251,7 +250,7 @@ SYMBOL_EXPORT bool ImGui_ImplAllegro5_Init(ALLEGRO_DISPLAY* display) {
 	return true;
 }
 
-SYMBOL_EXPORT void ImGui_ImplAllegro5_Shutdown() {
+SYMBOL_INTERNAL void ImGui_ImplAllegro5_Shutdown() {
 	ImGui_ImplAllegro5_InvalidateDeviceObjects();
 	g_Display = NULL;
 
@@ -266,7 +265,7 @@ SYMBOL_EXPORT void ImGui_ImplAllegro5_Shutdown() {
 // - When io->WantCaptureMouse is true, do not dispatch mouse input data to your main application.
 // - When io->WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
 // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-SYMBOL_EXPORT bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* ev) {
+SYMBOL_INTERNAL bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* ev) {
 	ImGuiIO* io = igGetIO();
 
 	switch (ev->type) {
@@ -366,7 +365,7 @@ static void ImGui_ImplAllegro5_UpdateMouseCursor() {
 	}
 }
 
-SYMBOL_EXPORT void ImGui_ImplAllegro5_NewFrame() {
+SYMBOL_INTERNAL void ImGui_ImplAllegro5_NewFrame() {
 	if (!g_Texture) {
 		ImGui_ImplAllegro5_CreateDeviceObjects();
 	}

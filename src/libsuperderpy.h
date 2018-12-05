@@ -80,7 +80,8 @@ struct GamestateResources;
 #endif
 
 #ifdef LIBSUPERDERPY_IMGUI
-#include "imgui/imgui_impl_allegro5.h"
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS 1
+#include "3rdparty/cimgui/cimgui.h"
 #endif
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16

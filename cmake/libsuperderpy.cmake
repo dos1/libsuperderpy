@@ -6,11 +6,21 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten (MB, must be multiple of 16)" )
 
+	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
+	if (LIBSUPERDERPY_IMGUI)
+		enable_language(CXX)
+		add_definitions(-DLIBSUPERDERPY_IMGUI)
+	endif (LIBSUPERDERPY_IMGUI)
+
 	set(CMAKE_C_STANDARD 99)
 	set(CMAKE_C_STANDARD_REQUIRED true)
 	set(CMAKE_CXX_STANDARD 98)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-return-type-c-linkage -ffast-math")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
+
+	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage")
+	endif()
 
 	if(MAEMO5)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
@@ -58,11 +68,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	if(LIBSUPERDERPY_STATIC_DEPS)
 		SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a)
 	endif(LIBSUPERDERPY_STATIC_DEPS)
-
-	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
-	if (LIBSUPERDERPY_IMGUI)
-		add_definitions(-DLIBSUPERDERPY_IMGUI)
-	endif (LIBSUPERDERPY_IMGUI)
 
 	if(MAEMO5)
 		add_definitions(-DMAEMO5=1)

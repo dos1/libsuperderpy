@@ -19,6 +19,9 @@
 #define LIBSUPERDERPY_INTERNAL_H
 
 #include "libsuperderpy.h"
+#ifdef LIBSUPERDERPY_IMGUI
+#include "imgui/imgui_impl_allegro5.h"
+#endif
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define SYMBOL_INTERNAL
