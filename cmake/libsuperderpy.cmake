@@ -17,6 +17,12 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++98")
 	endif(MAEMO5)
 
+	if(WIN32)
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -municode")
+		add_definitions(-DWIN32_LEAN_AND_MEAN)
+		option(LIBSUPERDERPY_DLFCN "Use built-in dlfcn with Unicode support" ON)
+	endif(WIN32)
+
 	if(ANDROID)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
 	endif(ANDROID)

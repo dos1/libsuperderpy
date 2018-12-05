@@ -1,3 +1,6 @@
 [submodule "src/3rdparty/cimgui"]
 	path = src/3rdparty/cimgui
 	url = https://gitlab.com/dosowisko.net/cimgui.git
+[submodule "src/3rdparty/dlfcn-win32"]
+	path = src/3rdparty/dlfcn-win32
+	url = https://gitlab.com/dosowisko.net/dlfcn-win32.git

@@ -31,6 +31,12 @@ else (LIBSUPERDERPY_STATIC)
 	add_library("libsuperderpy" SHARED ${SRC_LIST})
 endif (LIBSUPERDERPY_STATIC)
 
+if (WIN32 AND LIBSUPERDERPY_DLFCN)
+	set(BUILD_SHARED_LIBS OFF CACHE STRING "" FORCE)
+	add_subdirectory(3rdparty/dlfcn-win32 EXCLUDE_FROM_ALL)
+	set_property(TARGET "dl" PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif(WIN32 AND LIBSUPERDERPY_DLFCN)
+
 SET_TARGET_PROPERTIES("libsuperderpy" PROPERTIES PREFIX "")
 
 target_link_libraries("libsuperderpy" ${ALLEGRO5_LIBRARIES} ${ALLEGRO5_FONT_LIBRARIES} ${ALLEGRO5_TTF_LIBRARIES} ${ALLEGRO5_PRIMITIVES_LIBRARIES} ${ALLEGRO5_AUDIO_LIBRARIES} ${ALLEGRO5_ACODEC_LIBRARIES} ${ALLEGRO5_VIDEO_LIBRARIES} ${ALLEGRO5_IMAGE_LIBRARIES} m dl)
@@ -38,6 +44,10 @@ target_link_libraries("libsuperderpy" ${ALLEGRO5_LIBRARIES} ${ALLEGRO5_FONT_LIBR
 if (LIBSUPERDERPY_IMGUI)
 	target_link_libraries("libsuperderpy" cimgui)
 endif (LIBSUPERDERPY_IMGUI)
+
+if (WIN32 AND LIBSUPERDERPY_DLFCN)
+	target_link_libraries("libsuperderpy" psapi)
+endif (WIN32 AND LIBSUPERDERPY_DLFCN)
 
 if (ANDROID)
 	target_link_libraries("libsuperderpy" log)

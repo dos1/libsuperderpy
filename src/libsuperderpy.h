@@ -29,6 +29,12 @@ struct GamestateResources;
 #define LIBSUPERDERPY_DATA_TYPE void
 #endif
 
+#ifdef _WIN32
+#define UNICODE
+#define _UNICODE
+#include <tchar.h>
+#endif
+
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_audio.h>
@@ -78,6 +84,21 @@ struct GamestateResources;
 #endif
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
+
+#if defined(ALLEGRO_WINDOWS) && !defined(LIBSUPERDERPY_NO_MAIN_MANGLING)
+int _libsuperderpy_main(int argc, char** argv);
+#define main(a, b)                                                                      \
+	wmain(int argc, wchar_t** wargv) {                                                    \
+		char* argv[argc];                                                                   \
+		for (int i = 0; i < argc; i++) {                                                    \
+			size_t size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL, 0, NULL, NULL); \
+			argv[i] = alloca(sizeof(char) * size);                                            \
+			WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, argv[i], size, NULL, NULL);         \
+		}                                                                                   \
+		return _libsuperderpy_main(argc, argv);                                             \
+	}                                                                                     \
+	int _libsuperderpy_main(a, b)
+#endif
 
 struct Viewport {
 	int width; /*!< Width of the drawing canvas. */

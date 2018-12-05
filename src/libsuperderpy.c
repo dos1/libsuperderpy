@@ -505,7 +505,17 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 #ifdef ALLEGRO_MACOSX
 		chdir(game->_priv.cwd);
 #endif
+#ifdef ALLEGRO_WINDOWS
+		wchar_t* wargv[game->_priv.argc];
+		for (int i = 0; i < game->_priv.argc; i++) {
+			size_t size = MultiByteToWideChar(CP_UTF8, 0, argv[i], -1, NULL, 0);
+			wargv[i] = alloca(sizeof(wchar_t) * size);
+			MultiByteToWideChar(CP_UTF8, 0, argv[i], -1, wargv[i], size);
+		}
+		_wexecv(wargv[0], (const wchar_t* const*)wargv);
+#else
 		execv(argv[0], argv);
+#endif
 	}
 #endif
 }
