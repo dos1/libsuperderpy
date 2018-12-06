@@ -281,20 +281,21 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
+	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "44100"), NULL, 10);
 	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_FLOAT32;
 #ifdef ALLEGRO_ANDROID
 	depth = ALLEGRO_AUDIO_DEPTH_INT16;
 #endif
-	game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.v = al_create_voice(samplerate, depth, ALLEGRO_CHANNEL_CONF_2);
 	if (!game->audio.v) {
 		// fallback
 		depth = (depth == ALLEGRO_AUDIO_DEPTH_FLOAT32) ? ALLEGRO_AUDIO_DEPTH_INT16 : ALLEGRO_AUDIO_DEPTH_FLOAT32;
-		game->audio.v = al_create_voice(44100, depth, ALLEGRO_CHANNEL_CONF_2);
+		game->audio.v = al_create_voice(samplerate, depth, ALLEGRO_CHANNEL_CONF_2);
 	}
-	game->audio.mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.fx = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.music = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.voice = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.mixer = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.fx = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.music = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.voice = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 	al_attach_mixer_to_mixer(game->audio.fx, game->audio.mixer);
 	al_attach_mixer_to_mixer(game->audio.music, game->audio.mixer);
