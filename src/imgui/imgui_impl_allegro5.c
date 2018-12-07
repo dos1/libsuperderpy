@@ -277,17 +277,9 @@ SYMBOL_INTERNAL bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* ev) {
 			}
 			return true;
 		case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-			if (ev->mouse.display == g_Display) {
-				if (ev->mouse.button <= 5) {
-					io->MouseDown[ev->mouse.button - 1] = true;
-				}
-			}
-			return true;
 		case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
-			if (ev->mouse.display == g_Display) {
-				if (ev->mouse.button <= 5) {
-					io->MouseDown[ev->mouse.button - 1] = false;
-				}
+			if (ev->mouse.display == g_Display && ev->mouse.button <= 5) {
+				io->MouseDown[ev->mouse.button - 1] = (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
 			}
 			return true;
 		case ALLEGRO_EVENT_TOUCH_MOVE:
@@ -296,14 +288,10 @@ SYMBOL_INTERNAL bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* ev) {
 			}
 			return true;
 		case ALLEGRO_EVENT_TOUCH_BEGIN:
-			if (ev->touch.display == g_Display) {
-				io->MouseDown[0] = true;
-			}
-			return true;
 		case ALLEGRO_EVENT_TOUCH_END:
 		case ALLEGRO_EVENT_TOUCH_CANCEL:
-			if (ev->touch.display == g_Display) {
-				io->MouseDown[0] = false;
+			if (ev->touch.display == g_Display && ev->touch.primary) {
+				io->MouseDown[0] = (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN);
 			}
 			return true;
 		case ALLEGRO_EVENT_MOUSE_LEAVE_DISPLAY:
