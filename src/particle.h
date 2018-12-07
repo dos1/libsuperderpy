@@ -69,15 +69,13 @@ bool LinearParticle(struct Game* game, struct ParticleState* particle, double de
 struct FaderParticleData {
 	ParticleFunc* func;
 	void* data;
-	void (*destructor)(void* data);
 	double delay;
 	double speed;
 	double time;
 	double fade;
 };
 
-void FaderParticleDestructor(void* data);
-struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d, void (*destructor)(void*));
+struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d);
 bool FaderParticle(struct Game* game, struct ParticleState* particle, double delta, void* d);
 
 struct ParticleState SpawnParticleIn(float x, float y);

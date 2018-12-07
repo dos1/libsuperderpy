@@ -62,11 +62,10 @@ SYMBOL_EXPORT bool LinearParticle(struct Game* game, struct ParticleState* parti
 	return true;
 }
 
-SYMBOL_EXPORT struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d, void (*destructor)(void*)) {
+SYMBOL_EXPORT struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d) {
 	struct FaderParticleData* data = calloc(1, sizeof(struct FaderParticleData));
 	data->delay = delay;
 	data->data = d;
-	data->destructor = destructor;
 	data->fade = 0.0;
 	data->func = func;
 	data->speed = speed;
@@ -74,19 +73,12 @@ SYMBOL_EXPORT struct FaderParticleData* FaderParticleData(double delay, double s
 	return data;
 }
 
-SYMBOL_EXPORT void FaderParticleDestructor(void* data) {
-	struct FaderParticleData* d = data;
-	if (d->destructor) {
-		d->destructor(d->data);
-	}
-	free(d);
-}
-
 SYMBOL_EXPORT bool FaderParticle(struct Game* game, struct ParticleState* particle, double delta, void* d) {
 	struct FaderParticleData* data = d;
 
 	if (!particle) {
-		FaderParticleDestructor(data);
+		data->func(game, particle, delta, data->data);
+		free(data);
 		return false;
 	}
 
@@ -115,7 +107,8 @@ SYMBOL_EXPORT bool FaderParticle(struct Game* game, struct ParticleState* partic
 	particle->tint = al_map_rgba_f(r, g, b, a);
 
 	if (data->fade >= 1.0) {
-		FaderParticleDestructor(data);
+		data->func(game, NULL, delta, data->data);
+		free(data);
 		return false;
 	}
 
