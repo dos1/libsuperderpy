@@ -256,6 +256,7 @@ static inline bool MainloopTick(struct Game* game) {
 				while (game->_priv.loading.inProgress) {
 					double delta = al_get_time() - game->_priv.loading.time;
 					if (tmp->showLoading) {
+						game->_priv.loading.shown = true;
 						(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 						DrawGamestates(game);
 					}
@@ -306,6 +307,7 @@ static inline bool MainloopTick(struct Game* game) {
 			}
 			if (tmp->showLoading) {
 				(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
+				game->_priv.loading.shown = false;
 			}
 			tmp->showLoading = true;
 			al_resume_timer(game->_priv.timer);

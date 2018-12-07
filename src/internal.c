@@ -30,7 +30,7 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* games
 		}
 		tmp = tmp->next;
 	}
-	if (game->_priv.loading.inProgress) {
+	if (game->_priv.loading.shown) {
 		al_draw_bitmap(game->loading_fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
 	}
 }

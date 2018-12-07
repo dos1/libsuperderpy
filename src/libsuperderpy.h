@@ -165,6 +165,7 @@ struct Game {
 			int progress;
 			int loaded, toLoad;
 			volatile bool inProgress;
+			bool shown;
 			double time;
 		} loading;
 
