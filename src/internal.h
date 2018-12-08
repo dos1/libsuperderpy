@@ -40,8 +40,11 @@
 
 #define STRINGIFY(a) #a
 #if defined(__clang__) || defined(__codemodel__)
-#define SUPPRESS_WARNING(x) _Pragma("clang diagnostic push") _Pragma(STRINGIFY(clang diagnostic ignored x))
+#define SUPPRESS_WARNING(x) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wpragmas\"") _Pragma(STRINGIFY(clang diagnostic ignored x))
 #define SUPPRESS_END _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+#define SUPPRESS_WARNING(x) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wpragmas\"") _Pragma(STRINGIFY(GCC diagnostic ignored x))
+#define SUPPRESS_END _Pragma("GCC diagnostic pop")
 #else
 #define SUPPRESS_WARNING(x)
 #define SUPPRESS_END
