@@ -553,6 +553,7 @@ SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
 }
 
 SYMBOL_EXPORT char* StrToLower(struct Game* game, char* text) {
+	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
 		*iter = tolower(*iter);
@@ -562,6 +563,7 @@ SYMBOL_EXPORT char* StrToLower(struct Game* game, char* text) {
 }
 
 SYMBOL_EXPORT char* StrToUpper(struct Game* game, char* text) {
+	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
 		*iter = toupper(*iter);
