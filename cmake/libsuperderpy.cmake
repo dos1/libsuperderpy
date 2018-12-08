@@ -1,11 +1,16 @@
 if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
+	# Set a default build type for single-configuration
+	# CMake generators if no build type is set.
+	if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+		set(CMAKE_BUILD_TYPE RelWithDebInfo)
+	endif (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+
 	add_definitions(-D_XOPEN_SOURCE=600)
 
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
 
 	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten (MB, must be multiple of 16)" )
-
 	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
 	if (LIBSUPERDERPY_IMGUI)
 		enable_language(CXX)
@@ -30,7 +35,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	if(WIN32)
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -municode")
 		add_definitions(-DWIN32_LEAN_AND_MEAN)
-		option(LIBSUPERDERPY_DLFCN "Use built-in dlfcn with Unicode support" ON)
+		option(LIBSUPERDERPY_DLFCN "Use built-in dlfcn with UTF-8 support" ON)
 	endif(WIN32)
 
 	if(ANDROID)
@@ -46,9 +51,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 	endif(APPLE)
 
-	option(USE_CLANG_TIDY "Analyze the code with clang-tidy" ON)
+	option(USE_CLANG_TIDY "Analyze the code with clang-tidy" OFF)
 	if(USE_CLANG_TIDY AND NOT MINGW)
 		find_program(CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable")
+		mark_as_advanced(CLANG_TIDY_EXE)
 		if(NOT CLANG_TIDY_EXE)
 			message(STATUS "clang-tidy not found, analysis disabled")
 		else()
@@ -158,7 +164,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			set(CMAKE_SHARED_MODULE_SUFFIX ".js")
 		endif()
 
-		option(LIBSUPERDERPY_USE_WEBGL2 "Use WebGL 2 context" OFF)
+		option(LIBSUPERDERPY_USE_WEBGL2 "Use WebGL 2 context" ON)
 		if(LIBSUPERDERPY_USE_WEBGL2)
 			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s USE_WEBGL2=1)
 		endif(LIBSUPERDERPY_USE_WEBGL2)
@@ -198,7 +204,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
 		if (NOT EMSCRIPTEN)
-			target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" ${ALLEGRO5_LIBRARIES} ${ALLEGRO5_FONT_LIBRARIES} ${ALLEGRO5_TTF_LIBRARIES} ${ALLEGRO5_PRIMITIVES_LIBRARIES} ${ALLEGRO5_AUDIO_LIBRARIES} ${ALLEGRO5_ACODEC_LIBRARIES} ${ALLEGRO5_VIDEO_LIBRARIES} ${ALLEGRO5_IMAGE_LIBRARIES} ${ALLEGRO5_COLOR_LIBRARIES} m)
+			target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" ${ALLEGRO5_LIBS} m)
 
 			if (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 				target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy-${LIBSUPERDERPY_GAMENAME})
@@ -209,7 +215,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			endif(TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 		endif (NOT EMSCRIPTEN)
 
-		install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${LIB_INSTALL_DIR})
+		install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 
 		if (ANDROID)
 			add_dependencies(${LIBSUPERDERPY_GAMENAME}_apk "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}")
@@ -313,8 +319,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_js
 				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_ogg
 				WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBRARIES} ${ALLEGRO5_FONT_LIBRARIES} ${ALLEGRO5_TTF_LIBRARIES} ${ALLEGRO5_PRIMITIVES_LIBRARIES} ${ALLEGRO5_AUDIO_LIBRARIES} ${ALLEGRO5_ACODEC_LIBRARIES}  ${ALLEGRO5_VIDEO_LIBRARIES} ${ALLEGRO5_IMAGE_LIBRARIES} ${ALLEGRO5_COLOR_LIBRARIES} ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=1 -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY_BYTES} -o ${LIBSUPERDERPY_GAMENAME}.html --preload-file data --preload-file gamestates@/
-				COMMAND rm -rf data gamestates
+				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../bin/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=1 -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY_BYTES} -o ${LIBSUPERDERPY_GAMENAME}.html --preload-file ../share/${LIBSUPERDERPY_GAMENAME}/data --preload-file gamestates@/
 				VERBATIM
 				)
 		endif(EMSCRIPTEN)
@@ -386,6 +391,23 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		execute_process(COMMAND ${ANDROID_UPDATE_COMMAND} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android")
 
 	endif(ANDROID)
+
+	# setup default RPATH/install_name handling
+	# default is to build with RPATH for the install dir, so it doesn't need to relink
+	if (UNIX)
+		if (APPLE)
+			set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+		else (APPLE)
+			# use the RPATH figured out by cmake when compiling
+			set(CMAKE_SKIP_BUILD_RPATH TRUE)
+			set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+			set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+		endif (APPLE)
+	endif (UNIX)
+
+	# uninstall target
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libsuperderpy/cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+	add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 	set(LIBSUPERDERPY_CONFIG_INCLUDED 1)
 
