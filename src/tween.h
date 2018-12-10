@@ -85,6 +85,7 @@ struct Tween {
 
 struct Tween Tween(struct Game* game, double start, double stop, TWEEN_STYLE style, double duration);
 struct Tween StaticTween(struct Game* game, double value);
+bool HasTweenEnded(struct Tween* tween);
 double GetTweenPosition(struct Tween* tween);
 double GetTweenInterpolation(struct Tween* tween);
 double GetTweenValue(struct Tween* tween);

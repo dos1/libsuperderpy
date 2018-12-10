@@ -262,6 +262,10 @@ SYMBOL_EXPORT struct Tween StaticTween(struct Game* game, double value) {
 	return Tween(game, value, value, TWEEN_STYLE_LINEAR, 0);
 }
 
+SYMBOL_EXPORT bool HasTweenEnded(struct Tween* tween) {
+	return tween->done;
+}
+
 SYMBOL_EXPORT double GetTweenPosition(struct Tween* tween) {
 	if (tween->duration == 0.0) {
 		return 1.0;

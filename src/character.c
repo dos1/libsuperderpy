@@ -349,9 +349,9 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 	}
 
 	if (!character->shared) {
-		struct Spritesheet *tmp, *s = character->spritesheets;
+		struct Spritesheet* s = character->spritesheets;
 		while (s) {
-			tmp = s;
+			struct Spritesheet* tmp = s;
 			s = s->next;
 			if (tmp->successor) {
 				free(tmp->successor);
