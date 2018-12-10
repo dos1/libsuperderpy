@@ -64,7 +64,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 
 	// Setup our strings
 	strncpy(stext, text, 1023);
-	strncpy(temp, "", 1024);
+	strncpy(temp, "", 1023);
 	for (int i = 0; i < 40; i += 1) {
 		strncpy(lines[i], "", 1024);
 	}
@@ -79,7 +79,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 		// This code checks for the new line character.
 		if (strncmp(word, breakchar, 255) == 0) {
 			line += 1; // Move down a Line
-			strncpy(temp, "", 1024); // Clear the tempstring
+			strncpy(temp, "", 1023); // Clear the tempstring
 		} else {
 			if (al_get_text_width(font, temp) >= (width)) { // Check if text is larger than the area.
 				strncpy(temp, word, 255); // clear the templine and add the word to it.
