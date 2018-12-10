@@ -187,13 +187,14 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		game->joystick = al_install_joystick();
 	}
 
-	int windowMode = ALLEGRO_FULLSCREEN_WINDOW;
 #ifdef ALLEGRO_ANDROID
-	windowMode |= ALLEGRO_FRAMELESS;
+	int windowMode = ALLEGRO_FULLSCREEN_WINDOW | ALLEGRO_FRAMELESS;
+#elif defined(__EMSCRIPTEN__)
+	int windowMode = ALLEGRO_WINDOWED;
+#else
+	int windowMode = ALLEGRO_FULLSCREEN_WINDOW;
 #endif
-#ifdef __EMSCRIPTEN__
-	windowMode = ALLEGRO_WINDOWED;
-#endif
+
 	if (!game->config.fullscreen) {
 		windowMode = ALLEGRO_WINDOWED;
 	}
@@ -282,9 +283,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 
 	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "44100"), NULL, 10);
-	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_FLOAT32;
 #ifdef ALLEGRO_ANDROID
-	depth = ALLEGRO_AUDIO_DEPTH_INT16;
+	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_INT16;
+#else
+	ALLEGRO_AUDIO_DEPTH depth = ALLEGRO_AUDIO_DEPTH_FLOAT32;
 #endif
 	game->audio.v = al_create_voice(samplerate, depth, ALLEGRO_CHANNEL_CONF_2);
 	if (!game->audio.v) {
@@ -510,7 +512,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		wchar_t* wargv[game->_priv.argc];
 		for (int i = 0; i < game->_priv.argc; i++) {
 			size_t size = MultiByteToWideChar(CP_UTF8, 0, argv[i], -1, NULL, 0);
-			wargv[i] = alloca(sizeof(wchar_t) * size);
+			wargv[i] = malloc(sizeof(wchar_t) * size);
 			MultiByteToWideChar(CP_UTF8, 0, argv[i], -1, wargv[i], size);
 		}
 		_wexecv(wargv[0], (const wchar_t* const*)wargv);

@@ -40,7 +40,7 @@ static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 		ALLEGRO_USTR_INFO info;
 
 		n = al_fread(fp, buf, sizeof(buf));
-		if (n <= 0) {
+		if (n == 0) {
 			break;
 		}
 		al_ustr_append(str, al_ref_buffer(&info, buf, n));

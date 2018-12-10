@@ -74,7 +74,6 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 
 	pch = strtok_r(stext, " ", &context); // Get the first word.
 	do {
-		strncpy(word, "", 255); // Truncate the string, to ensure there's no crazy stuff in there from memory.
 		snprintf(word, 255, "%s ", pch);
 		strncat(temp, word, 255); // Append the word to the end of TempLine
 		// This code checks for the new line character.
