@@ -26,13 +26,17 @@
 struct SpritesheetFrame {
 	char* file;
 	char* filepath;
-	ALLEGRO_BITMAP* bitmap;
+	ALLEGRO_BITMAP *bitmap, *source;
 	double duration;
 	ALLEGRO_COLOR tint;
 	int row;
 	int col;
 	int x;
 	int y;
+	int sx;
+	int sy;
+	int sw;
+	int sh;
 	bool flipX;
 	bool flipY;
 };

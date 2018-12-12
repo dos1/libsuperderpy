@@ -110,7 +110,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 			tmp->height = al_get_bitmap_height(tmp->bitmap) / tmp->rows;
 		}
 		for (int i = 0; i < tmp->frameCount; i++) {
-			if ((!tmp->frames[i].bitmap) && (tmp->frames[i].file)) {
+			if ((!tmp->frames[i].source) && (tmp->frames[i].file)) {
 				if (game->config.debug) {
 					PrintConsole(game, "  - %s", tmp->frames[i].file);
 				}
@@ -120,18 +120,20 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 				} else {
 					snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
 				}
-				tmp->frames[i].bitmap = AddBitmap(game, filename);
+				tmp->frames[i].source = AddBitmap(game, filename);
 				tmp->frames[i].filepath = strdup(filename);
-				int width = al_get_bitmap_width(tmp->frames[i].bitmap) + tmp->frames[i].x;
-				if (width > tmp->width) {
-					tmp->width = width;
-				}
-				int height = al_get_bitmap_height(tmp->frames[i].bitmap) + tmp->frames[i].y;
-				if (height > tmp->height) {
-					tmp->height = height;
-				}
-			} else if (!tmp->frames[i].bitmap) {
-				tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width, tmp->frames[i].row * tmp->height, tmp->width, tmp->height);
+			} else if (!tmp->frames[i].source) {
+				tmp->frames[i].source = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width, tmp->frames[i].row * tmp->height, tmp->width, tmp->height);
+			}
+			tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->frames[i].source, tmp->frames[i].sx, tmp->frames[i].sy, (tmp->frames[i].sw > 0) ? tmp->frames[i].sw : al_get_bitmap_width(tmp->frames[i].source), (tmp->frames[i].sh > 0) ? tmp->frames[i].sh : al_get_bitmap_height(tmp->frames[i].source));
+
+			int width = al_get_bitmap_width(tmp->frames[i].bitmap) + tmp->frames[i].x;
+			if (width > tmp->width) {
+				tmp->width = width;
+			}
+			int height = al_get_bitmap_height(tmp->frames[i].bitmap) + tmp->frames[i].y;
+			if (height > tmp->height) {
+				tmp->height = height;
 			}
 		}
 		if (progress) {
@@ -153,8 +155,9 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 			if (tmp->frames[i].filepath) {
 				RemoveBitmap(game, tmp->frames[i].filepath);
 			} else {
-				al_destroy_bitmap(tmp->frames[i].bitmap);
+				al_destroy_bitmap(tmp->frames[i].source);
 			}
+			al_destroy_bitmap(tmp->frames[i].bitmap);
 		}
 		if (tmp->bitmap) {
 			RemoveBitmap(game, tmp->filepath);
@@ -258,9 +261,14 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		snprintf(framename, 255, "frame%d", i);
 		s->frames[i].duration = strtodnull(al_get_config_value(config, framename, "duration"), s->duration);
 
+		s->frames[i].source = NULL;
 		s->frames[i].bitmap = NULL;
 		s->frames[i].x = strtolnull(al_get_config_value(config, framename, "x"), 0);
 		s->frames[i].y = strtolnull(al_get_config_value(config, framename, "y"), 0);
+		s->frames[i].sx = strtolnull(al_get_config_value(config, framename, "sx"), 0);
+		s->frames[i].sy = strtolnull(al_get_config_value(config, framename, "sy"), 0);
+		s->frames[i].sw = strtolnull(al_get_config_value(config, framename, "sw"), 0);
+		s->frames[i].sh = strtolnull(al_get_config_value(config, framename, "sh"), 0);
 		s->frames[i].flipX = strtolnull(al_get_config_value(config, framename, "flipX"), 0);
 		s->frames[i].flipY = strtolnull(al_get_config_value(config, framename, "flipY"), 0);
 
