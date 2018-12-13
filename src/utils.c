@@ -354,7 +354,9 @@ static char* TestDataFilePath(struct Game* game, const char* filename) {
 	TestPath(filename, "../Resources/data/", &result);
 #endif
 
+	// build directories
 	TestPath(filename, "../../data/", &result);
+	TestPath(filename, "../../../data/", &result);
 
 	if (result) {
 		return result;
