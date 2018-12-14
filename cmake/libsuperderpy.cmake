@@ -42,13 +42,27 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
 	endif(ANDROID)
 
-	set(DEFAULT_SANITIZERS "address,undefined")
-	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-		set(DEFAULT_SANITIZERS "leak")
+	set(SANITIZERS "address,undefined" CACHE STRING "List of code sanitizers enabled for Debug builds")
+	set_property(CACHE SANITIZERS PROPERTY STRINGS "" address undefined leak thread address,undefined leak,undefined thread,undefined)
+	# leak sanitizer is a subset of address sanitizer
+	# address/leak, memory and thread sanitizers are mutually exclusive (there can be only one at once)
+	# memory sanitizer is available only as a static library so far, which breaks -Wl,--no-undefined
+	# there's also fuzzer, but it doesn't seem particularly interesting for us
+
+	if (SANITIZERS)
+		set(SANITIZERS_ARG "-fsanitize=${SANITIZERS} -DLEAK_SANITIZER=1 -fsanitize-recover=all -fsanitize-address-use-after-scope")
+	endif(SANITIZERS)
+
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARG}")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARG}")
+
+	if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -shared-libsan")
 	endif()
-	set(SANITIZERS ${DEFAULT_SANITIZERS} CACHE STRING "List of code sanitizers enabled for Debug builds")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -DLEAK_SANITIZER=1 -fno-common -fsanitize-recover=all")
+	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -shared-libsan")
+	endif()
+
 
 	if(APPLE)
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
