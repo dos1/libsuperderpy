@@ -217,7 +217,7 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 	fprintf(stderr, "%s:%d [%s]\n%s\n", file, line, func, text);
 
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
-	if (game->_priv.loading.inProgress) {
+	if (game->_priv.loading.in_progress) {
 		al_lock_mutex(game->_priv.bsod_mutex);
 		game->_priv.in_bsod = true;
 		game->_priv.bsod_sync = true;
@@ -251,7 +251,7 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 		al_set_target_backbuffer(game->display);
 		al_clear_to_color(al_map_rgb(0, 0, 170));
 
-		const char* header = game->name;
+		const char* header = game->_priv.name;
 		const int headw = al_get_text_width(game->_priv.font_bsod, header);
 
 		al_draw_filled_rectangle(offsetx - headw / 2.0 - 4, offsety, 4 + offsetx + headw / 2.0, offsety + fonth, al_map_rgb(170, 170, 170));
@@ -318,9 +318,9 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 		done = true;
 #endif
 	}
-	al_use_transform(&game->projection);
+	al_use_transform(&game->_priv.projection);
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
-	if (game->_priv.loading.inProgress) {
+	if (game->_priv.loading.in_progress) {
 		PrintConsole(game, "Resuming the main thread...");
 		game->_priv.in_bsod = false;
 		al_signal_cond(game->_priv.bsod_cond);
@@ -448,29 +448,29 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 	al_unlock_mutex(game->_priv.mutex);
 }
 
-SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
-	game->viewport = config;
+SYMBOL_EXPORT void SetupViewport(struct Game* game) {
+	game->viewport.width = game->_priv.params.width;
+	game->viewport.height = game->_priv.params.height;
 
 	if ((game->viewport.width == 0) || (game->viewport.height == 0)) {
 		game->viewport.height = al_get_display_height(game->display);
-		game->viewport.width = (int)(game->viewport.aspect * game->viewport.height);
+		game->viewport.width = (int)(game->_priv.params.aspect * game->viewport.height);
 		if (game->viewport.width > al_get_display_width(game->display)) {
 			game->viewport.width = al_get_display_width(game->display);
-			game->viewport.height = (int)(game->viewport.width / game->viewport.aspect);
+			game->viewport.height = (int)(game->viewport.width / game->_priv.params.aspect);
 		}
 	}
-	game->viewport.aspect = game->viewport.width / (float)game->viewport.height;
 
 	al_set_target_backbuffer(game->display);
-	al_identity_transform(&game->projection);
-	al_use_transform(&game->projection);
+	al_identity_transform(&game->_priv.projection);
+	al_use_transform(&game->_priv.projection);
 	al_reset_clipping_rectangle();
 
 	float resolution = al_get_display_height(game->display) / (float)game->viewport.height;
 	if (al_get_display_width(game->display) / (float)game->viewport.width < resolution) {
 		resolution = al_get_display_width(game->display) / (float)game->viewport.width;
 	}
-	if (game->viewport.integer_scaling) {
+	if (game->_priv.params.integer_scaling) {
 		resolution = floorf(resolution);
 		if (floorf(resolution) == 0) {
 			resolution = 1;
@@ -488,16 +488,16 @@ SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
 	if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"), NULL, 10)) {
 		int clipX = (al_get_display_width(game->display) - clipWidth) / 2;
 		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
-		al_build_transform(&game->projection, clipX, clipY, resolution, resolution, 0.0f);
+		al_build_transform(&game->_priv.projection, clipX, clipY, resolution, resolution, 0.0f);
 		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
-		game->_priv.clip_rect.x = clipX;
-		game->_priv.clip_rect.y = clipY;
-		game->_priv.clip_rect.w = clipWidth;
-		game->_priv.clip_rect.h = clipHeight;
+		game->clip_rect.x = clipX;
+		game->clip_rect.y = clipY;
+		game->clip_rect.w = clipWidth;
+		game->clip_rect.h = clipHeight;
 	} else if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"), NULL, 10)) {
-		al_build_transform(&game->projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
+		al_build_transform(&game->_priv.projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
 	}
-	al_use_transform(&game->projection);
+	al_use_transform(&game->_priv.projection);
 	Console_Unload(game);
 	Console_Load(game);
 	ResizeGamestates(game);
@@ -516,7 +516,7 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
 	if (!game->_priv.current_gamestate) {
-		return game->loading_fb;
+		return game->_priv.loading.fb;
 	}
 	return game->_priv.current_gamestate->fb;
 }
@@ -544,15 +544,15 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	return bitmap;
 }
 
-SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates)) {
+SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb)) {
 	PrintConsole(game, "Compositor enabled.");
-	game->handlers.compositor = compositor ? compositor : SimpleCompositor;
+	game->_priv.params.handlers.compositor = compositor ? compositor : SimpleCompositor;
 	ResizeGamestates(game);
 }
 
 SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
 	PrintConsole(game, "Compositor disabled.");
-	game->handlers.compositor = NULL;
+	game->_priv.params.handlers.compositor = NULL;
 	ResizeGamestates(game);
 }
 

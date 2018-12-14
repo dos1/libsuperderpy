@@ -49,7 +49,7 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 #ifdef LIBSUPERDERPY_IMGUI
 			ImGui_ImplAllegro5_CreateDeviceObjects();
 #endif
-			SetupViewport(game, game->viewport_config);
+			SetupViewport(game);
 			break;
 
 		case ALLEGRO_EVENT_KEY_DOWN:
@@ -195,7 +195,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	game->_priv.loading.toLoad = 0;
 	game->_priv.loading.loaded = 0;
-	game->loading_progress = 0;
+	game->loading.progress = 0;
 
 	// TODO: support gamestate dependences/ordering
 	while (tmp) {
@@ -246,17 +246,17 @@ static inline bool MainloopTick(struct Game* game) {
 				game->_priv.current_gamestate = tmp;
 
 				struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags()};
-				game->_priv.loading.inProgress = true;
+				game->_priv.loading.in_progress = true;
 				double time = al_get_time();
 				game->_priv.loading.time = time;
 
 				CalculateProgress(game);
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 				al_run_detached_thread(GamestateLoadingThread, &data);
-				while (game->_priv.loading.inProgress) {
+				while (game->_priv.loading.in_progress) {
 					double delta = al_get_time() - game->_priv.loading.time;
 					if (tmp->showLoading) {
-						game->_priv.loading.shown = true;
+						game->loading.shown = true;
 						(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
 						DrawGamestates(game);
 					}
@@ -307,7 +307,7 @@ static inline bool MainloopTick(struct Game* game) {
 			}
 			if (tmp->showLoading) {
 				(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
-				game->_priv.loading.shown = false;
+				game->loading.shown = false;
 			}
 			tmp->showLoading = true;
 			al_resume_timer(game->_priv.timer);
@@ -411,8 +411,8 @@ static inline bool MainloopEvents(struct Game* game) {
 		}
 #endif
 
-		if (game->handlers.event) {
-			if ((*game->handlers.event)(game, &ev)) {
+		if (game->_priv.params.handlers.event) {
+			if ((*game->_priv.params.handlers.event)(game, &ev)) {
 				continue;
 			}
 		}

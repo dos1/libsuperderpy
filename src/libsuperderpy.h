@@ -86,6 +86,12 @@ struct GamestateResources;
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
 
+#if !defined(LIBSUPERDERPY_INTERNAL_H) && defined(__GNUC__)
+#define LIBSUPERDERPY_DEPRECATED_PRIV __attribute__((deprecated))
+#else
+#define LIBSUPERDERPY_DEPRECATED_PRIV
+#endif
+
 #if defined(ALLEGRO_WINDOWS) && !defined(LIBSUPERDERPY_NO_MAIN_MANGLING)
 int _libsuperderpy_main(int argc, char** argv);
 #define main(a, b)                                                                      \
@@ -101,21 +107,47 @@ int _libsuperderpy_main(int argc, char** argv);
 	int _libsuperderpy_main(a, b)
 #endif
 
-struct Viewport {
+/*! \brief A list of user callbacks to register. */
+struct Handlers {
+	bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
+	void (*destroy)(struct Game* game);
+	void (*compositor)(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb);
+	void (*prelogic)(struct Game* game, double delta);
+	void (*postlogic)(struct Game* game, double delta);
+	void (*predraw)(struct Game* game);
+	void (*postdraw)(struct Game* game);
+};
+
+/*! \brief Parameters for engine initialization. All values default to 0/false/NULL. */
+struct Params {
 	int width; /*!< Width of the drawing canvas. */
 	int height; /*!< Height of the drawing canvas. */
 	float aspect; /*!< When set instead of width/height pair, makes the viewport side fluid; when non-zero, locks its aspect ratio. */
 	bool integer_scaling; /*!< Ensure that the viewport is zoomed only with integer factors. */
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
+	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
+	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
+	struct Handlers handlers; /*!< A list of user callbacks to register. */
 };
 
 /*! \brief Main struct of the game. */
 struct Game {
 	ALLEGRO_DISPLAY* display; /*!< Main Allegro display. */
+	ALLEGRO_EVENT_SOURCE event_source; /*!< Event source for user events. */
+	struct {
+		ALLEGRO_VOICE* v; /*!< Main voice used by the game. */
+		ALLEGRO_MIXER* mixer; /*!< Main mixer of the game. */
+		ALLEGRO_MIXER* music; /*!< Music mixer. */
+		ALLEGRO_MIXER* voice; /*!< Voice mixer. */
+		ALLEGRO_MIXER* fx; /*!< Effects mixer. */
+	} audio; /*!< Audio resources. */
 
-	ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
+	LIBSUPERDERPY_DATA_TYPE* data; /*!< User defined structure. */
 
-	struct Viewport viewport, viewport_config;
+	struct {
+		int width;
+		int height;
+	} viewport; /*!< Canvas size. */
 
 	double time; /*!< In-game total passed time in seconds. */
 
@@ -128,17 +160,29 @@ struct Game {
 		bool debug; /*!< Toggles debug mode. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
-	} config;
+	} config; /*!< Configuration values from the config file. */
 
 	struct {
-		ALLEGRO_VOICE* v; /*!< Main voice used by the game. */
-		ALLEGRO_MIXER* mixer; /*!< Main mixer of the game. */
-		ALLEGRO_MIXER* music; /*!< Music mixer. */
-		ALLEGRO_MIXER* voice; /*!< Voice mixer. */
-		ALLEGRO_MIXER* fx; /*!< Effects mixer. */
-	} audio; /*!< Audio resources. */
+		int x, y;
+		int w, h;
+	} clip_rect; /*!< Clipping rectangle of the display's backbuffer. */
 
 	struct {
+		float progress;
+		bool shown;
+	} loading; /*!< Data about gamestate loading process. */
+
+	struct {
+		struct {
+			bool touch;
+			bool joystick;
+			bool mouse;
+		} available;
+	} input;
+
+	struct {
+		struct Params params;
+
 		struct Gamestate* gamestates; /*!< List of known gamestates. */
 		ALLEGRO_FONT* font_console; /*!< Font used in game console. */
 		ALLEGRO_FONT* font_bsod; /*!< Font used in Blue Screens of Derp. */
@@ -164,9 +208,9 @@ struct Game {
 			struct Gamestate* current;
 			int progress;
 			int loaded, toLoad;
-			volatile bool inProgress;
-			bool shown;
+			volatile bool in_progress;
 			double time;
+			ALLEGRO_BITMAP* fb;
 		} loading;
 
 		struct Gamestate* current_gamestate;
@@ -174,11 +218,6 @@ struct Game {
 		struct List *garbage, *timelines, *shaders, *bitmaps[LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS];
 
 		double timestamp;
-
-		struct {
-			int x, y;
-			int w, h;
-		} clip_rect;
 
 		bool paused;
 
@@ -193,45 +232,25 @@ struct Game {
 
 		ALLEGRO_MUTEX* mutex;
 
+		const char* name;
+
+		bool shutting_down; /*!< If true then shut down of the game is pending. */
+		bool restart; /*!< If true then restart of the game is pending. */
+
 		struct {
 			bool verbose, livereload, autopause;
 		} debug;
+
+		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif
 
-	} _priv; /*!< Private resources. Do not use in gamestates! */
-
-	bool shutting_down; /*!< If true then shut down of the game is pending. */
-	bool restart; /*!< If true then restart of the game is pending. */
-	bool touch;
-	bool joystick;
-	bool mouse;
-
-	bool show_loading_on_launch;
-
-	const char* name;
-
-	ALLEGRO_EVENT_SOURCE event_source;
-
-	float loading_progress;
-	ALLEGRO_BITMAP* loading_fb;
-
-	struct {
-		bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
-		void (*destroy)(struct Game* game);
-		void (*compositor)(struct Game* game, struct Gamestate* gamestates);
-		void (*prelogic)(struct Game* game, double delta);
-		void (*postlogic)(struct Game* game, double delta);
-		void (*predraw)(struct Game* game);
-		void (*postdraw)(struct Game* game);
-	} handlers;
-
-	LIBSUPERDERPY_DATA_TYPE* data;
+	} _priv LIBSUPERDERPY_DEPRECATED_PRIV; /*!< Private resources. Do not use in gamestates! */
 };
 
-struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport);
+struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Params params);
 int libsuperderpy_start(struct Game* game);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);

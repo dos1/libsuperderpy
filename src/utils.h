@@ -35,7 +35,6 @@
 #define LIBRARY_EXTENSION ".so"
 #endif
 
-struct Viewport;
 struct Gamestate;
 
 /*! \brief Draws rectangle filled with vertical gradient. */
@@ -80,7 +79,7 @@ __attribute__((__format__(__printf__, 5, 6))) void PrintConsoleWithContext(struc
 __attribute__((__format__(__printf__, 6, 7))) void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...);
 #define FatalError(game, exit, format, ...) FatalErrorWithContext(game, __LINE__, __FILE__, __func__, exit, format, ##__VA_ARGS__)
 
-void SetupViewport(struct Game* game, struct Viewport config);
+void SetupViewport(struct Game* game);
 
 void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
@@ -90,7 +89,7 @@ void SetFramebufferAsTarget(struct Game* game);
 
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 
-void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates));
+void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb));
 void DisableCompositor(struct Game* game);
 
 char* StrToLower(struct Game* game, char* text);

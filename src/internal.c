@@ -21,33 +21,33 @@
 #include "3rdparty/valgrind.h"
 #include <dlfcn.h>
 
-SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates) {
+SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb) {
 	struct Gamestate* tmp = gamestates;
 	ClearToColor(game, al_map_rgb(0, 0, 0));
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
-			al_draw_bitmap(tmp->fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
+			al_draw_bitmap(tmp->fb, game->clip_rect.x, game->clip_rect.y, 0);
 		}
 		tmp = tmp->next;
 	}
-	if (game->_priv.loading.shown) {
-		al_draw_bitmap(game->loading_fb, game->_priv.clip_rect.x, game->_priv.clip_rect.y, 0);
+	if (game->loading.shown) {
+		al_draw_bitmap(loading_fb, game->clip_rect.x, game->clip_rect.y, 0);
 	}
 }
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
-	if (!game->handlers.compositor) {
+	if (!game->_priv.params.handlers.compositor) {
 		ClearScreen(game);
 	}
 	struct Gamestate* tmp = game->_priv.gamestates;
-	if (game->handlers.predraw) {
-		game->handlers.predraw(game);
+	if (game->_priv.params.handlers.predraw) {
+		game->_priv.params.handlers.predraw(game);
 	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
 			SetFramebufferAsTarget(game);
-			if (game->handlers.compositor) { // don't clear when uncomposited
+			if (game->_priv.params.handlers.compositor) { // don't clear when uncomposited
 				al_reset_clipping_rectangle();
 				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
@@ -57,11 +57,11 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		tmp = tmp->next;
 	}
 
-	if (game->_priv.loading.inProgress) {
+	if (game->_priv.loading.in_progress) {
 		// same as above, but for the loading gamestate
 		game->_priv.current_gamestate = NULL;
 		SetFramebufferAsTarget(game);
-		if (game->handlers.compositor) {
+		if (game->_priv.params.handlers.compositor) {
 			al_reset_clipping_rectangle();
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 		}
@@ -76,19 +76,19 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	al_use_transform(&t);
 	al_reset_clipping_rectangle();
 
-	if (game->handlers.compositor) {
-		game->handlers.compositor(game, game->_priv.gamestates);
+	if (game->_priv.params.handlers.compositor) {
+		game->_priv.params.handlers.compositor(game, game->_priv.gamestates, game->_priv.loading.fb);
 	}
 
-	if (game->handlers.postdraw) {
-		game->handlers.postdraw(game);
+	if (game->_priv.params.handlers.postdraw) {
+		game->_priv.params.handlers.postdraw(game);
 	}
 }
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
-	if (game->handlers.prelogic) {
-		game->handlers.prelogic(game, delta);
+	if (game->_priv.params.handlers.prelogic) {
+		game->_priv.params.handlers.prelogic(game, delta);
 	}
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
@@ -97,8 +97,8 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 		}
 		tmp = tmp->next;
 	}
-	if (game->handlers.postlogic) {
-		game->handlers.postlogic(game, delta);
+	if (game->_priv.params.handlers.postlogic) {
+		game->_priv.params.handlers.postlogic(game, delta);
 	}
 }
 
@@ -166,18 +166,18 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		al_destroy_bitmap(tmp->fb);
-		if (game->handlers.compositor) {
-			tmp->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+		if (game->_priv.params.handlers.compositor) {
+			tmp->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 		} else {
-			tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+			tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 		}
 		tmp = tmp->next;
 	}
-	al_destroy_bitmap(game->loading_fb);
-	if (game->handlers.compositor) {
-		game->loading_fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	al_destroy_bitmap(game->_priv.loading.fb);
+	if (game->_priv.params.handlers.compositor) {
+		game->_priv.loading.fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 	} else {
-		game->loading_fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+		game->_priv.loading.fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 }
 
@@ -215,7 +215,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 		DrawTimelines(game);
 
 		al_hold_bitmap_drawing(false);
-		al_use_transform(&game->projection);
+		al_use_transform(&game->_priv.projection);
 	}
 
 	if (game_time - game->_priv.fps_count.old_time >= 1.0) {
@@ -228,11 +228,11 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void Console_Load(struct Game* game) {
-	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->_priv.clip_rect.h * 0.025), 0);
-	if (game->_priv.clip_rect.h * 0.025 >= 16) {
-		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"), 16 * ((game->_priv.clip_rect.h > 1080) ? 2 : 1), 0);
+	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->clip_rect.h * 0.025), 0);
+	if (game->clip_rect.h * 0.025 >= 16) {
+		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"), 16 * ((game->clip_rect.h > 1080) ? 2 : 1), 0);
 	} else {
-		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->_priv.clip_rect.h * 0.025), 0);
+		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->clip_rect.h * 0.025), 0);
 	}
 }
 
@@ -244,7 +244,7 @@ SYMBOL_INTERNAL void Console_Unload(struct Game* game) {
 
 SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	struct GamestateLoadingThreadData* data = arg;
-	data->game->_priv.loading.inProgress = true;
+	data->game->_priv.loading.in_progress = true;
 	al_set_new_bitmap_flags(data->bitmap_flags);
 	data->gamestate->data = data->gamestate->api->Gamestate_Load(data->game, &GamestateProgress);
 	if (data->game->_priv.loading.progress != data->gamestate->progressCount) {
@@ -256,7 +256,7 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 		}
 	}
 	data->bitmap_flags = al_get_new_bitmap_flags();
-	data->game->_priv.loading.inProgress = false;
+	data->game->_priv.loading.in_progress = false;
 	return NULL;
 }
 
@@ -264,7 +264,7 @@ SYMBOL_INTERNAL void* ScreenshotThread(void* arg) {
 	struct ScreenshotThreadData* data = arg;
 	ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_USER_DOCUMENTS_PATH);
 	char filename[255];
-	snprintf(filename, 255, "%s_%ju_%ju.png", data->game->name, (uintmax_t)time(NULL), (uintmax_t)clock());
+	snprintf(filename, 255, "%s_%ju_%ju.png", data->game->_priv.name, (uintmax_t)time(NULL), (uintmax_t)clock());
 	al_set_path_filename(path, filename);
 	al_save_bitmap(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP), data->bitmap);
 	PrintConsole(data->game, "Screenshot stored in %s", al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
@@ -280,7 +280,7 @@ SYMBOL_INTERNAL void CalculateProgress(struct Game* game) {
 	if (game->config.debug) {
 		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, tmp->progressCount + 1);
 	}
-	game->loading_progress = progress;
+	game->loading.progress = progress;
 }
 
 SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
@@ -310,16 +310,16 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestate) {
 	PrintConsole(game, "Opening gamestate \"%s\"...", gamestate->name);
 	char libname[1024];
-	snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->name, gamestate->name);
+	snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->_priv.name, gamestate->name);
 	gamestate->handle = dlopen(AddGarbage(game, GetLibraryPath(game, libname)), RTLD_NOW);
 	if (!gamestate->handle) {
 		FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror()); // TODO: move out
 		return false;
 	}
-	if (game->handlers.compositor) {
-		gamestate->fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	if (game->_priv.params.handlers.compositor) {
+		gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 	} else {
-		gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+		gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 	gamestate->open = true;
 	return true;
@@ -499,10 +499,10 @@ SYMBOL_INTERNAL void ClearScreen(struct Game* game) {
 	al_set_target_backbuffer(game->display);
 	al_reset_clipping_rectangle();
 	al_clear_to_color(al_map_rgb(0, 0, 0));
-	if (game->viewport_config.depth_buffer) {
+	if (game->_priv.params.depth_buffer) {
 		al_clear_depth_buffer(1.0);
 	}
-	al_set_clipping_rectangle(game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	al_set_clipping_rectangle(game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 }
 
 static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int clipY) {
@@ -511,19 +511,19 @@ static void DrawQueue(struct Game* game, struct TM_Action* queue, int clipX, int
 	struct TM_Action* pom = queue;
 	while (pom != NULL) {
 		int width = al_get_text_width(game->_priv.font_console, pom->name);
-		al_draw_filled_rectangle(pos - (10 / 3200.0) * game->_priv.clip_rect.w, clipY, pos + width + (10 / 3200.0) * game->_priv.clip_rect.w, clipY + (60 / 1800.0) * game->_priv.clip_rect.h, pom->started ? al_map_rgba(255, 255, 255, 192) : al_map_rgba(0, 0, 0, 0));
-		al_draw_rectangle(pos - (10 / 3200.0) * game->_priv.clip_rect.w, clipY, pos + width + (10 / 3200.0) * game->_priv.clip_rect.w, clipY + (60 / 1800.0) * game->_priv.clip_rect.h, al_map_rgb(255, 255, 255), 2);
+		al_draw_filled_rectangle(pos - (10 / 3200.0) * game->clip_rect.w, clipY, pos + width + (10 / 3200.0) * game->clip_rect.w, clipY + (60 / 1800.0) * game->clip_rect.h, pom->started ? al_map_rgba(255, 255, 255, 192) : al_map_rgba(0, 0, 0, 0));
+		al_draw_rectangle(pos - (10 / 3200.0) * game->clip_rect.w, clipY, pos + width + (10 / 3200.0) * game->clip_rect.w, clipY + (60 / 1800.0) * game->clip_rect.h, al_map_rgb(255, 255, 255), 2);
 		al_draw_text(game->_priv.font_console, pom->started ? al_map_rgb(0, 0, 0) : al_map_rgb(255, 255, 255), pos, clipY, ALLEGRO_ALIGN_LEFT, pom->name);
 
 		if (pom->delay) {
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * game->_priv.clip_rect.h, ALLEGRO_ALIGN_LEFT, "%d", (int)(pom->delay * 1000));
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * game->clip_rect.h, ALLEGRO_ALIGN_LEFT, "%d", (int)(pom->delay * 1000));
 		}
 
 		if (strncmp(pom->name, "TM_RunInBackground", 18) == 0) { // FIXME: this is crappy way to detect queued background actions
-			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * game->_priv.clip_rect.h, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
+			al_draw_textf(game->_priv.font_console, al_map_rgb(255, 255, 255), pos, clipY - (50 / 1800.0) * game->clip_rect.h, ALLEGRO_ALIGN_LEFT, "%s", (char*)pom->arguments->next->next->value);
 		}
 
-		pos += width + (int)((20 / 3200.0) * game->_priv.clip_rect.w);
+		pos += width + (int)((20 / 3200.0) * game->clip_rect.w);
 		pom = pom->next;
 	}
 }
@@ -618,7 +618,7 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 SYMBOL_INTERNAL char* GetGameName(struct Game* game, const char* format) {
 	char* result = malloc(sizeof(char) * 255);
 	SUPPRESS_WARNING("-Wformat-nonliteral")
-	snprintf(result, 255, format, game->name);
+	snprintf(result, 255, format, game->_priv.name);
 	SUPPRESS_END
 	return AddGarbage(game, result);
 }

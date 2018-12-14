@@ -72,7 +72,7 @@ struct ScreenshotThreadData {
 	ALLEGRO_BITMAP* bitmap;
 };
 
-void SimpleCompositor(struct Game* game, struct Gamestate* gamestates);
+void SimpleCompositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb);
 void DrawGamestates(struct Game* game);
 void LogicGamestates(struct Game* game, double delta);
 void TickGamestates(struct Game* game);

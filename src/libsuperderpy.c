@@ -36,7 +36,7 @@
 
 static char* GetDefaultWindowWidth(struct Game* game) {
 	char* buf = malloc(sizeof(char) * 255);
-	double aspect = game->viewport_config.aspect ? game->viewport_config.aspect : (game->viewport_config.width / (double)game->viewport_config.height);
+	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.width / (double)game->_priv.params.height);
 	if (aspect < 1.0) {
 		aspect = 1.0;
 	}
@@ -46,7 +46,7 @@ static char* GetDefaultWindowWidth(struct Game* game) {
 
 static char* GetDefaultWindowHeight(struct Game* game) {
 	char* buf = malloc(sizeof(char) * 255);
-	double aspect = game->viewport_config.aspect ? game->viewport_config.aspect : (game->viewport_config.width / (double)game->viewport_config.height);
+	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.width / (double)game->_priv.params.height);
 	if (aspect > 1.0) {
 		aspect = 1.0;
 	}
@@ -54,11 +54,11 @@ static char* GetDefaultWindowHeight(struct Game* game) {
 	return AddGarbage(game, buf);
 }
 
-SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Viewport viewport) {
+SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Params params) {
 	struct Game* game = calloc(1, sizeof(struct Game));
 
-	game->name = name;
-	game->viewport_config = viewport;
+	game->_priv.name = name;
+	game->_priv.params = params;
 
 #ifdef ALLEGRO_MACOSX
 	getcwd(game->_priv.cwd, MAXPATHLEN);
@@ -92,14 +92,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.shaders = NULL;
 
 	game->_priv.paused = false;
-
-	game->handlers.event = NULL;
-	game->handlers.destroy = NULL;
-	game->handlers.compositor = NULL;
-	game->handlers.prelogic = NULL;
-	game->handlers.postlogic = NULL;
-	game->handlers.predraw = NULL;
-	game->handlers.postdraw = NULL;
 
 	game->_priv.texture_sync = false;
 	game->_priv.texture_sync_cond = al_create_cond();
@@ -156,8 +148,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	game->mouse = al_install_mouse();
-	if (!game->mouse) {
+	game->input.available.mouse = al_install_mouse();
+	if (!game->input.available.mouse) {
 		fprintf(stderr, "failed to initialize the mouse!\n");
 	}
 
@@ -171,10 +163,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	game->touch = false;
+	game->input.available.touch = false;
 
 	if (!strtol(GetConfigOptionDefault(game, "SuperDerpy", "disableTouch", "0"), NULL, 10)) {
-		game->touch = al_install_touch_input();
+		game->input.available.touch = al_install_touch_input();
 	}
 
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
@@ -183,10 +175,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 #endif
 
-	game->joystick = false;
+	game->input.available.joystick = false;
 
 	if (!strtol(GetConfigOptionDefault(game, "SuperDerpy", "disableJoystick", "0"), NULL, 10)) {
-		game->joystick = al_install_joystick();
+		game->input.available.joystick = al_install_joystick();
 	}
 
 #ifdef ALLEGRO_ANDROID
@@ -211,7 +203,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_display_option(ALLEGRO_SUPPORTED_ORIENTATIONS, ALLEGRO_DISPLAY_ORIENTATION_PORTRAIT, ALLEGRO_SUGGEST);
 #endif
 
-	if (viewport.depth_buffer) {
+	if (params.depth_buffer) {
 		al_set_new_display_option(ALLEGRO_DEPTH_SIZE, 24, ALLEGRO_SUGGEST);
 	}
 
@@ -219,7 +211,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_new_window_position(20, 40); // workaround nasty Windows bug with window being created off-screen
 #endif
 
-	al_set_new_window_title(al_get_app_name());
+	al_set_new_window_title(game->_priv.params.window_title ? game->_priv.params.window_title : al_get_app_name());
+
 	game->display = al_create_display(game->config.width, game->config.height);
 	if (!game->display) {
 		fprintf(stderr, "Failed to create display!\n");
@@ -269,7 +262,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	if (game->config.fullscreen) { al_hide_mouse_cursor(game->display); }
 	al_inhibit_screensaver(true);
 
-	SetupViewport(game, viewport);
+	SetupViewport(game);
 
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
@@ -317,17 +310,15 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->data = NULL;
 
-	game->shutting_down = false;
-	game->restart = false;
+	game->_priv.shutting_down = false;
+	game->_priv.restart = false;
 
-	game->show_loading_on_launch = false;
+	game->loading.progress = 0;
 
-	game->loading_progress = 0;
-
-	if (game->handlers.compositor) {
-		game->loading_fb = CreateNotPreservedBitmap(game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+	if (game->_priv.params.handlers.compositor) {
+		game->_priv.loading.fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 	} else {
-		game->loading_fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->_priv.clip_rect.x, game->_priv.clip_rect.y, game->_priv.clip_rect.w, game->_priv.clip_rect.h);
+		game->_priv.loading.fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 
 	return game;
@@ -336,13 +327,13 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
 	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
-	if (game->mouse) {
+	if (game->input.available.mouse) {
 		al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
 	}
-	if (game->joystick) {
+	if (game->input.available.joystick) {
 		al_register_event_source(game->_priv.event_queue, al_get_joystick_event_source());
 	}
-	if (game->touch) {
+	if (game->input.available.touch) {
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
 		al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
@@ -366,7 +357,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 		struct Gamestate* tmp = game->_priv.gamestates;
 		while (tmp) {
 			// don't show loading screen on init if requested
-			tmp->showLoading = game->show_loading_on_launch;
+			tmp->showLoading = game->_priv.params.show_loading_on_launch;
 			tmp = tmp->next;
 		}
 	}
@@ -421,7 +412,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 }
 
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
-	game->shutting_down = true;
+	game->_priv.shutting_down = true;
 
 #ifdef LIBSUPERDERPY_IMGUI
 	ImGui_ImplAllegro5_Shutdown();
@@ -456,8 +447,8 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	CloseGamestate(game, game->_priv.loading.gamestate);
 	free(game->_priv.loading.gamestate);
 
-	if (game->handlers.destroy) {
-		(*game->handlers.destroy)(game);
+	if (game->_priv.params.handlers.destroy) {
+		(*game->_priv.params.handlers.destroy)(game);
 	}
 	DestroyShaders(game);
 
@@ -505,7 +496,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 #ifndef __EMSCRIPTEN__
 	al_uninstall_system();
 	char** argv = game->_priv.argv;
-	bool restart = game->restart;
+	bool restart = game->_priv.restart;
 	free(game);
 	if (restart) {
 #ifdef ALLEGRO_MACOSX
