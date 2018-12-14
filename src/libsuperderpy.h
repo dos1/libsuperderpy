@@ -191,6 +191,8 @@ struct Game {
 		ALLEGRO_MUTEX* bsod_mutex;
 		ALLEGRO_COND* bsod_cond;
 
+		ALLEGRO_MUTEX* mutex;
+
 		struct {
 			bool verbose, livereload, autopause;
 		} debug;

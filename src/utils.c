@@ -417,6 +417,7 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
 SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...) {
+	al_lock_mutex(game->_priv.mutex);
 	va_list vl;
 	va_start(vl, format);
 	char* text = game->_priv.console[game->_priv.console_pos];
@@ -444,6 +445,7 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 	if (game->_priv.console_pos >= (sizeof(game->_priv.console) / sizeof(game->_priv.console[0]))) {
 		game->_priv.console_pos = 0;
 	}
+	al_unlock_mutex(game->_priv.mutex);
 }
 
 SYMBOL_EXPORT void SetupViewport(struct Game* game, struct Viewport config) {
