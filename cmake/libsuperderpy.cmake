@@ -50,11 +50,17 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	# there's also fuzzer, but it doesn't seem particularly interesting for us
 
 	if (SANITIZERS)
-		set(SANITIZERS_ARG "-fsanitize=${SANITIZERS} -DLEAK_SANITIZER=1 -fsanitize-recover=all -fsanitize-address-use-after-scope")
+		set(SANITIZERS_ARGS "-fsanitize=${SANITIZERS}")
+		if ("${SANITIZERS}" MATCHES "(address)|(leak)")
+			set(SANITIZERS_ARGS "${SANITIZERS_ARGS} -DLEAK_SANITIZER=1")
+		endif()
+		if ("${SANITIZERS}" MATCHES "address")
+			set(SANITIZERS_ARGS "${SANITIZERS_ARGS} -fsanitize-address-use-after-scope")
+		endif()
 	endif(SANITIZERS)
 
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARG}")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARG}")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARGS}")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARGS}")
 
 	if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
 		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -shared-libsan")
