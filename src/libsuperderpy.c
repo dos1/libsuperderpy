@@ -108,17 +108,17 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
 	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
-	game->config.debug = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
+	game->config.debug.enabled = strtol(GetConfigOptionDefault(game, "SuperDerpy", "debug", "0"), NULL, 10);
 	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", GetDefaultWindowWidth(game)), NULL, 10);
 	if (game->config.width < 100) { game->config.width = 100; }
 	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", GetDefaultWindowHeight(game)), NULL, 10);
 	if (game->config.height < 100) { game->config.height = 100; }
 
-	game->_priv.debug.verbose = strtol(GetConfigOptionDefault(game, "debug", "verbose", "0"), NULL, 10);
-	game->_priv.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "1"), NULL, 10);
-	game->_priv.debug.autopause = strtol(GetConfigOptionDefault(game, "debug", "autopause", "1"), NULL, 10);
+	game->config.debug.verbose = strtol(GetConfigOptionDefault(game, "debug", "verbose", "0"), NULL, 10);
+	game->config.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "1"), NULL, 10);
+	game->config.debug.autopause = strtol(GetConfigOptionDefault(game, "debug", "autopause", "1"), NULL, 10);
 
-	game->_priv.showconsole = game->config.debug;
+	game->_priv.showconsole = game->config.debug.enabled;
 	game->_priv.showtimeline = false;
 
 	if (!al_init_image_addon()) {

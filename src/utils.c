@@ -429,10 +429,10 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 	SUPPRESS_END
 
 #if !defined(__EMSCRIPTEN__) && !defined(ALLEGRO_ANDROID)
-	if (game->config.debug)
+	if (game->config.debug.enabled)
 #endif
 	{
-		if (game->_priv.debug.verbose) {
+		if (game->config.debug.verbose) {
 			printf("%s:%d ", file, line);
 		}
 		printf("[%s] %s\n", func, text);

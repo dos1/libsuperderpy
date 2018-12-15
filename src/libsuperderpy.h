@@ -157,9 +157,14 @@ struct Game {
 		int voice; /*!< Voice volume. */
 		bool mute; /*!< Whether audio should be muted globally. */
 		bool fullscreen; /*!< Fullscreen toggle. */
-		bool debug; /*!< Toggles debug mode. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
+		struct {
+			bool enabled; /*!< Toggles debug mode. */
+			bool verbose; /*!< Prints file names and line numbers with every message. */
+			bool livereload; /*!< Automatically reloads gamestates on window focus. */
+			bool autopause; /*!< Pauses/resumes the game when the window loses/gains focus. */
+		} debug; /*!< Debug mode settings. */
 	} config; /*!< Configuration values from the config file. */
 
 	struct {
@@ -236,10 +241,6 @@ struct Game {
 
 		bool shutting_down; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
-
-		struct {
-			bool verbose, livereload, autopause;
-		} debug;
 
 		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 

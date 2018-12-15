@@ -249,7 +249,7 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	data->gamestate->data = data->gamestate->api->Gamestate_Load(data->game, &GamestateProgress);
 	if (data->game->_priv.loading.progress != data->gamestate->progressCount) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
-		if (data->game->config.debug) {
+		if (data->game->config.debug.enabled) {
 			PrintConsole(data->game, "(sleeping for 3 seconds...)");
 			data->game->_priv.showconsole = true;
 			al_rest(3.0);
@@ -277,7 +277,7 @@ SYMBOL_INTERNAL void* ScreenshotThread(void* arg) {
 SYMBOL_INTERNAL void CalculateProgress(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.loading.current;
 	float progress = ((game->_priv.loading.progress / (float)(tmp->progressCount + 1)) / (float)game->_priv.loading.toLoad) + (game->_priv.loading.loaded / (float)game->_priv.loading.toLoad);
-	if (game->config.debug) {
+	if (game->config.debug.enabled) {
 		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, tmp->progressCount + 1);
 	}
 	game->loading.progress = progress;

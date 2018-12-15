@@ -59,7 +59,7 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			if ((ev->keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev->keyboard.keycode == ALLEGRO_KEY_BACKQUOTE)) {
 #endif
 				game->_priv.showconsole = !game->_priv.showconsole;
-				if ((ev->keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) && (game->config.debug)) {
+				if ((ev->keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) && (game->config.debug.enabled)) {
 					game->_priv.showtimeline = game->_priv.showconsole;
 				}
 			}
@@ -131,15 +131,15 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
 		case ALLEGRO_EVENT_DISPLAY_SWITCH_OUT:
-			if (game->_priv.debug.autopause) {
+			if (game->config.debug.autopause) {
 				PrintConsole(game, "DEBUG: autopause");
 				PauseExecution(game);
 			}
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_SWITCH_IN:
-			if (game->_priv.debug.autopause) {
-				if (game->_priv.debug.livereload) {
+			if (game->config.debug.autopause) {
+				if (game->config.debug.livereload) {
 					ReloadCode(game);
 				}
 				ResumeExecution(game);
@@ -424,7 +424,7 @@ static inline bool MainloopEvents(struct Game* game) {
 
 		HandleEvent(game, &ev);
 
-		if (game->config.debug) {
+		if (game->config.debug.enabled) {
 			HandleDebugEvent(game, &ev);
 		}
 

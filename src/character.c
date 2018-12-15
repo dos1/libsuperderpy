@@ -111,7 +111,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 		}
 		for (int i = 0; i < tmp->frameCount; i++) {
 			if ((!tmp->frames[i].source) && (tmp->frames[i].file)) {
-				if (game->config.debug) {
+				if (game->config.debug.enabled) {
 					PrintConsole(game, "  - %s", tmp->frames[i].file);
 				}
 				char filename[255] = {0};
