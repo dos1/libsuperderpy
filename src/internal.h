@@ -18,6 +18,8 @@
 #ifndef LIBSUPERDERPY_INTERNAL_H
 #define LIBSUPERDERPY_INTERNAL_H
 
+#define LIBSUPERDERPY_PRIV_ACCESS
+
 #include "libsuperderpy.h"
 #ifdef LIBSUPERDERPY_IMGUI
 #include "imgui/imgui_impl_allegro5.h"

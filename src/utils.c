@@ -207,7 +207,6 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 }
 
 SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...) {
-	// TODO: interrupt and take over loading thread when it happens
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");
 	va_list vl;

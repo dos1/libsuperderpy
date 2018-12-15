@@ -86,7 +86,7 @@ struct GamestateResources;
 
 #define LIBSUPERDERPY_BITMAP_HASHMAP_BUCKETS 16
 
-#if !defined(LIBSUPERDERPY_INTERNAL_H) && defined(__GNUC__)
+#if !defined(LIBSUPERDERPY_PRIV_ACCESS) && defined(__GNUC__)
 #define LIBSUPERDERPY_DEPRECATED_PRIV __attribute__((deprecated))
 #else
 #define LIBSUPERDERPY_DEPRECATED_PRIV
