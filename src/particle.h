@@ -34,14 +34,6 @@ struct ParticleState {
 
 typedef bool ParticleFunc(struct Game* game, struct ParticleState* particle, double delta, void* data);
 
-struct Particle {
-	struct Character* character;
-	bool active;
-	ParticleFunc* func;
-	struct ParticleState state;
-	void* data;
-};
-
 struct ParticleBucket {
 	int size;
 	int last;
@@ -50,32 +42,13 @@ struct ParticleBucket {
 	struct Particle* particles;
 };
 
-struct GravityParticleData {
-	double dx, dy;
-	double gravity;
-	double friction;
-};
-
-struct GravityParticleData* GravityParticleData(double dx, double dy, double gravity, double friction);
+void* GravityParticleData(double dx, double dy, double gravity, double friction);
 bool GravityParticle(struct Game* game, struct ParticleState* particle, double delta, void* d);
 
-struct LinearParticleData {
-	double dx, dy;
-};
-
-struct LinearParticleData* LinearParticleData(double dx, double dy);
+void* LinearParticleData(double dx, double dy);
 bool LinearParticle(struct Game* game, struct ParticleState* particle, double delta, void* d);
 
-struct FaderParticleData {
-	ParticleFunc* func;
-	void* data;
-	double delay;
-	double speed;
-	double time;
-	double fade;
-};
-
-struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d);
+void* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d);
 bool FaderParticle(struct Game* game, struct ParticleState* particle, double delta, void* d);
 
 struct ParticleState SpawnParticleIn(float x, float y);

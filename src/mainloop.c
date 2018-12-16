@@ -190,7 +190,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	struct Gamestate* tmp = game->_priv.gamestates;
 
-	game->_priv.loading.toLoad = 0;
+	game->_priv.loading.to_load = 0;
 	game->_priv.loading.loaded = 0;
 	game->loading.progress = 0;
 
@@ -199,13 +199,13 @@ static inline bool MainloopTick(struct Game* game) {
 		if (tmp->pending_stop) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Stop)(game, tmp->data);
+			(*tmp->api->stop)(game, tmp->data);
 			tmp->started = false;
 			tmp->pending_stop = false;
 			PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
 		}
 
-		if (tmp->pending_load) { game->_priv.loading.toLoad++; }
+		if (tmp->pending_load) { game->_priv.loading.to_load++; }
 		tmp = tmp->next;
 	}
 
@@ -218,14 +218,14 @@ static inline bool MainloopTick(struct Game* game) {
 			tmp->loaded = false;
 			tmp->pending_unload = false;
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Unload)(game, tmp->data);
+			(*tmp->api->unload)(game, tmp->data);
 			al_resume_timer(game->_priv.timer);
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 		}
 		if (tmp->pending_load) {
 			al_stop_timer(game->_priv.timer);
 			if (tmp->showLoading) {
-				(*game->_priv.loading.gamestate->api->Gamestate_Start)(game, game->_priv.loading.gamestate->data);
+				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
 
 			if (!tmp->api) {
@@ -254,7 +254,7 @@ static inline bool MainloopTick(struct Game* game) {
 					double delta = al_get_time() - game->_priv.loading.time;
 					if (tmp->showLoading) {
 						game->loading.shown = true;
-						(*game->_priv.loading.gamestate->api->Gamestate_Logic)(game, game->_priv.loading.gamestate->data, delta);
+						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
 						DrawGamestates(game);
 					}
 					game->_priv.loading.time += delta;
@@ -289,9 +289,9 @@ static inline bool MainloopTick(struct Game* game) {
 
 				al_set_new_bitmap_flags(data.bitmap_flags);
 
-				if (tmp->api->Gamestate_PostLoad) {
+				if (tmp->api->post_load) {
 					PrintConsole(game, "[%s] Post-loading...", tmp->name);
-					tmp->api->Gamestate_PostLoad(game, tmp->data);
+					tmp->api->post_load(game, tmp->data);
 				}
 
 				game->_priv.loading.progress++;
@@ -303,7 +303,7 @@ static inline bool MainloopTick(struct Game* game) {
 				tmp->pending_load = false;
 			}
 			if (tmp->showLoading) {
-				(*game->_priv.loading.gamestate->api->Gamestate_Stop)(game, game->_priv.loading.gamestate->data);
+				(*game->_priv.loading.gamestate->api->stop)(game, game->_priv.loading.gamestate->data);
 				game->loading.shown = false;
 			}
 			tmp->showLoading = true;
@@ -328,7 +328,7 @@ static inline bool MainloopTick(struct Game* game) {
 			game->_priv.current_gamestate = tmp;
 			tmp->started = true;
 			tmp->pending_start = false;
-			(*tmp->api->Gamestate_Start)(game, tmp->data);
+			(*tmp->api->start)(game, tmp->data);
 			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
 			PrintConsole(game, "Gamestate \"%s\" started successfully.", tmp->name);

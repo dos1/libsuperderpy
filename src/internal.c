@@ -16,7 +16,6 @@
  *
  * Also, ponies.
  */
-/// \privatesection
 
 #include "internal.h"
 #include "3rdparty/valgrind.h"
@@ -52,7 +51,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 				al_reset_clipping_rectangle();
 				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
-			tmp->api->Gamestate_Draw(game, tmp->data);
+			tmp->api->draw(game, tmp->data);
 			// TODO: save and restore more state for careless gamestating
 		}
 		tmp = tmp->next;
@@ -66,7 +65,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 			al_reset_clipping_rectangle();
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 		}
-		game->_priv.loading.gamestate->api->Gamestate_Draw(game, game->_priv.loading.gamestate->data);
+		game->_priv.loading.gamestate->api->draw(game, game->_priv.loading.gamestate->data);
 	}
 
 	al_set_target_backbuffer(game->display);
@@ -94,7 +93,7 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			tmp->api->Gamestate_Logic(game, tmp->data, delta);
+			tmp->api->logic(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
 	}
@@ -108,8 +107,8 @@ SYMBOL_INTERNAL void TickGamestates(struct Game* game) {
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			if (tmp->api->Gamestate_Tick) {
-				tmp->api->Gamestate_Tick(game, tmp->data);
+			if (tmp->api->tick) {
+				tmp->api->tick(game, tmp->data);
 			}
 		}
 		tmp = tmp->next;
@@ -122,8 +121,8 @@ SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 	while (tmp) {
 		if (tmp->loaded) {
 			game->_priv.current_gamestate = tmp;
-			if (tmp->api->Gamestate_Reload) {
-				tmp->api->Gamestate_Reload(game, tmp->data);
+			if (tmp->api->reload) {
+				tmp->api->reload(game, tmp->data);
 			}
 		}
 		tmp = tmp->next;
@@ -135,7 +134,7 @@ SYMBOL_INTERNAL void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev) {
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
 			game->_priv.current_gamestate = tmp;
-			tmp->api->Gamestate_ProcessEvent(game, tmp->data, ev);
+			tmp->api->process_event(game, tmp->data, ev);
 		}
 		tmp = tmp->next;
 	}
@@ -247,8 +246,8 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	struct GamestateLoadingThreadData* data = arg;
 	data->game->_priv.loading.in_progress = true;
 	al_set_new_bitmap_flags(data->bitmap_flags);
-	data->gamestate->data = data->gamestate->api->Gamestate_Load(data->game, &GamestateProgress);
-	if (data->game->_priv.loading.progress != data->gamestate->progressCount) {
+	data->gamestate->data = data->gamestate->api->load(data->game, &GamestateProgress);
+	if (data->game->_priv.loading.progress != data->gamestate->progress_count) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
 		if (data->game->config.debug.enabled) {
 			PrintConsole(data->game, "(sleeping for 3 seconds...)");
@@ -277,9 +276,9 @@ SYMBOL_INTERNAL void* ScreenshotThread(void* arg) {
 
 SYMBOL_INTERNAL void CalculateProgress(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.loading.current;
-	float progress = ((game->_priv.loading.progress / (float)(tmp->progressCount + 1)) / (float)game->_priv.loading.toLoad) + (game->_priv.loading.loaded / (float)game->_priv.loading.toLoad);
+	float progress = ((game->_priv.loading.progress / (float)(tmp->progress_count + 1)) / (float)game->_priv.loading.to_load) + (game->_priv.loading.loaded / (float)game->_priv.loading.to_load);
 	if (game->config.debug.enabled) {
-		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, tmp->progressCount + 1);
+		PrintConsole(game, "[%s] Progress: %d%% (%d/%d)", tmp->name, (int)(progress * 100), game->_priv.loading.progress, tmp->progress_count + 1);
 	}
 	game->loading.progress = progress;
 }
@@ -327,31 +326,31 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 }
 
 SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestate) {
-	gamestate->api = calloc(1, sizeof(struct Gamestate_API));
+	gamestate->api = calloc(1, sizeof(struct GamestateAPI));
 
 #define GS_ERROR                                                                                                            \
 	FatalError(game, false, "Error on resolving gamestate's %s symbol: %s", gamestate->name, dlerror()); /* TODO: move out */ \
 	free(gamestate->api);                                                                                                     \
 	return false;
 
-	if (!(gamestate->api->Gamestate_Draw = dlsym(gamestate->handle, "Gamestate_Draw"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Logic = dlsym(gamestate->handle, "Gamestate_Logic"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Load = dlsym(gamestate->handle, "Gamestate_Load"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Unload = dlsym(gamestate->handle, "Gamestate_Unload"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Start = dlsym(gamestate->handle, "Gamestate_Start"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_Stop = dlsym(gamestate->handle, "Gamestate_Stop"))) { GS_ERROR; }
-	if (!(gamestate->api->Gamestate_ProcessEvent = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
+	if (!(gamestate->api->draw = dlsym(gamestate->handle, "Gamestate_Draw"))) { GS_ERROR; }
+	if (!(gamestate->api->logic = dlsym(gamestate->handle, "Gamestate_Logic"))) { GS_ERROR; }
+	if (!(gamestate->api->load = dlsym(gamestate->handle, "Gamestate_Load"))) { GS_ERROR; }
+	if (!(gamestate->api->unload = dlsym(gamestate->handle, "Gamestate_Unload"))) { GS_ERROR; }
+	if (!(gamestate->api->start = dlsym(gamestate->handle, "Gamestate_Start"))) { GS_ERROR; }
+	if (!(gamestate->api->stop = dlsym(gamestate->handle, "Gamestate_Stop"))) { GS_ERROR; }
+	if (!(gamestate->api->process_event = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
 
 	// optional
-	gamestate->api->Gamestate_Tick = dlsym(gamestate->handle, "Gamestate_Tick");
-	gamestate->api->Gamestate_PostLoad = dlsym(gamestate->handle, "Gamestate_PostLoad");
-	gamestate->api->Gamestate_Pause = dlsym(gamestate->handle, "Gamestate_Pause");
-	gamestate->api->Gamestate_Resume = dlsym(gamestate->handle, "Gamestate_Resume");
-	gamestate->api->Gamestate_Reload = dlsym(gamestate->handle, "Gamestate_Reload");
-	gamestate->api->Gamestate_ProgressCount = dlsym(gamestate->handle, "Gamestate_ProgressCount");
+	gamestate->api->tick = dlsym(gamestate->handle, "Gamestate_Tick");
+	gamestate->api->post_load = dlsym(gamestate->handle, "Gamestate_PostLoad");
+	gamestate->api->pause = dlsym(gamestate->handle, "Gamestate_Pause");
+	gamestate->api->resume = dlsym(gamestate->handle, "Gamestate_Resume");
+	gamestate->api->reload = dlsym(gamestate->handle, "Gamestate_Reload");
+	gamestate->api->progress_count = dlsym(gamestate->handle, "Gamestate_ProgressCount");
 
-	if (gamestate->api->Gamestate_ProgressCount) {
-		gamestate->progressCount = *gamestate->api->Gamestate_ProgressCount;
+	if (gamestate->api->progress_count) {
+		gamestate->progress_count = *gamestate->api->progress_count;
 	}
 
 #undef GS_ERROR
@@ -374,7 +373,7 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 	tmp->next = NULL;
 	tmp->api = NULL;
 	tmp->fromlib = true;
-	tmp->progressCount = 0;
+	tmp->progress_count = 0;
 	tmp->open = false;
 	tmp->fb = NULL;
 	tmp->showLoading = true;
@@ -590,9 +589,9 @@ SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 			CloseGamestate(game, tmp);
 			tmp->name = name;
 			if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
-				if (tmp->api->Gamestate_Reload) {
+				if (tmp->api->reload) {
 					PrintConsole(game, "[%s] Reloading...", tmp->name);
-					tmp->api->Gamestate_Reload(game, tmp->data);
+					tmp->api->reload(game, tmp->data);
 				}
 			} else {
 				// live-reload failed

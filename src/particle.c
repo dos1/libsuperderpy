@@ -19,7 +19,34 @@
 
 // TODO: think about pre-allocating particle data
 
-SYMBOL_EXPORT struct GravityParticleData* GravityParticleData(double dx, double dy, double gravity, double friction) {
+struct Particle {
+	struct Character* character;
+	bool active;
+	ParticleFunc* func;
+	struct ParticleState state;
+	void* data;
+};
+
+struct GravityParticleData {
+	double dx, dy;
+	double gravity;
+	double friction;
+};
+
+struct LinearParticleData {
+	double dx, dy;
+};
+
+struct FaderParticleData {
+	ParticleFunc* func;
+	void* data;
+	double delay;
+	double speed;
+	double time;
+	double fade;
+};
+
+SYMBOL_EXPORT void* GravityParticleData(double dx, double dy, double gravity, double friction) {
 	struct GravityParticleData* data = calloc(1, sizeof(struct GravityParticleData));
 	data->dx = dx;
 	data->dy = dy;
@@ -41,7 +68,7 @@ SYMBOL_EXPORT bool GravityParticle(struct Game* game, struct ParticleState* part
 	return true;
 }
 
-SYMBOL_EXPORT struct LinearParticleData* LinearParticleData(double dx, double dy) {
+SYMBOL_EXPORT void* LinearParticleData(double dx, double dy) {
 	struct LinearParticleData* data = calloc(1, sizeof(struct LinearParticleData));
 	data->dx = dx;
 	data->dy = dy;
@@ -59,7 +86,7 @@ SYMBOL_EXPORT bool LinearParticle(struct Game* game, struct ParticleState* parti
 	return true;
 }
 
-SYMBOL_EXPORT struct FaderParticleData* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d) {
+SYMBOL_EXPORT void* FaderParticleData(double delay, double speed, ParticleFunc* func, void* d) {
 	struct FaderParticleData* data = calloc(1, sizeof(struct FaderParticleData));
 	data->delay = delay;
 	data->data = d;

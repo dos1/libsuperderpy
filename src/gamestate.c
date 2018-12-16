@@ -43,7 +43,7 @@ static struct Gamestate* FindGamestate(struct Game* game, const char* name) {
 	return NULL;
 }
 
-SYMBOL_EXPORT void RegisterGamestate(struct Game* game, const char* name, struct Gamestate_API* api) {
+SYMBOL_EXPORT void RegisterGamestate(struct Game* game, const char* name, struct GamestateAPI* api) {
 	struct Gamestate* gs = FindGamestate(game, name);
 	if (!gs) {
 		gs = AddNewGamestate(game, name);
@@ -146,8 +146,8 @@ SYMBOL_EXPORT void PauseGamestate(struct Game* game, const char* name) {
 		}
 		gs->paused = true;
 		game->_priv.current_gamestate = gs;
-		if (gs->api->Gamestate_Pause) {
-			(*gs->api->Gamestate_Pause)(game, gs->data);
+		if (gs->api->pause) {
+			(*gs->api->pause)(game, gs->data);
 		}
 		PrintConsole(game, "Gamestate \"%s\" paused.", name);
 	} else {
@@ -168,8 +168,8 @@ SYMBOL_EXPORT void ResumeGamestate(struct Game* game, const char* name) {
 		}
 		gs->paused = false;
 		game->_priv.current_gamestate = gs;
-		if (gs->api->Gamestate_Resume) {
-			(*gs->api->Gamestate_Resume)(game, gs->data);
+		if (gs->api->resume) {
+			(*gs->api->resume)(game, gs->data);
 		}
 		PrintConsole(game, "Gamestate \"%s\" resumed.", name);
 	} else {

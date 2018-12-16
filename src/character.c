@@ -49,7 +49,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 				character->predecessor = NULL;
 			}
 			character->repeats = tmp->repeats;
-			character->pos = reversed ? (tmp->frameCount - 1) : 0;
+			character->pos = reversed ? (tmp->frame_count - 1) : 0;
 			character->reversed = reversed;
 			character->reversing = tmp->reversed ^ reversed;
 			character->frame = &tmp->frames[character->pos];
@@ -65,7 +65,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 SYMBOL_EXPORT void SwitchSpritesheet(struct Game* game, struct Character* character, char* name) {
 	int pos = character->pos;
 	SelectSpritesheet(game, character, name);
-	if (pos < character->spritesheets->frameCount) {
+	if (pos < character->spritesheets->frame_count) {
 		character->pos = pos;
 		character->frame = &character->spritesheet->frames[character->pos];
 	}
@@ -106,7 +106,7 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 			tmp->width = al_get_bitmap_width(tmp->bitmap) / tmp->cols;
 			tmp->height = al_get_bitmap_height(tmp->bitmap) / tmp->rows;
 		}
-		for (int i = 0; i < tmp->frameCount; i++) {
+		for (int i = 0; i < tmp->frame_count; i++) {
 			if ((!tmp->frames[i].source) && (tmp->frames[i].file)) {
 				if (game->config.debug.enabled) {
 					PrintConsole(game, "  - %s", tmp->frames[i].file);
@@ -148,7 +148,7 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 	PrintConsole(game, "Unloading spritesheets for character %s...", character->name);
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
-		for (int i = 0; i < tmp->frameCount; i++) {
+		for (int i = 0; i < tmp->frame_count; i++) {
 			if (tmp->frames[i].filepath) {
 				RemoveBitmap(game, tmp->frames[i].filepath);
 			} else {
@@ -194,17 +194,17 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s = malloc(sizeof(struct Spritesheet));
 	s->name = strdup(name);
 	s->bitmap = NULL;
-	s->frameCount = strtolnull(al_get_config_value(config, "animation", "frames"), 0);
+	s->frame_count = strtolnull(al_get_config_value(config, "animation", "frames"), 0);
 	s->rows = strtolnull(al_get_config_value(config, "animation", "rows"), 0);
 	s->cols = strtolnull(al_get_config_value(config, "animation", "cols"), 0);
 	s->flipX = strtolnull(al_get_config_value(config, "animation", "flipX"), 0);
 	s->flipY = strtolnull(al_get_config_value(config, "animation", "flipY"), 0);
 	int blanks = strtolnull(al_get_config_value(config, "animation", "blanks"), 0);
-	if (s->frameCount == 0) {
-		s->frameCount = s->rows * s->cols - blanks;
+	if (s->frame_count == 0) {
+		s->frame_count = s->rows * s->cols - blanks;
 	} else {
-		s->rows = floor(sqrt(s->frameCount));
-		s->cols = ceil(s->frameCount / (double)s->rows);
+		s->rows = floor(sqrt(s->frame_count));
+		s->cols = ceil(s->frame_count / (double)s->rows);
 	}
 
 	s->bidir = strtolnull(al_get_config_value(config, "animation", "bidir"), 0);
@@ -251,9 +251,9 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->offsetX = strtolnull(al_get_config_value(config, "offset", "x"), 0);
 	s->offsetY = strtolnull(al_get_config_value(config, "offset", "y"), 0);
 
-	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frameCount);
+	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
 
-	for (int i = 0; i < s->frameCount; i++) {
+	for (int i = 0; i < s->frame_count; i++) {
 		char framename[255];
 		snprintf(framename, 255, "frame%d", i);
 		s->frames[i].duration = strtodnull(al_get_config_value(config, framename, "duration"), s->duration);
@@ -338,7 +338,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->hidden = false;
 	character->data = NULL;
 	character->callback = NULL;
-	character->callbackData = NULL;
+	character->callback_data = NULL;
 	character->destructor = NULL;
 
 	return character;
@@ -367,7 +367,7 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 			if (tmp->file) {
 				free(tmp->file);
 			}
-			for (int i = 0; i < tmp->frameCount; i++) {
+			for (int i = 0; i < tmp->frame_count; i++) {
 				if (tmp->frames[i].filepath) {
 					RemoveBitmap(game, tmp->frames[i].filepath);
 				} else {
@@ -420,7 +420,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 		} else {
 			character->pos++;
 		}
-		if (character->pos >= character->spritesheet->frameCount) {
+		if (character->pos >= character->spritesheet->frame_count) {
 			if (character->spritesheet->bidir) {
 				character->pos -= 2;
 				character->reversing = true;
@@ -440,7 +440,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 					reachedEnd = true;
 				}
 			} else {
-				character->pos = character->spritesheet->frameCount - 1;
+				character->pos = character->spritesheet->frame_count - 1;
 				reachedEnd = true;
 			}
 		}
@@ -449,37 +449,37 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			if (character->repeats > 0) {
 				character->repeats--;
 				if (character->callback) {
-					character->callback(game, character, NULL, character->spritesheet, character->callbackData);
+					character->callback(game, character, NULL, character->spritesheet, character->callback_data);
 				}
 			} else {
 				if ((!character->reversed) && (character->successor)) {
 					struct Spritesheet* old = character->spritesheet;
 					SelectSpritesheet(game, character, character->successor);
 					if (character->callback) {
-						character->callback(game, character, character->spritesheet, old, character->callbackData);
+						character->callback(game, character, character->spritesheet, old, character->callback_data);
 					}
 				} else if ((character->reversed) && (character->predecessor)) {
 					struct Spritesheet* old = character->spritesheet;
 					SelectSpritesheet(game, character, character->predecessor);
 					if (character->callback) {
-						character->callback(game, character, character->spritesheet, old, character->callbackData);
+						character->callback(game, character, character->spritesheet, old, character->callback_data);
 					}
 				} else {
 					if (character->repeats == 0) {
 						if (character->reversed) {
 							character->pos = 1;
 						} else {
-							character->pos = character->spritesheet->frameCount - 1;
+							character->pos = character->spritesheet->frame_count - 1;
 						}
 						if (character->callback) {
-							character->callback(game, character, NULL, character->spritesheet, character->callbackData);
+							character->callback(game, character, NULL, character->spritesheet, character->callback_data);
 						}
 					}
 				}
 			}
 		}
 
-		if (character->spritesheet->frameCount == 1) {
+		if (character->spritesheet->frame_count == 1) {
 			character->pos = 0;
 		}
 	}

@@ -362,7 +362,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 		// TODO: support loading-less scenario
 		return 2;
 	}
-	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->Gamestate_Load)(game, NULL);
+	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, NULL);
 	PrintConsole(game, "Loading screen registered.");
 
 	ReloadShaders(game, false);
@@ -421,14 +421,14 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		if (tmp->started) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Stop)(game, tmp->data);
+			(*tmp->api->stop)(game, tmp->data);
 			tmp->started = false;
 			PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
 		}
 		if (tmp->loaded) {
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			game->_priv.current_gamestate = tmp;
-			(*tmp->api->Gamestate_Unload)(game, tmp->data);
+			(*tmp->api->unload)(game, tmp->data);
 			tmp->loaded = false;
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 		}
@@ -438,7 +438,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		tmp = pom;
 	}
 
-	(*game->_priv.loading.gamestate->api->Gamestate_Unload)(game, game->_priv.loading.gamestate->data);
+	(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
 	CloseGamestate(game, game->_priv.loading.gamestate);
 	free(game->_priv.loading.gamestate);
 

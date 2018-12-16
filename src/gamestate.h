@@ -22,23 +22,23 @@
 
 #include "libsuperderpy.h"
 
-struct Gamestate_API {
-	void (*Gamestate_Draw)(struct Game* game, void* data);
-	void (*Gamestate_Logic)(struct Game* game, void* data, double delta);
-	void (*Gamestate_Tick)(struct Game* game, void* data);
+struct GamestateAPI {
+	void (*draw)(struct Game* game, void* data);
+	void (*logic)(struct Game* game, void* data, double delta);
+	void (*tick)(struct Game* game, void* data);
 
-	void* (*Gamestate_Load)(struct Game* game, void (*progress)(struct Game* game));
-	void (*Gamestate_PostLoad)(struct Game* game, void* data);
-	void (*Gamestate_Start)(struct Game* game, void* data);
-	void (*Gamestate_Pause)(struct Game* game, void* data);
-	void (*Gamestate_Resume)(struct Game* game, void* data);
-	void (*Gamestate_Stop)(struct Game* game, void* data);
-	void (*Gamestate_Unload)(struct Game* game, void* data);
+	void* (*load)(struct Game* game, void (*progress)(struct Game* game));
+	void (*post_load)(struct Game* game, void* data);
+	void (*start)(struct Game* game, void* data);
+	void (*pause)(struct Game* game, void* data);
+	void (*resume)(struct Game* game, void* data);
+	void (*stop)(struct Game* game, void* data);
+	void (*unload)(struct Game* game, void* data);
 
-	void (*Gamestate_ProcessEvent)(struct Game* game, void* data, ALLEGRO_EVENT* ev);
-	void (*Gamestate_Reload)(struct Game* game, void* data);
+	void (*process_event)(struct Game* game, void* data, ALLEGRO_EVENT* ev);
+	void (*reload)(struct Game* game, void* data);
 
-	int* Gamestate_ProgressCount;
+	int* progress_count;
 };
 
 struct Gamestate {
@@ -52,15 +52,15 @@ struct Gamestate {
 	bool fromlib;
 	bool open;
 	struct Gamestate* next;
-	struct Gamestate_API* api;
+	struct GamestateAPI* api;
 	ALLEGRO_BITMAP* fb;
-	int progressCount;
+	int progress_count;
 	void* data;
 };
 
 void LoadGamestate(struct Game* game, const char* name);
 void UnloadGamestate(struct Game* game, const char* name);
-void RegisterGamestate(struct Game* game, const char* name, struct Gamestate_API* api);
+void RegisterGamestate(struct Game* game, const char* name, struct GamestateAPI* api);
 void StartGamestate(struct Game* game, const char* name);
 void StopGamestate(struct Game* game, const char* name);
 void PauseGamestate(struct Game* game, const char* name);

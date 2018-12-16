@@ -45,7 +45,7 @@ struct SpritesheetFrame {
 struct Spritesheet {
 	char* name; /*!< Name of the spritesheet (used in file paths). */
 	ALLEGRO_BITMAP* bitmap; /*!< Spritesheet bitmap. */
-	int frameCount;
+	int frame_count;
 	int rows; /*!< Number of rows in the spritesheet. */
 	int cols; /*!< Number of columns in the spritesheet. */
 	double duration;
@@ -108,7 +108,7 @@ struct Character {
 	bool hidden;
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	CharacterCallback* callback;
-	void* callbackData;
+	void* callback_data;
 	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 };

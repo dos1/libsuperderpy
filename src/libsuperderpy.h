@@ -213,7 +213,7 @@ struct Game {
 			struct Gamestate* gamestate;
 			struct Gamestate* current;
 			int progress;
-			int loaded, toLoad;
+			int loaded, to_load;
 			volatile bool in_progress;
 			double time;
 			ALLEGRO_BITMAP* fb;

@@ -26,8 +26,6 @@
 //  2018-02-06: Misc: Removed call to ImGui::Shutdown() which is not available from 1.60 WIP, user needs to call CreateContext/DestroyContext themselves.
 //  2018-02-06: Inputs: Added mapping for ImGuiKey_Space.
 
-/// \privatesection
-
 #include "imgui/imgui_impl_allegro5.h"
 #include <float.h>
 #include <stdint.h> // uint64_t

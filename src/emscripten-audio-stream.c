@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/// \privatesection
-
 #include "internal.h"
 
 #undef al_create_audio_stream
