@@ -1,6 +1,3 @@
-/*! \file gamestate.c
- *  \brief Gamestate management.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

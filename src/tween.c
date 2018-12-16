@@ -1,6 +1,3 @@
-/*! \file tween.c
- *  \brief Tweening engine.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

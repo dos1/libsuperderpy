@@ -1,8 +1,3 @@
-/*! \file emscripten.h
- *  \brief Headers of main file of SuperDerpy engine.
- *
- *   Contains basic functions shared by all views.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *
@@ -20,11 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/// \privatesection
+
 #ifndef LIBSUPERDERPY_EMSCRIPTEN_H
 #define LIBSUPERDERPY_EMSCRIPTEN_H
 
 #include "libsuperderpy.h"
 
+/// \private
 typedef struct {
 	ALLEGRO_SAMPLE* sample;
 	ALLEGRO_SAMPLE_INSTANCE* instance;

@@ -1,6 +1,3 @@
-/*! \file particle.c
- *  \brief Particle engine.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

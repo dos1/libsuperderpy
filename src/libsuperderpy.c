@@ -1,8 +1,3 @@
-/*! \file main.c
- *  \brief Main file of SuperDerpy engine.
- *
- *  Contains basic functions shared by all views.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

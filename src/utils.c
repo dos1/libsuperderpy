@@ -1,6 +1,3 @@
-/*! \file utils.c
- *  \brief Helper functions.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

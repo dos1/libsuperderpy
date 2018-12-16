@@ -1,6 +1,3 @@
-/*! \file shader.c
- *  \brief GPU shaders abstraction.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

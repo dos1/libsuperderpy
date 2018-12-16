@@ -1,6 +1,3 @@
-/*! \file maths.c
- *  \brief Math helper functions.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

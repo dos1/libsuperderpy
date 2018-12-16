@@ -23,18 +23,6 @@
 
 #include "libsuperderpy.h"
 
-#ifdef ALLEGRO_WINDOWS
-#define LIBRARY_EXTENSION ".dll"
-#elif defined(__EMSCRIPTEN__)
-#if defined(LIBSUPERDERPY_WASM)
-#define LIBRARY_EXTENSION ".wasm"
-#else
-#define LIBRARY_EXTENSION ".js"
-#endif
-#else
-#define LIBRARY_EXTENSION ".so"
-#endif
-
 struct Gamestate;
 
 /*! \brief Draws rectangle filled with vertical gradient. */

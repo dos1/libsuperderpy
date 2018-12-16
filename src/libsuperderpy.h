@@ -185,6 +185,7 @@ struct Game {
 		} available;
 	} input;
 
+	/// \private
 	struct {
 		struct Params params;
 

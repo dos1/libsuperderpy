@@ -16,6 +16,7 @@
  *
  * Also, ponies.
  */
+/// \privatesection
 
 #include "internal.h"
 #include "3rdparty/valgrind.h"

@@ -1,6 +1,3 @@
-/*! \file timeline.c
- *  \brief Timeline Manager framework code.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

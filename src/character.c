@@ -1,6 +1,3 @@
-/*! \file character.c
- *  \brief Character and spritesheet functions.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

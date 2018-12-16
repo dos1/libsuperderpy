@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/// \privatesection
 
 #ifndef LIBSUPERDERPY_INTERNAL_H
 #define LIBSUPERDERPY_INTERNAL_H
@@ -50,6 +51,18 @@
 #else
 #define SUPPRESS_WARNING(x)
 #define SUPPRESS_END
+#endif
+
+#ifdef ALLEGRO_WINDOWS
+#define LIBRARY_EXTENSION ".dll"
+#elif defined(__EMSCRIPTEN__)
+#if defined(LIBSUPERDERPY_WASM)
+#define LIBRARY_EXTENSION ".wasm"
+#else
+#define LIBRARY_EXTENSION ".js"
+#endif
+#else
+#define LIBRARY_EXTENSION ".so"
 #endif
 
 struct RefCount {

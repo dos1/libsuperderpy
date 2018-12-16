@@ -1,6 +1,3 @@
-/*! \file mainloop.c
- *  \brief Mainloop handling.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *

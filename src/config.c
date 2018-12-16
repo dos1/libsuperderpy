@@ -1,6 +1,3 @@
-/*! \file config.c
- *  \brief Configuration manager code.
- */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *
