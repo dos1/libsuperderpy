@@ -35,7 +35,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	)
 	add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
 
-
 	add_definitions(-D_XOPEN_SOURCE=600)
 
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
@@ -50,6 +49,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_C_STANDARD 99)
 	set(CMAKE_C_STANDARD_REQUIRED true)
 	set(CMAKE_CXX_STANDARD 98)
+	set(CMAKE_CXX_STANDARD_REQUIRED true)
+
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math -fstack-protector")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math -fstack-protector")
 
@@ -130,7 +131,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif()
 
 	if(POLICY CMP0069)
-		if(NOT USE_CLANG_TIDY) # clang-tidy + GCC + LTO = errors
+		if(NOT USE_CLANG_TIDY AND NOT MINGW) # clang-tidy + GCC + LTO = errors; also, MinGW crashes
 			cmake_policy(SET CMP0069 NEW)
 			include(CheckIPOSupported)
 			check_ipo_supported(RESULT IPO_SUPPORTED)
