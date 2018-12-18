@@ -68,7 +68,7 @@ SYMBOL_EXPORT void LoadGamestate(struct Game* game, const char* name) {
 	} else {
 		gs = AddNewGamestate(game, name);
 		gs->pending_load = true;
-		gs->showLoading = true;
+		gs->show_loading = true;
 	}
 	PrintConsole(game, "Gamestate \"%s\" marked to be LOADED.", name);
 }

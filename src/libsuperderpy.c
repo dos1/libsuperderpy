@@ -352,7 +352,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 		struct Gamestate* tmp = game->_priv.gamestates;
 		while (tmp) {
 			// don't show loading screen on init if requested
-			tmp->showLoading = game->_priv.params.show_loading_on_launch;
+			tmp->show_loading = game->_priv.params.show_loading_on_launch;
 			tmp = tmp->next;
 		}
 	}

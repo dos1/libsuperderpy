@@ -224,7 +224,7 @@ static inline bool MainloopTick(struct Game* game) {
 		}
 		if (tmp->pending_load) {
 			al_stop_timer(game->_priv.timer);
-			if (tmp->showLoading) {
+			if (tmp->show_loading) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
 
@@ -252,7 +252,7 @@ static inline bool MainloopTick(struct Game* game) {
 				al_run_detached_thread(GamestateLoadingThread, &data);
 				while (game->_priv.loading.in_progress) {
 					double delta = al_get_time() - game->_priv.loading.time;
-					if (tmp->showLoading) {
+					if (tmp->show_loading) {
 						game->loading.shown = true;
 						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
 						DrawGamestates(game);
@@ -302,11 +302,11 @@ static inline bool MainloopTick(struct Game* game) {
 				tmp->loaded = true;
 				tmp->pending_load = false;
 			}
-			if (tmp->showLoading) {
+			if (tmp->show_loading) {
 				(*game->_priv.loading.gamestate->api->stop)(game, game->_priv.loading.gamestate->data);
 				game->loading.shown = false;
 			}
-			tmp->showLoading = true;
+			tmp->show_loading = true;
 			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
 		}

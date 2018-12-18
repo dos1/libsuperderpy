@@ -47,7 +47,7 @@ struct Gamestate {
 	bool loaded, pending_load, pending_unload;
 	bool started, pending_start, pending_stop;
 	bool frozen;
-	bool showLoading;
+	bool show_loading;
 	bool paused;
 	bool fromlib;
 	bool open;
