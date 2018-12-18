@@ -6,6 +6,36 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_BUILD_TYPE RelWithDebInfo)
 	endif (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+	if (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+		set(LIBSUPERDERPY_DIR "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+		if(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
+			execute_process(
+				COMMAND git rev-parse --short HEAD
+				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+				OUTPUT_VARIABLE LIBSUPERDERPY_GAME_GIT_REV
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+			)
+		endif(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
+
+		include_directories("libsuperderpy/src")
+
+	else (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+		set(LIBSUPERDERPY_DIR ${CMAKE_SOURCE_DIR})
+
+	endif (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
+
+	execute_process(
+		COMMAND git rev-parse --short HEAD
+		WORKING_DIRECTORY ${LIBSUPERDERPY_DIR}
+		OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
+
+
 	add_definitions(-D_XOPEN_SOURCE=600)
 
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
@@ -120,39 +150,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(MACOSX_BUNDLE_BUNDLE_NAME ${LIBSUPERDERPY_GAMENAME_PRETTY})
 
 	endif(APPLE)
-
-	if (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
-
-		execute_process(
-			COMMAND git rev-parse --short HEAD
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libsuperderpy
-			OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-		)
-		add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
-
-		if(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
-			execute_process(
-				COMMAND git rev-parse --short HEAD
-				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-				OUTPUT_VARIABLE LIBSUPERDERPY_GAME_GIT_REV
-				OUTPUT_STRIP_TRAILING_WHITESPACE
-			)
-		endif(NOT DEFINED LIBSUPERDERPY_NO_GAME_GIT_REV)
-
-		include_directories("libsuperderpy/src")
-
-	else (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
-
-		execute_process(
-			COMMAND git rev-parse --short HEAD
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-			OUTPUT_VARIABLE LIBSUPERDERPY_GIT_REV
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-		)
-		add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
-
-	endif (EXISTS "${CMAKE_SOURCE_DIR}/libsuperderpy")
 
 	if(MINGW)
 		# Guess MINGDIR from the value of CMAKE_C_COMPILER if it's not set.
@@ -269,7 +266,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	include(InstallRequiredSystemLibraries)
 
 	if(LIBSUPERDERPY_GAMENAME)
-		configure_file("${CMAKE_SOURCE_DIR}/libsuperderpy/src/defines.h.in" "${CMAKE_BINARY_DIR}/gen/defines.h")
+		configure_file("${LIBSUPERDERPY_DIR}/src/defines.h.in" "${CMAKE_BINARY_DIR}/gen/defines.h")
 		include_directories("${CMAKE_BINARY_DIR}/gen")
 	endif(LIBSUPERDERPY_GAMENAME)
 
@@ -296,7 +293,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 		add_custom_target(${LIBSUPERDERPY_GAMENAME}_flac_to_ogg
 			DEPENDS ${FLACTOOGG_DEPEND}
-			COMMAND ${CMAKE_COMMAND} -DDATADIR=${FLACTOOGG_DATADIR} -P ${CMAKE_SOURCE_DIR}/libsuperderpy/cmake/FlacToOgg.cmake)
+			COMMAND ${CMAKE_COMMAND} -DDATADIR=${FLACTOOGG_DATADIR} -P ${LIBSUPERDERPY_DIR}/cmake/FlacToOgg.cmake)
 
 	endif(ANDROID OR EMSCRIPTEN)
 
@@ -369,7 +366,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 
 		file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/android")
-		file(COPY "${CMAKE_SOURCE_DIR}/libsuperderpy/android" DESTINATION "${CMAKE_BINARY_DIR}")
+		file(COPY "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
 
 		MACRO(configure_android_file PATH)
 			configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
@@ -433,7 +430,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif (UNIX)
 
 	# uninstall target
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libsuperderpy/cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+	configure_file("${LIBSUPERDERPY_DIR}/cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 	add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 	set(LIBSUPERDERPY_CONFIG_INCLUDED 1)
