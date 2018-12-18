@@ -50,8 +50,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_C_STANDARD 99)
 	set(CMAKE_C_STANDARD_REQUIRED true)
 	set(CMAKE_CXX_STANDARD 98)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math -fstack-protector")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math -fstack-protector")
 
 	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage")
@@ -91,6 +91,11 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARGS}")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb3 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-common ${SANITIZERS_ARGS}")
+
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_FORTIFY_SOURCE=2")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -D_FORTIFY_SOURCE=2")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -D_FORTIFY_SOURCE=2")
 
 	if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
 		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -shared-libsan")
