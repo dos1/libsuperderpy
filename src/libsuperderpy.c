@@ -113,6 +113,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "1"), NULL, 10);
 	game->config.debug.autopause = strtol(GetConfigOptionDefault(game, "debug", "autopause", "1"), NULL, 10);
 
+#ifdef __EMSCRIPTEN__
+	game->config.fullscreen = false;
+#endif
+
 	game->_priv.showconsole = game->config.debug.enabled;
 	game->_priv.showtimeline = false;
 
