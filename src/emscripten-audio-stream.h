@@ -49,7 +49,7 @@ float emscripten_get_audio_stream_gain(ALLEGRO_AUDIO_STREAM* stream);
 float emscripten_get_audio_stream_pan(ALLEGRO_AUDIO_STREAM* stream);
 bool emscripten_set_audio_stream_speed(ALLEGRO_AUDIO_STREAM* stream, float val);
 bool emscripten_set_audio_stream_pan(ALLEGRO_AUDIO_STREAM* stream, float val);
-double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM* stream);
+double emscripten_get_audio_stream_length_secs(ALLEGRO_AUDIO_STREAM* stream);
 bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM* stream, double val);
 double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM* stream);
 void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM* stream);
@@ -87,7 +87,7 @@ ALLEGRO_AUDIO_STREAM* emscripten_create_audio_stream(size_t fragment_count, unsi
 #define al_get_audio_stream_speed emscripten_get_audio_stream_speed
 #define al_get_audio_stream_gain emscripten_get_audio_stream_gain
 #define al_get_audio_stream_pan emscripten_get_audio_stream_pan
-#define al_get_audio_stream_length_sec emscripten_get_audio_stream_length_sec
+#define al_get_audio_stream_length_secs emscripten_get_audio_stream_length_secs
 #define al_get_audio_stream_position_secs emscripten_get_audio_stream_position_secs
 #define al_get_audio_stream_played_samples emscripten_get_audio_stream_played_samples
 #define al_get_audio_stream_fragment emscripten_get_audio_stream_fragment

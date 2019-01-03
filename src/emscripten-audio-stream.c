@@ -37,7 +37,7 @@
 #undef al_get_audio_stream_playing
 #undef al_get_audio_stream_playmode
 #undef al_get_audio_stream_attached
-#undef al_get_audio_stream_length_sec
+#undef al_get_audio_stream_length_secs
 #undef al_get_audio_stream_position_secs
 #undef al_get_audio_stream_played_samples
 #undef al_get_audio_stream_fragment
@@ -205,7 +205,7 @@ SYMBOL_EXPORT unsigned int emscripten_get_available_audio_stream_fragments(ALLEG
 	return 0;
 }
 
-SYMBOL_EXPORT double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM *stream) {
+SYMBOL_EXPORT double emscripten_get_audio_stream_length_secs(ALLEGRO_AUDIO_STREAM *stream) {
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
 	unsigned int samples_per_sec = al_get_sample_instance_frequency(s->instance);
 	return al_get_sample_instance_length(s->instance) / (double)samples_per_sec;
@@ -213,7 +213,7 @@ SYMBOL_EXPORT double emscripten_get_audio_stream_length_sec(ALLEGRO_AUDIO_STREAM
 
 SYMBOL_EXPORT bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *stream, double val) {
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
-	double length = emscripten_get_audio_stream_length_sec(stream);
+	double length = emscripten_get_audio_stream_length_secs(stream);
 	unsigned int samples = emscripten_get_audio_stream_length(stream);
 	return al_set_sample_instance_position(s->instance, samples * (val / length));
 }
@@ -221,7 +221,7 @@ SYMBOL_EXPORT bool emscripten_seek_audio_stream_secs(ALLEGRO_AUDIO_STREAM *strea
 SYMBOL_EXPORT double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STREAM *stream) {
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
 	double sample_pos = al_get_sample_instance_position(s->instance);
-	double length = emscripten_get_audio_stream_length_sec(stream);
+	double length = emscripten_get_audio_stream_length_secs(stream);
 	unsigned int samples = emscripten_get_audio_stream_length(stream);
 	return length * (sample_pos / (double)samples);
 }
