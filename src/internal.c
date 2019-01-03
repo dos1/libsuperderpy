@@ -57,7 +57,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		tmp = tmp->next;
 	}
 
-	if (game->_priv.loading.in_progress) {
+	if (game->_priv.loading.in_progress && game->loading.shown) {
 		// same as above, but for the loading gamestate
 		game->_priv.current_gamestate = NULL;
 		SetFramebufferAsTarget(game);
@@ -249,11 +249,13 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	data->gamestate->data = data->gamestate->api->load(data->game, &GamestateProgress);
 	if (data->game->_priv.loading.progress != data->gamestate->progress_count) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
+#ifndef LIBSUPERDERPY_SINGLE_THREAD
 		if (data->game->config.debug.enabled) {
 			PrintConsole(data->game, "(sleeping for 3 seconds...)");
 			data->game->_priv.showconsole = true;
 			al_rest(3.0);
 		}
+#endif
 	}
 	data->bitmap_flags = al_get_new_bitmap_flags();
 	data->game->_priv.loading.in_progress = false;
@@ -297,11 +299,12 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 #else
 	al_convert_memory_bitmaps();
 	double delta = al_get_time() - game->_priv.loading.time;
-	if (game->_priv.loading.current->show_loading) {
-		game->_priv.loading.gamestate->api->logic(game, game->_priv.loading.gamestate->data, delta);
-		DrawGamestates(game);
-	}
+	game->time += delta; // TODO: ability to disable passing time during loading
 	game->_priv.loading.time += delta;
+	if (game->loading.shown) {
+		game->_priv.loading.gamestate->api->logic(game, game->_priv.loading.gamestate->data, delta);
+	}
+	DrawGamestates(game);
 	DrawConsole(game);
 	al_flip_display();
 #endif

@@ -183,6 +183,66 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	}
 }
 
+static inline bool MainloopEvents(struct Game* game) {
+	do {
+		ALLEGRO_EVENT ev;
+
+		if (game->_priv.paused) {
+			// there's no frame flipping when paused, so avoid pointless busylooping
+			al_wait_for_event(game->_priv.event_queue, &ev);
+		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
+			break;
+		}
+
+#ifdef LIBSUPERDERPY_IMGUI
+		ImGui_ImplAllegro5_ProcessEvent(&ev);
+		switch (ev.type) {
+			case ALLEGRO_EVENT_KEY_CHAR:
+			case ALLEGRO_EVENT_KEY_DOWN:
+			case ALLEGRO_EVENT_KEY_UP:
+				if (igGetIO()->WantCaptureKeyboard) {
+					continue;
+				}
+				break;
+			case ALLEGRO_EVENT_MOUSE_AXES:
+			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+			case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+			case ALLEGRO_EVENT_TOUCH_BEGIN:
+			case ALLEGRO_EVENT_TOUCH_CANCEL:
+			case ALLEGRO_EVENT_TOUCH_END:
+			case ALLEGRO_EVENT_TOUCH_MOVE:
+				if (igGetIO()->WantCaptureMouse) {
+					continue;
+				}
+				break;
+			default:
+				break;
+		}
+#endif
+
+		if (game->_priv.params.handlers.event) {
+			if ((*game->_priv.params.handlers.event)(game, &ev)) {
+				continue;
+			}
+		}
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+			EventGamestates(game, &ev);
+			return false;
+		}
+
+		HandleEvent(game, &ev);
+
+		if (game->config.debug.enabled) {
+			HandleDebugEvent(game, &ev);
+		}
+
+		EventGamestates(game, &ev);
+
+	} while (!al_is_event_queue_empty(game->_priv.event_queue));
+	return true;
+}
+
 static inline bool MainloopTick(struct Game* game) {
 	if (game->_priv.paused) {
 		return true;
@@ -248,27 +308,31 @@ static inline bool MainloopTick(struct Game* game) {
 				game->_priv.loading.time = time;
 
 				CalculateProgress(game);
+				if (tmp->show_loading) {
+					game->loading.shown = true;
+					DrawGamestates(game);
+					DrawConsole(game);
+					al_flip_display();
+				}
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 				al_run_detached_thread(GamestateLoadingThread, &data);
 				while (game->_priv.loading.in_progress) {
 					double delta = al_get_time() - game->_priv.loading.time;
-					if (tmp->show_loading) {
-						game->loading.shown = true;
-						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
-						DrawGamestates(game);
-					}
-					game->_priv.loading.time += delta;
 					game->time += delta; // TODO: ability to disable passing time during loading
+					game->_priv.loading.time += delta;
+					if (game->loading.shown) {
+						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
+					}
+					DrawGamestates(game);
 					if (game->_priv.texture_sync) {
 						al_convert_memory_bitmaps();
 						game->_priv.texture_sync = false;
 						al_signal_cond(game->_priv.texture_sync_cond);
-						game->_priv.loading.time = al_get_time();
+						game->_priv.loading.time = al_get_time(); // TODO: rethink time management during loading
 					}
 					DrawConsole(game);
 					al_flip_display();
 
-#ifndef LIBSUPERDERPY_SINGLE_THREAD
 					if (game->_priv.bsod_sync) {
 						al_set_target_bitmap(NULL);
 						game->_priv.bsod_sync = false;
@@ -280,10 +344,12 @@ static inline bool MainloopTick(struct Game* game) {
 						al_wait_cond(game->_priv.bsod_cond, game->_priv.bsod_mutex);
 					}
 					al_unlock_mutex(game->_priv.bsod_mutex);
-#endif
 				}
 #else
 				GamestateLoadingThread(&data);
+#ifdef __EMSCRIPTEN__
+				emscripten_sleep(0);
+#endif
 				al_convert_memory_bitmaps();
 #endif
 
@@ -316,6 +382,10 @@ static inline bool MainloopTick(struct Game* game) {
 
 	if (game->_priv.loading.loaded) {
 		ReloadShaders(game, false);
+		MainloopEvents(game); // consume queued events
+#ifdef __EMSCRIPTEN__
+		emscripten_sleep(0);
+#endif
 	}
 
 	bool gameActive = false;
@@ -328,6 +398,7 @@ static inline bool MainloopTick(struct Game* game) {
 			game->_priv.current_gamestate = tmp;
 			tmp->started = true;
 			tmp->pending_start = false;
+
 			(*tmp->api->start)(game, tmp->data);
 			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
@@ -368,66 +439,6 @@ static inline bool MainloopTick(struct Game* game) {
 	DrawConsole(game);
 
 	al_flip_display();
-	return true;
-}
-
-static inline bool MainloopEvents(struct Game* game) {
-	do {
-		ALLEGRO_EVENT ev;
-
-		if (game->_priv.paused) {
-			// there's no frame flipping when paused, so avoid pointless busylooping
-			al_wait_for_event(game->_priv.event_queue, &ev);
-		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
-			break;
-		}
-
-#ifdef LIBSUPERDERPY_IMGUI
-		ImGui_ImplAllegro5_ProcessEvent(&ev);
-		switch (ev.type) {
-			case ALLEGRO_EVENT_KEY_CHAR:
-			case ALLEGRO_EVENT_KEY_DOWN:
-			case ALLEGRO_EVENT_KEY_UP:
-				if (igGetIO()->WantCaptureKeyboard) {
-					continue;
-				}
-				break;
-			case ALLEGRO_EVENT_MOUSE_AXES:
-			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-			case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
-			case ALLEGRO_EVENT_TOUCH_BEGIN:
-			case ALLEGRO_EVENT_TOUCH_CANCEL:
-			case ALLEGRO_EVENT_TOUCH_END:
-			case ALLEGRO_EVENT_TOUCH_MOVE:
-				if (igGetIO()->WantCaptureMouse) {
-					continue;
-				}
-				break;
-			default:
-				break;
-		}
-#endif
-
-		if (game->_priv.params.handlers.event) {
-			if ((*game->_priv.params.handlers.event)(game, &ev)) {
-				continue;
-			}
-		}
-
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			EventGamestates(game, &ev);
-			return false;
-		}
-
-		HandleEvent(game, &ev);
-
-		if (game->config.debug.enabled) {
-			HandleDebugEvent(game, &ev);
-		}
-
-		EventGamestates(game, &ev);
-
-	} while (!al_is_event_queue_empty(game->_priv.event_queue));
 	return true;
 }
 
