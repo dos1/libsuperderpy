@@ -59,6 +59,7 @@ SYMBOL_EXPORT ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream(const char* fil
 	EMSCRIPTEN_AUDIO_STREAM *stream = calloc(1, sizeof(EMSCRIPTEN_AUDIO_STREAM));
 	stream->sample = al_load_sample(filename);
 	stream->instance = al_create_sample_instance(stream->sample);
+	stream->old_pos = 0.0;
 	al_set_sample_instance_playing(stream->instance, true);
 	return (ALLEGRO_AUDIO_STREAM*)stream;
 }
@@ -67,6 +68,7 @@ SYMBOL_EXPORT ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream_f(ALLEGRO_FILE 
 	EMSCRIPTEN_AUDIO_STREAM *stream = calloc(1, sizeof(EMSCRIPTEN_AUDIO_STREAM));
 	stream->sample = al_load_sample_f(file, ident);
 	stream->instance = al_create_sample_instance(stream->sample);
+	stream->old_pos = 0.0;
 	al_set_sample_instance_playing(stream->instance, true);
 	return (ALLEGRO_AUDIO_STREAM*)stream;
 }
@@ -223,7 +225,14 @@ SYMBOL_EXPORT double emscripten_get_audio_stream_position_secs(ALLEGRO_AUDIO_STR
 	double sample_pos = al_get_sample_instance_position(s->instance);
 	double length = emscripten_get_audio_stream_length_secs(stream);
 	unsigned int samples = emscripten_get_audio_stream_length(stream);
-	return length * (sample_pos / (double)samples);
+	double pos = length * (sample_pos / (double)samples);
+	// hack needed to return the end after the stream has ended (samples rollback to 0.0 instead)
+	if (s->old_pos > 0.0 && pos == 0.0) {
+		return length;
+	} else {
+		s->old_pos = pos;
+		return pos;
+	}
 }
 
 SYMBOL_EXPORT void emscripten_destroy_audio_stream(ALLEGRO_AUDIO_STREAM *stream) {
