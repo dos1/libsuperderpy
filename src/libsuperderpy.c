@@ -386,7 +386,6 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 SYMBOL_INTERNAL void libsuperderpy_emscripten_mainloop(void* game) {
 	if (!libsuperderpy_mainloop(game)) {
 		libsuperderpy_destroy(game);
-		free(game);
 		printf("Halted.\n");
 		emscripten_cancel_main_loop();
 	}

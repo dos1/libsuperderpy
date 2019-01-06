@@ -62,7 +62,7 @@ struct GamestateResources;
 #elif defined(ALLEGRO_IPHONE)
 #include <allegro5/allegro_iphone.h>
 #elif defined(__EMSCRIPTEN__)
-#include <emscripten.h>
+#include <emscripten/emscripten.h>
 #endif
 
 #include "character.h"
