@@ -90,7 +90,6 @@ struct ScreenshotThreadData {
 void SimpleCompositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb);
 void DrawGamestates(struct Game* game);
 void LogicGamestates(struct Game* game, double delta);
-void TickGamestates(struct Game* game);
 void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev);
 void ReloadGamestates(struct Game* game);
 void FreezeGamestates(struct Game* game);

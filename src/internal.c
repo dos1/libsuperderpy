@@ -87,31 +87,25 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+	int ticks = floor((game->time + delta) / ALLEGRO_BPS_TO_SECS(60.0)) - floor(game->time / ALLEGRO_BPS_TO_SECS(60.0));
+	game->time += delta;
 	if (game->_priv.params.handlers.prelogic) {
 		game->_priv.params.handlers.prelogic(game, delta);
 	}
 	while (tmp) {
-		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
+		if ((tmp->loaded) && (tmp->started) && (!tmp->paused) && (!tmp->pending_stop)) {
 			game->_priv.current_gamestate = tmp;
+			if (tmp->api->tick) {
+				for (int i = 0; i < ticks; i++) {
+					tmp->api->tick(game, tmp->data);
+				}
+			}
 			tmp->api->logic(game, tmp->data, delta);
 		}
 		tmp = tmp->next;
 	}
 	if (game->_priv.params.handlers.postlogic) {
 		game->_priv.params.handlers.postlogic(game, delta);
-	}
-}
-
-SYMBOL_INTERNAL void TickGamestates(struct Game* game) {
-	struct Gamestate* tmp = game->_priv.gamestates;
-	while (tmp) {
-		if ((tmp->loaded) && (tmp->started) && (!tmp->paused)) {
-			game->_priv.current_gamestate = tmp;
-			if (tmp->api->tick) {
-				tmp->api->tick(game, tmp->data);
-			}
-		}
-		tmp = tmp->next;
 	}
 }
 
@@ -576,7 +570,6 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 		return;
 	}
 	game->_priv.paused = true;
-	al_stop_timer(game->_priv.timer);
 	al_detach_voice(game->audio.v);
 	FreezeGamestates(game);
 	PrintConsole(game, "Engine halted.");
@@ -612,7 +605,6 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 	}
 	UnfreezeGamestates(game);
 	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
-	al_resume_timer(game->_priv.timer);
 	game->_priv.paused = false;
 	game->_priv.timestamp = al_get_time();
 	PrintConsole(game, "Engine resumed.");

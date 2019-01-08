@@ -21,12 +21,6 @@
 
 static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
-		case ALLEGRO_EVENT_TIMER:
-			if (ev->timer.source == game->_priv.timer) {
-				TickGamestates(game);
-			}
-			break;
-
 		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:
 			PauseExecution(game);
 			al_acknowledge_drawing_halt(game->display);
@@ -155,23 +149,23 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 					}
 					break;
 				case ALLEGRO_KEY_F9:
-					al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(60.0));
+					game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
 					game->_priv.showconsole = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: 1.00x");
 					break;
 				case ALLEGRO_KEY_F10: {
-					double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
+					double speed = ALLEGRO_BPS_TO_SECS(game->_priv.speed); // inverting
 					speed -= 10;
 					if (speed < 10) { speed = 10; }
-					al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(speed));
+					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
 					game->_priv.showconsole = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
 				} break;
 				case ALLEGRO_KEY_F11: {
-					double speed = ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer)); // inverting
+					double speed = ALLEGRO_BPS_TO_SECS(game->_priv.speed); // inverting
 					speed += 10;
 					if (speed > 600) { speed = 600; }
-					al_set_timer_speed(game->_priv.timer, ALLEGRO_BPS_TO_SECS(speed));
+					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
 					game->_priv.showconsole = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
 				} break;
@@ -274,16 +268,13 @@ static inline bool MainloopTick(struct Game* game) {
 	while (tmp) {
 		if (tmp->pending_unload) {
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
-			al_stop_timer(game->_priv.timer);
 			tmp->loaded = false;
 			tmp->pending_unload = false;
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->unload)(game, tmp->data);
-			al_resume_timer(game->_priv.timer);
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 		}
 		if (tmp->pending_load) {
-			al_stop_timer(game->_priv.timer);
 			if (tmp->show_loading) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
@@ -373,7 +364,6 @@ static inline bool MainloopTick(struct Game* game) {
 				game->loading.shown = false;
 			}
 			tmp->show_loading = true;
-			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
 		}
 
@@ -394,13 +384,11 @@ static inline bool MainloopTick(struct Game* game) {
 	while (tmp) {
 		if ((tmp->pending_start) && (tmp->loaded)) {
 			PrintConsole(game, "Starting gamestate \"%s\"...", tmp->name);
-			al_stop_timer(game->_priv.timer);
 			game->_priv.current_gamestate = tmp;
 			tmp->started = true;
 			tmp->pending_start = false;
 
 			(*tmp->api->start)(game, tmp->data);
-			al_resume_timer(game->_priv.timer);
 			game->_priv.timestamp = al_get_time();
 			PrintConsole(game, "Gamestate \"%s\" started successfully.", tmp->name);
 		}
@@ -420,8 +408,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	double delta = al_get_time() - game->_priv.timestamp;
 	game->_priv.timestamp += delta;
-	delta *= ALLEGRO_BPS_TO_SECS(al_get_timer_speed(game->_priv.timer) / (1 / 60.f));
-	game->time += delta;
+	delta *= ALLEGRO_BPS_TO_SECS(game->_priv.speed / (1 / 60.f));
 
 #ifdef LIBSUPERDERPY_IMGUI
 	ImGui_ImplAllegro5_NewFrame();

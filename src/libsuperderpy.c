@@ -96,6 +96,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.bsod_cond = al_create_cond();
 	game->_priv.bsod_mutex = al_create_mutex();
 
+	game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
+
 	game->_priv.mutex = al_create_mutex();
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
@@ -338,16 +340,9 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	al_register_event_source(game->_priv.event_queue, &(game->event_source));
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
-	game->_priv.timer = al_create_timer(ALLEGRO_BPS_TO_SECS(60)); // logic timer
-	if (!game->_priv.timer) {
-		FatalError(game, true, "Failed to create logic timer.");
-		return 1;
-	}
-	al_register_event_source(game->_priv.event_queue, al_get_timer_event_source(game->_priv.timer));
 
 	ReloadShaders(game, false);
 	al_flip_display();
-	al_start_timer(game->_priv.timer);
 
 	{
 		struct Gamestate* tmp = game->_priv.gamestates;
@@ -471,7 +466,6 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		free(game->_priv.garbage->data);
 		game->_priv.garbage = game->_priv.garbage->next;
 	}
-	al_destroy_timer(game->_priv.timer);
 	Console_Unload(game);
 	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));

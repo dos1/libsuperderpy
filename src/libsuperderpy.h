@@ -195,9 +195,10 @@ struct Game {
 		char console[5][1024];
 		unsigned int console_pos;
 		ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
-		ALLEGRO_TIMER* timer; /*!< Main LPS (logic) timer. */
 		bool showconsole; /*!< If true, game console is rendered on screen. */
 		bool showtimeline;
+
+		double speed; /*!< Speed of the game in FPS. 60 == 1x */
 
 		struct {
 			double old_time, fps, time;
