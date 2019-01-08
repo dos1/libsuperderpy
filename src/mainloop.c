@@ -303,6 +303,9 @@ static inline bool MainloopTick(struct Game* game) {
 					DrawGamestates(game);
 					DrawConsole(game);
 					al_flip_display();
+#ifdef __EMSCRIPTEN__
+					emscripten_sleep(0);
+#endif
 				}
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 				al_run_detached_thread(GamestateLoadingThread, &data);
@@ -337,6 +340,9 @@ static inline bool MainloopTick(struct Game* game) {
 				}
 #else
 				GamestateLoadingThread(&data);
+				DrawGamestates(game);
+				DrawConsole(game);
+				al_flip_display();
 #ifdef __EMSCRIPTEN__
 				emscripten_sleep(0);
 #endif
@@ -373,6 +379,9 @@ static inline bool MainloopTick(struct Game* game) {
 		ReloadShaders(game, false);
 		MainloopEvents(game); // consume queued events
 #ifdef __EMSCRIPTEN__
+		DrawGamestates(game);
+		DrawConsole(game);
+		al_flip_display();
 		emscripten_sleep(0);
 #endif
 	}
