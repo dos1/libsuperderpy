@@ -53,6 +53,12 @@
 #define SUPPRESS_END
 #endif
 
+#ifdef __EMSCRIPTEN__
+#define IS_EMSCRIPTEN true
+#else
+#define IS_EMSCRIPTEN false
+#endif
+
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
 #elif defined(__EMSCRIPTEN__)

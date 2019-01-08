@@ -32,6 +32,22 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			ResumeExecution(game);
 			break;
 
+		case ALLEGRO_EVENT_DISPLAY_SWITCH_OUT:
+			if (game->config.autopause) {
+				PrintConsole(game, "Focus lost, autopausing...");
+				PauseExecution(game);
+			}
+			break;
+
+		case ALLEGRO_EVENT_DISPLAY_SWITCH_IN:
+			if (game->config.autopause) {
+				if (game->config.debug.enabled && game->config.debug.livereload) {
+					ReloadCode(game);
+				}
+				ResumeExecution(game);
+			}
+			break;
+
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 #ifdef LIBSUPERDERPY_IMGUI
 			ImGui_ImplAllegro5_InvalidateDeviceObjects();
@@ -121,24 +137,7 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 
 static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
-		case ALLEGRO_EVENT_DISPLAY_SWITCH_OUT:
-			if (game->config.debug.autopause) {
-				PrintConsole(game, "DEBUG: autopause");
-				PauseExecution(game);
-			}
-			break;
-
-		case ALLEGRO_EVENT_DISPLAY_SWITCH_IN:
-			if (game->config.debug.autopause) {
-				if (game->config.debug.livereload) {
-					ReloadCode(game);
-				}
-				ResumeExecution(game);
-			}
-			break;
-
 		case ALLEGRO_EVENT_KEY_DOWN:
-
 			switch (ev->keyboard.keycode) {
 				case ALLEGRO_KEY_F1:
 					if (!game->_priv.paused) {
@@ -181,7 +180,7 @@ static inline bool MainloopEvents(struct Game* game) {
 	do {
 		ALLEGRO_EVENT ev;
 
-		if (game->_priv.paused) {
+		if (game->_priv.paused && !IS_EMSCRIPTEN) {
 			// there's no frame flipping when paused, so avoid pointless busylooping
 			al_wait_for_event(game->_priv.event_queue, &ev);
 		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {

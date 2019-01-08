@@ -159,11 +159,11 @@ struct Game {
 		bool fullscreen; /*!< Fullscreen toggle. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
+		bool autopause; /*!< Pauses/resumes the game when the window loses/gains focus. */
 		struct {
 			bool enabled; /*!< Toggles debug mode. */
 			bool verbose; /*!< Prints file names and line numbers with every message. */
 			bool livereload; /*!< Automatically reloads gamestates on window focus. */
-			bool autopause; /*!< Pauses/resumes the game when the window loses/gains focus. */
 		} debug; /*!< Debug mode settings. */
 	} config; /*!< Configuration values from the config file. */
 
