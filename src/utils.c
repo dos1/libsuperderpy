@@ -438,14 +438,25 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 	if (game->config.debug.enabled)
 #endif
 	{
+#ifdef ALLEGRO_ANDROID
+		if (game->config.debug.verbose) {
+			__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "%s:%d [%s] %s", file, line, func, text);
+		} else {
+			__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "[%s] %s", func, text);
+		}
+#elif defined(__EMSCRIPTEN__)
+		if (game->config.debug.verbose) {
+			emscripten_log(EM_LOG_CONSOLE, "%s:%d [%s] %s", file, line, func, text);
+		} else {
+			emscripten_log(EM_LOG_CONSOLE, "[%s] %s", func, text);
+		}
+#else
 		if (game->config.debug.verbose) {
 			printf("%s:%d ", file, line);
 		}
 		printf("[%s] %s\n", func, text);
-#ifdef ALLEGRO_ANDROID
-		__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "[%s] %s", func, text);
-#endif
 		fflush(stdout);
+#endif
 	}
 	game->_priv.console_pos++;
 	if (game->_priv.console_pos >= (sizeof(game->_priv.console) / sizeof(game->_priv.console[0]))) {
