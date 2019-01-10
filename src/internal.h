@@ -63,7 +63,7 @@
 #define LIBRARY_EXTENSION ".dll"
 #elif defined(__EMSCRIPTEN__)
 #if defined(LIBSUPERDERPY_WASM)
-#define LIBRARY_EXTENSION ".wasm"
+#define LIBRARY_EXTENSION ".wasm.so"
 #else
 #define LIBRARY_EXTENSION ".js"
 #endif
