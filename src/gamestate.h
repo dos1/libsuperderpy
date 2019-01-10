@@ -79,17 +79,17 @@ void UnloadCurrentGamestate(struct Game* game);
 // Gamestate API
 
 extern int Gamestate_ProgressCount;
-void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
-void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
-void Gamestate_Tick(struct Game* game, struct GamestateResources* data);
-void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
-void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data);
-void Gamestate_Start(struct Game* game, struct GamestateResources* data);
-void Gamestate_Pause(struct Game* game, struct GamestateResources* data);
-void Gamestate_Resume(struct Game* game, struct GamestateResources* data);
-void Gamestate_Stop(struct Game* game, struct GamestateResources* data);
-void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
-void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
-void Gamestate_Reload(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
+__attribute__((used)) void Gamestate_Tick(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
+__attribute__((used)) void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Start(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Pause(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Resume(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Stop(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_Unload(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
+__attribute__((used)) void Gamestate_Reload(struct Game* game, struct GamestateResources* data);
 
 #endif
