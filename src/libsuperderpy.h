@@ -217,6 +217,7 @@ struct Game {
 			int progress;
 			int loaded, to_load;
 			volatile bool in_progress;
+			bool lock;
 			double time;
 			ALLEGRO_BITMAP* fb;
 		} loading;

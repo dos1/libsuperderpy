@@ -245,6 +245,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	game->_priv.loading.to_load = 0;
 	game->_priv.loading.loaded = 0;
+	game->_priv.loading.lock = true;
 	game->loading.progress = 0;
 
 	// TODO: support gamestate dependences/ordering
@@ -407,6 +408,8 @@ static inline bool MainloopTick(struct Game* game) {
 		tmp = tmp->next;
 	}
 
+	game->_priv.loading.lock = false;
+
 	if (!gameActive) {
 		PrintConsole(game, "No gamestates left, exiting...");
 		return false;
@@ -438,6 +441,9 @@ static inline bool MainloopTick(struct Game* game) {
 }
 
 SYMBOL_EXPORT bool libsuperderpy_mainloop(struct Game* game) {
+	if (game->_priv.loading.lock) {
+		return true;
+	}
 	ClearGarbage(game);
-	return MainloopEvents(game) && MainloopTick(game);
+	return MainloopEvents(game) && MainloopTick(game) && MainloopEvents(game);
 }
