@@ -194,7 +194,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_EXECUTABLE_SUFFIX ".bc")
 		set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 
-		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=2")
+		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=2 -s EXPORTED_FUNCTIONS=[\"_Gamestate_ProgressCount\"]")
 		set(EMSCRIPTEN_FLAGS --llvm-lto 1 --use-preload-plugins --pre-js "${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js" -s FULL_ES2=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1 -s EMTERPRETIFY_WHITELIST=[\"_libsuperderpy_emscripten_mainloop\",\"_libsuperderpy_mainloop\",\"_MainloopTick\",\"_GamestateLoadingThread\"] -s EXPORT_ALL=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=[\"Pointer_stringify\"])
 
 		set(LIBSUPERDERPY_EMSCRIPTEN_MODE "asm.js" CACHE STRING "Emscripten compilation mode (JavaScript or WebAssembly)")
