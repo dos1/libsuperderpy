@@ -57,7 +57,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		tmp = tmp->next;
 	}
 
-	if (game->_priv.loading.in_progress && game->loading.shown) {
+	if (game->loading.shown) {
 		// same as above, but for the loading gamestate
 		game->_priv.current_gamestate = NULL;
 		SetFramebufferAsTarget(game);

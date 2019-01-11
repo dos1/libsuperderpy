@@ -371,14 +371,21 @@ static inline bool MainloopTick(struct Game* game) {
 				PrintConsole(game, "Gamestate \"%s\" loaded successfully in %f seconds.", tmp->name, al_get_time() - time);
 				game->_priv.loading.loaded++;
 
+				DrawGamestates(game);
+				DrawConsole(game);
+				al_flip_display();
+#ifdef __EMSCRIPTEN__
+				emscripten_sleep(0);
+#endif
+
 				tmp->loaded = true;
 				tmp->pending_load = false;
 			}
 			if (tmp->show_loading) {
 				(*game->_priv.loading.gamestate->api->stop)(game, game->_priv.loading.gamestate->data);
-				game->loading.shown = false;
 			}
 			tmp->show_loading = true;
+			game->loading.shown = false;
 			game->_priv.timestamp = al_get_time();
 #ifdef __EMSCRIPTEN__
 			al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
@@ -424,6 +431,9 @@ static inline bool MainloopTick(struct Game* game) {
 
 	if (!gameActive) {
 		PrintConsole(game, "No gamestates left, exiting...");
+		ClearScreen(game);
+		DrawConsole(game);
+		al_flip_display();
 		return false;
 	}
 
