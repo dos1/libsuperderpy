@@ -267,14 +267,23 @@ static inline bool MainloopTick(struct Game* game) {
 
 	while (tmp) {
 		if (tmp->pending_unload) {
+#ifdef __EMSCRIPTEN__
+			al_detach_voice(game->audio.v);
+#endif
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			tmp->loaded = false;
 			tmp->pending_unload = false;
 			game->_priv.current_gamestate = tmp;
 			(*tmp->api->unload)(game, tmp->data);
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
+#ifdef __EMSCRIPTEN__
+			al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+#endif
 		}
 		if (tmp->pending_load) {
+#ifdef __EMSCRIPTEN__
+			al_detach_voice(game->audio.v);
+#endif
 			if (tmp->show_loading) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
@@ -371,6 +380,9 @@ static inline bool MainloopTick(struct Game* game) {
 			}
 			tmp->show_loading = true;
 			game->_priv.timestamp = al_get_time();
+#ifdef __EMSCRIPTEN__
+			al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+#endif
 		}
 
 		tmp = tmp->next;

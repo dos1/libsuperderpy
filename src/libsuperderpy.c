@@ -481,7 +481,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_mixer(game->audio.music);
 	al_destroy_mixer(game->audio.voice);
 	al_destroy_mixer(game->audio.mixer);
-	al_destroy_voice(game->audio.v); // FIXME: doesn't seem to work in Chromium under Emscripten
+	al_destroy_voice(game->audio.v);
 	al_destroy_cond(game->_priv.texture_sync_cond);
 	al_destroy_mutex(game->_priv.texture_sync_mutex);
 	al_destroy_cond(game->_priv.bsod_cond);
