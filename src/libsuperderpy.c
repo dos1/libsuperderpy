@@ -313,12 +313,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->loading.progress = 0;
 
-	if (game->_priv.params.handlers.compositor) {
-		game->_priv.loading.fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
-	} else {
-		game->_priv.loading.fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
-	}
-
 	return game;
 }
 
@@ -359,6 +353,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 		return 2;
 	}
 	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, NULL);
+	game->_priv.loading.gamestate->loaded = true;
 	PrintConsole(game, "Loading screen registered.");
 
 	ReloadShaders(game, false);

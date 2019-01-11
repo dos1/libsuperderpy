@@ -59,7 +59,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 
 	if (game->loading.shown) {
 		// same as above, but for the loading gamestate
-		game->_priv.current_gamestate = NULL;
+		game->_priv.current_gamestate = game->_priv.loading.gamestate;
 		SetFramebufferAsTarget(game);
 		if (game->_priv.params.handlers.compositor) {
 			al_reset_clipping_rectangle();
@@ -77,7 +77,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	al_reset_clipping_rectangle();
 
 	if (game->_priv.params.handlers.compositor) {
-		game->_priv.params.handlers.compositor(game, game->_priv.gamestates, game->_priv.loading.fb);
+		game->_priv.params.handlers.compositor(game, game->_priv.gamestates, game->_priv.loading.gamestate->fb);
 	}
 
 	if (game->_priv.params.handlers.postdraw) {
@@ -167,11 +167,11 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
-	al_destroy_bitmap(game->_priv.loading.fb);
+	al_destroy_bitmap(game->_priv.loading.gamestate->fb);
 	if (game->_priv.params.handlers.compositor) {
-		game->_priv.loading.fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
+		game->_priv.loading.gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 	} else {
-		game->_priv.loading.fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
+		game->_priv.loading.gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 }
 

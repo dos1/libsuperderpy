@@ -532,9 +532,6 @@ SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
 }
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
-	if (!game->_priv.current_gamestate) {
-		return game->_priv.loading.fb;
-	}
 	return game->_priv.current_gamestate->fb;
 }
 

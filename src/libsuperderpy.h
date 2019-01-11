@@ -219,7 +219,6 @@ struct Game {
 			volatile bool in_progress;
 			bool lock;
 			double time;
-			ALLEGRO_BITMAP* fb;
 		} loading;
 
 		struct Gamestate* current_gamestate;
