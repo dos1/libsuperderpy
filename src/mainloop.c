@@ -243,6 +243,10 @@ static inline bool MainloopTick(struct Game* game) {
 
 	struct Gamestate* tmp = game->_priv.gamestates;
 
+#ifdef __EMSCRIPTEN__
+	emscripten_pause_main_loop();
+#endif
+
 	game->_priv.loading.to_load = 0;
 	game->_priv.loading.loaded = 0;
 	game->_priv.loading.lock = true;
@@ -428,6 +432,9 @@ static inline bool MainloopTick(struct Game* game) {
 	}
 
 	game->_priv.loading.lock = false;
+#ifdef __EMSCRIPTEN__
+	emscripten_resume_main_loop();
+#endif
 
 	if (!gameActive) {
 		PrintConsole(game, "No gamestates left, exiting...");
