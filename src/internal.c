@@ -167,11 +167,13 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
-	al_destroy_bitmap(game->_priv.loading.gamestate->fb);
-	if (game->_priv.params.handlers.compositor) {
-		game->_priv.loading.gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
-	} else {
-		game->_priv.loading.gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
+	if (game->_priv.loading.gamestate) {
+		al_destroy_bitmap(game->_priv.loading.gamestate->fb);
+		if (game->_priv.params.handlers.compositor) {
+			game->_priv.loading.gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
+		} else {
+			game->_priv.loading.gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
+		}
 	}
 }
 

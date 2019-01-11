@@ -458,6 +458,7 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 		fflush(stdout);
 #endif
 	}
+
 	game->_priv.console_pos++;
 	if (game->_priv.console_pos >= (sizeof(game->_priv.console) / sizeof(game->_priv.console[0]))) {
 		game->_priv.console_pos = 0;
