@@ -15,7 +15,8 @@
 
 /// \privatesection
 
-#pragma once
+#ifndef LIBSUPERDERPY_IMGUI_IMPL_ALLEGRO5_H
+#define LIBSUPERDERPY_IMGUI_IMPL_ALLEGRO5_H
 
 #ifdef __cplusplus
 #include "3rdparty/cimgui/imgui/imgui.h"
@@ -35,3 +36,5 @@ bool ImGui_ImplAllegro5_ProcessEvent(ALLEGRO_EVENT* event);
 // Use if you want to reset your rendering device without losing ImGui state.
 bool ImGui_ImplAllegro5_CreateDeviceObjects(void);
 void ImGui_ImplAllegro5_InvalidateDeviceObjects(void);
+
+#endif /* LIBSUPERDERPY_IMGUI_IMPL_ALLEGRO5_H */

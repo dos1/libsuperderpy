@@ -155,4 +155,4 @@ void ShowCharacter(struct Game* game, struct Character* character);
 void HideCharacter(struct Game* game, struct Character* character);
 bool IsCharacterHidden(struct Game* game, struct Character* character);
 
-#endif
+#endif /* LIBSUPERDERPY_CHARACTER_H */

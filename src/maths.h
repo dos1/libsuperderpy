@@ -31,4 +31,4 @@ double Lerp(double left, double right, double pos);
 int Sign(double val);
 double Fract(double val);
 
-#endif
+#endif /* LIBSUPERDERPY_MATHS_H */

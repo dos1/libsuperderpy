@@ -51,6 +51,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_CXX_STANDARD 98)
 	set(CMAKE_CXX_STANDARD_REQUIRED true)
 
+	# TODO: add -fvisibility=hidden, but only to libsuperderpy target
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math -fstack-protector")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math -fstack-protector")
 

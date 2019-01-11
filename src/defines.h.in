@@ -1,5 +1,5 @@
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef LIBSUPERDERPY_DEFINES_H
+#define LIBSUPERDERPY_DEFINES_H
 
 /*
  * These values are automatically set according to their cmake variables.
@@ -8,4 +8,4 @@
 #define LIBSUPERDERPY_GAMENAME_PRETTY "${LIBSUPERDERPY_GAMENAME_PRETTY}"
 #define LIBSUPERDERPY_GAME_GIT_REV "${LIBSUPERDERPY_GAME_GIT_REV}"
 
-#endif /* DEFINES_H */
+#endif /* LIBSUPERDERPY_DEFINES_H */

@@ -88,4 +88,4 @@ char* PunchNumber(struct Game* game, char* text, char ch, int number);
 /*! \brief Quits the game. On platforms that allow it, brings the game to the background without quiting if <allow_pausing> is true. */
 void QuitGame(struct Game* game, bool allow_pausing);
 
-#endif
+#endif /* LIBSUPERDERPY_UTILS_H */

@@ -34,4 +34,4 @@ void SetConfigOption(struct Game* game, char* section, char* name, char* value);
 /*! \brief Writes config from memory to file. */
 void DeinitConfig(struct Game* game);
 
-#endif
+#endif /* LIBSUPERDERPY_CONFIG_H */

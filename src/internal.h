@@ -131,4 +131,4 @@ __attribute__((__format__(__printf__, 2, 0))) char* GetGameName(struct Game* gam
 ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename);
 void RemoveBitmap(struct Game* game, char* filename);
 
-#endif
+#endif /* LIBSUPERDERPY_INTERNAL_H */

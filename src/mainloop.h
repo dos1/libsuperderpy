@@ -25,4 +25,4 @@
 
 bool libsuperderpy_mainloop(struct Game* game);
 
-#endif
+#endif /* LIBSUPERDERPY_MAINLOOP_H */

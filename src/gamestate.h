@@ -92,4 +92,4 @@ __attribute__((used)) void Gamestate_Unload(struct Game* game, struct GamestateR
 __attribute__((used)) void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, ALLEGRO_EVENT* ev);
 __attribute__((used)) void Gamestate_Reload(struct Game* game, struct GamestateResources* data);
 
-#endif
+#endif /* LIBSUPERDERPY_GAMESTATE_H */

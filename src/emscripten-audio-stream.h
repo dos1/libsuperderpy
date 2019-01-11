@@ -106,4 +106,4 @@ ALLEGRO_AUDIO_STREAM* emscripten_create_audio_stream(size_t fragment_count, unsi
 #define al_set_audio_stream_channel_matrix emscripten_set_audio_stream_channel_matrix
 #endif
 
-#endif
+#endif /* LIBSUPERDERPY_EMSCRIPTEN_H */

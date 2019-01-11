@@ -259,4 +259,4 @@ int libsuperderpy_start(struct Game* game);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 
-#endif
+#endif /* LIBSUPERDERPY_MAIN_H */

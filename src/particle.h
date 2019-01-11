@@ -60,4 +60,4 @@ void DrawParticles(struct Game* game, struct ParticleBucket* bucket);
 void EmitParticle(struct Game* game, struct ParticleBucket* bucket, struct Character* archetype, ParticleFunc* func, struct ParticleState state, void* data);
 void DestroyParticleBucket(struct Game* game, struct ParticleBucket* bucket);
 
-#endif
+#endif /* LIBSUPERDERPY_PARTICLE_H */
