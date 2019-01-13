@@ -71,6 +71,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	InitConfig(game);
 
+	al_set_config_value(al_get_system_config(), "ttf", "cache_text", "0123456789QWERTYUIOPASDFGHJKLZXCVBNMĘÓĄŚŁŻŹĆŃqwertyuiopasdfghjklzxcvbnmęóąśłżźćń.@#$%^&*():\"!?\\[];'{}|,<>/~`-=_+ ");
+
 	game->_priv.fps_count.frames_done = 0;
 	game->_priv.fps_count.fps = 0;
 	game->_priv.fps_count.old_time = 0;
