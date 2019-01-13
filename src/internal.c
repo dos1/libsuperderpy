@@ -649,6 +649,9 @@ SYMBOL_INTERNAL ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename) {
 		rc->counter = 1;
 		rc->id = strdup(filename);
 		rc->data = al_load_bitmap(GetDataFilePath(game, filename));
+		if (!rc->data) {
+			FatalError(game, false, "Bitmap %s (%s) failed to load.", filename, GetDataFilePath(game, filename));
+		}
 		game->_priv.bitmaps[bucket] = AddToList(game->_priv.bitmaps[bucket], rc);
 	}
 	return rc->data;

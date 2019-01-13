@@ -384,7 +384,17 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 
 #ifdef MAEMO5
 	char origfn[255] = "maemo5/";
-	strncat(origfn, filename, 246);
+	strncat(origfn, filename, 247);
+
+	result = TestDataFilePath(game, origfn);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+#endif
+
+#ifdef __EMSCRIPTEN__
+	char origfn[255] = "emscripten/";
+	strncat(origfn, filename, 243);
 
 	result = TestDataFilePath(game, origfn);
 	if (result) {
@@ -398,14 +408,68 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 	if (sub) {
 		sub[0] = '.';
 		sub[1] = 'o';
-		sub[2] = 'g';
-		sub[3] = 'g';
+		sub[2] = 'p';
+		sub[3] = 'u';
+		sub[4] = 's';
+		sub[5] = 0;
+	}
+	result = TestDataFilePath(game, file);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+
+	sub = strstr(file, ".png");
+	if (sub) {
+		sub[0] = '.';
+		sub[1] = 'w';
+		sub[2] = 'b';
+		sub[3] = 'p';
 		sub[4] = 0;
 	}
 	result = TestDataFilePath(game, file);
 	if (result) {
 		return AddGarbage(game, result);
 	}
+
+	sub = strstr(file, ".jpg");
+	if (sub) {
+		sub[0] = '.';
+		sub[1] = 'w';
+		sub[2] = 'b';
+		sub[3] = 'p';
+		sub[4] = 0;
+	}
+	result = TestDataFilePath(game, file);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+
+	sub = strstr(file, ".JPG");
+	if (sub) {
+		sub[0] = '.';
+		sub[1] = 'w';
+		sub[2] = 'b';
+		sub[3] = 'p';
+		sub[4] = 0;
+	}
+	result = TestDataFilePath(game, file);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+
+	sub = strstr(file, ".webp");
+	if (sub) {
+		sub[0] = '.';
+		sub[1] = 'w';
+		sub[2] = 'b';
+		sub[3] = 'p';
+		sub[4] = 0;
+	}
+	result = TestDataFilePath(game, file);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+
 #endif
 
 	result = TestDataFilePath(game, filename);
