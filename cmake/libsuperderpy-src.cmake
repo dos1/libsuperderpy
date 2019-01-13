@@ -22,7 +22,7 @@ install(TARGETS ${EXECUTABLE} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}" SHARED "common.c")
 set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}" PROPERTIES PREFIX "")
-target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}" ${ALLEGRO5_LIBS} m libsuperderpy)
+target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}" libsuperderpy)
 install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}" DESTINATION ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 
 add_subdirectory("gamestates")

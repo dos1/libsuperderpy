@@ -39,7 +39,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
 
-	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten (MB, must be multiple of 16)" )
+	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten in asm.js builds (MB, must be multiple of 16)" )
 	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
 	if (LIBSUPERDERPY_IMGUI)
 		enable_language(CXX)
@@ -96,6 +96,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			message(STATUS "Sanitizers unavailable under Emscripten, disabling...")
 			set(SANITIZERS_ARGS "")
 		endif()
+		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g3")
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3")
 	else()
 		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb3")
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb3")
@@ -205,18 +207,20 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 
 		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=2 -s EXPORTED_FUNCTIONS=[\"_Gamestate_ProgressCount\"]")
-		set(EMSCRIPTEN_FLAGS --llvm-lto 1 --use-preload-plugins --pre-js "${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js" -s FULL_ES2=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1 -s EMTERPRETIFY_WHITELIST=[\"_libsuperderpy_emscripten_mainloop\",\"_libsuperderpy_mainloop\",\"_MainloopTick\",\"_GamestateLoadingThread\"] -s EXPORT_ALL=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=[\"Pointer_stringify\"])
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --ignore-dynamic-linking")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --ignore-dynamic-linking")
+		set(EMSCRIPTEN_FLAGS -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY}MB --llvm-lto 1 --use-preload-plugins -s FULL_ES2=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_FILE=\"${LIBSUPERDERPY_GAMENAME}.emterpret.js\" -s EMTERPRETIFY_ASYNC=1 -s EMTERPRETIFY_WHITELIST=[\"_libsuperderpy_emscripten_mainloop\",\"_libsuperderpy_mainloop\",\"_MainloopTick\",\"_GamestateLoadingThread\"] -s EXTRA_EXPORTED_RUNTIME_METHODS=[\"Pointer_stringify\"] -s INCLUDE_FULL_LIBRARY=1 -s ERROR_ON_MISSING_LIBRARIES=1)
 
-		set(LIBSUPERDERPY_EMSCRIPTEN_MODE "asm.js" CACHE STRING "Emscripten compilation mode (JavaScript or WebAssembly)")
+		set(LIBSUPERDERPY_EMSCRIPTEN_MODE "wasm" CACHE STRING "Emscripten compilation mode (JavaScript or WebAssembly)")
 		set_property(CACHE LIBSUPERDERPY_EMSCRIPTEN_MODE PROPERTY STRINGS "asm.js;wasm")
 		if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
 			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=1")
-			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy)
+			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy -s MAIN_MODULE=2 -s EXPORTED_FUNCTIONS=@${CMAKE_BINARY_DIR}/emscripten-imports.json)
 			set(CMAKE_SHARED_MODULE_SUFFIX ".wasm.so")
 			add_definitions(-DLIBSUPERDERPY_WASM=1)
 		else()
 			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=0")
-			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=0 -s PRECISE_F32=1)
+			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=0 -s PRECISE_F32=1 -s MAIN_MODULE=1 -s EXPORT_ALL=1)
 			set(CMAKE_SHARED_MODULE_SUFFIX ".js")
 		endif()
 
@@ -258,8 +262,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
 		if (NOT EMSCRIPTEN)
-			target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" ${ALLEGRO5_LIBS} m)
-
 			if (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 				target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy-${LIBSUPERDERPY_GAMENAME})
 			else (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
@@ -382,16 +384,21 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			string(REPLACE " " ";" CFLAGS_L ${CMAKE_C_FLAGS} " " ${${CFLAGS}})
 			set(CFLAGS_LIST ${CFLAGS_L})
 
-			math(EXPR EMSCRIPTEN_TOTAL_MEMORY_BYTES "${EMSCRIPTEN_TOTAL_MEMORY} * 1024 * 1024")
-
+			if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
+				add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/emscripten-imports.json COMMAND bash -c "(for file in ${CMAKE_INSTALL_PREFIX}/*.wasm.so; do wasm-dis $file; done) | grep \"(import \\\"env\\\" \" | awk '{print $3}' | sort -u | awk 'BEGIN {printf \"[\\\"_main\\\"\" } END {print \"]\"} {printf \",%s\", $1}' > ${CMAKE_BINARY_DIR}/emscripten-imports.json" DEPENDS ${LIBSUPERDERPY_GAMENAME}_install WORKING_DIRECTORY ${CMAKE_BINARY_DIR} USES_TERMINAL VERBATIM)
+			else()
+				# not implemented yet for asm.js
+				add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/emscripten-imports.json COMMAND bash -c "echo '[\"_main\"]' > ${CMAKE_BINARY_DIR}/emscripten-imports.json" DEPENDS ${LIBSUPERDERPY_GAMENAME}_install WORKING_DIRECTORY ${CMAKE_BINARY_DIR} USES_TERMINAL VERBATIM)
+			endif()
 
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_js
-				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_opus ${LIBSUPERDERPY_GAMENAME}_img_to_webp
+				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_opus ${LIBSUPERDERPY_GAMENAME}_img_to_webp ${CMAKE_BINARY_DIR}/emscripten-imports.json
 				WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../bin/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=1 -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY_BYTES} -o ${LIBSUPERDERPY_GAMENAME}.html --preload-file ../share/${LIBSUPERDERPY_GAMENAME}/data --preload-file gamestates@/
+				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../bin/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -o ${LIBSUPERDERPY_GAMENAME}.html --pre-js ${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js --preload-file ../share/${LIBSUPERDERPY_GAMENAME}/data --preload-file gamestates@/
 				USES_TERMINAL
 				VERBATIM
 				)
+
 		endif(EMSCRIPTEN)
 	ENDMACRO()
 
