@@ -504,19 +504,19 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 	{
 #ifdef ALLEGRO_ANDROID
 		if (game->config.debug.verbose) {
-			__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "%s:%d [%s] %s", file, line, func, text);
+			__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "%f %s:%d [%s] %s", al_get_time(), file, line, func, text);
 		} else {
 			__android_log_print(ANDROID_LOG_DEBUG, al_get_app_name(), "[%s] %s", func, text);
 		}
 #elif defined(__EMSCRIPTEN__)
 		if (game->config.debug.verbose) {
-			emscripten_log(EM_LOG_CONSOLE, "%s:%d [%s] %s", file, line, func, text);
+			emscripten_log(EM_LOG_CONSOLE, "%f %s:%d [%s] %s", al_get_time(), file, line, func, text);
 		} else {
 			emscripten_log(EM_LOG_CONSOLE, "[%s] %s", func, text);
 		}
 #else
 		if (game->config.debug.verbose) {
-			printf("%s:%d ", file, line);
+			printf("%f %s:%d ", al_get_time(), file, line);
 		}
 		printf("[%s] %s\n", func, text);
 		fflush(stdout);
