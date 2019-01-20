@@ -316,7 +316,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	if (ANDROID OR EMSCRIPTEN)
 		if (ANDROID)
-			set(ASSET_PIPELINE_DATADIR "${CMAKE_BINARY_DIR}/android/assets/data")
+			set(ASSET_PIPELINE_DATADIR "${CMAKE_BINARY_DIR}/android/app/src/main/assets/data")
 			set(ASSET_PIPELINE_DEPEND "")
 		else (EMSCRIPTEN)
 			set(ASSET_PIPELINE_DATADIR "${CMAKE_INSTALL_PREFIX}/share/${LIBSUPERDERPY_GAMENAME}/data")
@@ -352,7 +352,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 				DEPENDS ${EXECUTABLE} ${LIBSUPERDERPY_GAMENAME}_flac_to_opus ${LIBSUPERDERPY_GAMENAME}_img_to_webp
 				BYPRODUCTS ${APK_PATH}
 				WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android"
-				COMMAND ${ANT_COMMAND} debug
+				COMMAND ./gradlew assembleDebug
 				USES_TERMINAL
 				)
 
@@ -406,18 +406,6 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(ANDROID_TARGET "android-26" CACHE STRING "What Android target to compile for.")
 		STRING(REGEX REPLACE "^android-" "" ANDROID_TARGET_VERSION ${ANDROID_TARGET})
 
-		# The android tool on Windows is a batch file wrapper, which cannot be
-		# started by MSYS shell directly. We invoke it via cmd.exe instead.
-		# We don't use the full path to avoid problems with spaces,
-		# and hope that android.bat is somewhere on the PATH.
-		if(ANDROID_TOOL MATCHES "[.]bat$")
-			set(ANDROID_UPDATE_COMMAND
-				cmd.exe /c "android.bat update project -p . -t ${ANDROID_TARGET}")
-		else()
-			set(ANDROID_UPDATE_COMMAND
-				"${ANDROID_TOOL}" update project -p . -t ${ANDROID_TARGET})
-		endif()
-
 		file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/android")
 		file(COPY "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
 
@@ -438,34 +426,29 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			set(LIBSUPERDERPY_ANDROID_DEBUGGABLE "true")
 		endif(NOT DEFINED LIBSUPERDERPY_ANDROID_DEBUGGABLE)
 
-		configure_android_file("AndroidManifest.xml")
-		configure_android_file("localgen.properties")
-		configure_android_file("build.xml" @ONLY)
-		configure_android_file("project.properties" @ONLY)
-		configure_android_file("res/values/strings.xml")
-		configure_android_file("jni/localgen.mk")
+		configure_android_file("app/src/main/AndroidManifest.xml")
+		configure_android_file("local.properties")
+		configure_android_file("app/build.gradle")
+		configure_android_file("app/src/main/res/values/strings.xml")
 		if (ALLEGRO5_LIBRARIES MATCHES "^.*-debug.*$")
 			set(ALLEGRO_DEBUG_SUFFIX "-debug")
 		endif()
-		configure_file("${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java.in" "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java")
-		file(REMOVE "${CMAKE_BINARY_DIR}/android/src/net/dosowisko/libsuperderpy/Activity.java.in")
+		configure_android_file("app/src/main/java/net/dosowisko/libsuperderpy/Activity.java")
 
 		file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
-		file(COPY "${ANDROID_ALLEGRO_ROOT}/lib/Allegro5.jar" DESTINATION ${LIBRARY_OUTPUT_PATH})
+		configure_file("${ANDROID_ALLEGRO_ROOT}/lib/allegro-release.aar" ${CMAKE_BINARY_DIR}/android/app/libs/allegro.aar COPYONLY)
 
-		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/assets/" PATTERN "stuff" EXCLUDE
+		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/assets/" PATTERN "stuff" EXCLUDE
 			PATTERN ".git" EXCLUDE
 			PATTERN ".gitignore" EXCLUDE
 			PATTERN ".directory" EXCLUDE
 			PATTERN "CMakeLists.txt" EXCLUDE)
 
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/48/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-mdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/72/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-hdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/96/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-xhdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/144/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-xxhdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/192/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/res/mipmap-xxxhdpi/")
-
-		execute_process(COMMAND ${ANDROID_UPDATE_COMMAND} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/android")
+		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/48/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-mdpi/")
+		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/72/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-hdpi/")
+		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/96/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xhdpi/")
+		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/144/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxhdpi/")
+		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/192/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxxhdpi/")
 
 	endif(ANDROID)
 

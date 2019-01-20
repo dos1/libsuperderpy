@@ -1,0 +1,66 @@
+package net.dosowisko.libsuperderpy;
+
+import org.liballeg.android.AllegroActivity;
+import android.util.Log;
+import android.os.Bundle;
+import android.view.View;
+
+public class Activity extends AllegroActivity {
+
+   static void loadLibrary(String name) {
+      try {
+         // try loading the debug library first.
+         Log.d("loadLibrary", name + "-debug");
+         System.loadLibrary(name + "-debug");
+      } catch (UnsatisfiedLinkError e) {
+         try {
+            // If it fails load the release library.
+            Log.d("loadLibrary", name);
+            System.loadLibrary(name);
+         } catch (UnsatisfiedLinkError e2) {
+            // We still continue as failing to load an addon may
+            // not be a fatal error - for example if the TTF was
+            // not built we can still run an example which does not
+            // need that addon.
+            Log.d("loadLibrary", name + " FAILED");
+         }
+      }
+   }
+
+   /* Load Allegro and other shared libraries in the lib directory of the apk
+    * bundle. You must load libraries which are required by later libraries
+    * first.
+    */
+   static {
+      loadLibrary("allegro");
+      loadLibrary("allegro_primitives");
+      loadLibrary("allegro_image");
+      loadLibrary("allegro_font");
+      loadLibrary("allegro_ttf");
+      loadLibrary("allegro_audio");
+      loadLibrary("allegro_acodec");
+      loadLibrary("allegro_color");
+      loadLibrary("allegro_memfile");
+      loadLibrary("allegro_physfs");
+      loadLibrary("allegro_video");
+      loadLibrary("libsuperderpy");
+      loadLibrary("libsuperderpy-${LIBSUPERDERPY_GAMENAME}");
+   }
+
+   /* By default, AllegroActivity.onCreate will cause Allegro to load the
+    * shared object `libapp.so'.  You can specify another library name by
+    * overriding the constructor.
+    */
+   public Activity() {
+      super("libgame.so");
+   }
+
+   /** Called when the activity is first created. */
+   @Override
+   public void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      if (android.os.Build.VERSION.SDK_INT >= 19) {
+         this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+      }
+   }
+}

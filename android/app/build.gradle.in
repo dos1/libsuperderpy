@@ -1,0 +1,18 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "${LIBSUPERDERPY_APPID}"
+        minSdkVersion 15
+        targetSdkVersion ${ANDROID_TARGET_VERSION}
+        versionCode ${LIBSUPERDERPY_RELEASE}
+        versionName "${LIBSUPERDERPY_VERSION}"
+    }
+sourceSets { main { jniLibs.srcDirs = ['libs'] } }
+}
+
+dependencies {
+    //implementation fileTree(dir: 'libs', include: ['*.jar', '*.so'])
+    implementation "org.liballeg.android:allegro:1.0@aar"
+}

@@ -2,6 +2,8 @@
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_VERSION 1)
 
+set(ANDROID_HOME "$ENV{ANDROID_HOME}" CACHE PATH "Path to Android SDK" )
+
 #set path for android toolchain -- look
 
 set(ANDROID_ALLEGRO_ROOT "$ENV{ANDROID_ALLEGRO_ROOT}" CACHE PATH "Path to Allegro 5 (>=5.2.2) build directory for Android" )
@@ -20,9 +22,6 @@ if(NOT EXISTS ${ANDROID_NDK_TOOLCHAIN_ROOT})
    message( STATUS "If you prefer to use a different location, please set the ANDROID_NDK_TOOLCHAIN_ROOT cmake variable.")
 endif()
    
-#set(ANDROID_NDK_TOOLCHAIN_ROOT ${ANDROID_NDK_TOOLCHAIN_ROOT} CACHE PATH
-#    "root of the android ndk standalone toolchain" FORCE)
-    
 if(NOT EXISTS ${ANDROID_NDK_TOOLCHAIN_ROOT})
   message(FATAL_ERROR
   "${ANDROID_NDK_TOOLCHAIN_ROOT} does not exist!
@@ -95,7 +94,7 @@ set(CMAKE_RANLIB
 
 set_property(CACHE ARM_TARGETS PROPERTY STRINGS ${PossibleArmTargets} )
 
-set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_BINARY_DIR}/android CACHE PATH
+set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_BINARY_DIR}/android/app CACHE PATH
     "root for library output, set this to change where
     android libs are installed to")
     
@@ -147,21 +146,6 @@ endif()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "c++ flags")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "c flags")
-
-find_program(ANDROID_TOOL android NAMES android android.bat CMAKE_FIND_ROOT_PATH_BOTH)
-find_program(NDK_BUILD ndk-build CMAKE_FIND_ROOT_PATH_BOTH)
-find_program(ANT ant CMAKE_FIND_ROOT_PATH_BOTH)
-set(ANT_COMMAND "${ANT}" -noinput -nouserlib -noclasspath -quiet)
-
-if(NOT ANDROID_TOOL)
-    message(FATAL_ERROR "android tool not found")
-endif()
-if(NOT NDK_BUILD)
-    message(FATAL_ERROR "ndk-build not found")
-endif()
-if(NOT ANT)
-    message(FATAL_ERROR "ant not found")
-endif()
 
 #set these global flags for cmake client scripts to change behavior
 set(ANDROID True)
