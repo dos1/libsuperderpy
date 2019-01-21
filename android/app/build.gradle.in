@@ -9,10 +9,18 @@ android {
         versionCode ${LIBSUPERDERPY_RELEASE}
         versionName "${LIBSUPERDERPY_VERSION}"
     }
-sourceSets { main { jniLibs.srcDirs = ['libs'] } }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+    buildTypes {
+        debug {
+            debuggable ${LIBSUPERDERPY_ANDROID_DEBUGGABLE}
+        }
+    }
 }
 
 dependencies {
-    //implementation fileTree(dir: 'libs', include: ['*.jar', '*.so'])
     implementation "org.liballeg.android:allegro:1.0@aar"
 }
