@@ -19,6 +19,9 @@ android {
             debuggable ${LIBSUPERDERPY_ANDROID_DEBUGGABLE}
         }
     }
+    aaptOptions {
+        noCompress "opus", "wbp"
+    }
 }
 
 dependencies {
