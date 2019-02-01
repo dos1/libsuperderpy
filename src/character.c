@@ -644,7 +644,11 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, (int)x - character->spritesheet->frames[character->pos].x, (int)y - character->spritesheet->frames[character->pos].y);
+		int xpos = (int)x - character->spritesheet->frames[character->pos].x, ypos = (int)y - character->spritesheet->frames[character->pos].y;
+		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->bitmap) || ypos >= al_get_bitmap_height(character->frame->bitmap)) {
+			return false;
+		}
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, xpos, ypos);
 		return (color.a > 0.0);
 	}
 
