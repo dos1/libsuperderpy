@@ -127,6 +127,7 @@ struct Params {
 	bool integer_scaling; /*!< Ensure that the viewport is zoomed only with integer factors. */
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
+	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
 	struct Handlers handlers; /*!< A list of user callbacks to register. */
 };

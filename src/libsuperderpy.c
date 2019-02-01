@@ -210,6 +210,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		al_set_new_display_option(ALLEGRO_DEPTH_SIZE, 24, ALLEGRO_SUGGEST);
 	}
 
+	al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, params.samples ? 1 : 0, ALLEGRO_SUGGEST);
+	al_set_new_display_option(ALLEGRO_SAMPLES, params.samples, ALLEGRO_SUGGEST);
+
 #ifdef ALLEGRO_WINDOWS
 	al_set_new_window_position(20, 40); // workaround nasty Windows bug with window being created off-screen
 #endif
