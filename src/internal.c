@@ -177,6 +177,28 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 	}
 }
 
+SYMBOL_INTERNAL int SetupAudio(struct Game* game) {
+	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "44100"), NULL, 10);
+#ifdef __EMSCRIPTEN__
+	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+#else
+	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+	if (!game->audio.v) {
+		// fallback
+		game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	}
+#endif
+	al_set_default_voice(game->audio.v);
+
+	if (game->audio.v) {
+		al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+	} else {
+		PrintConsole(game, "Could not create audio voice!");
+		return 1;
+	}
+	return 0;
+}
+
 SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 	double game_time = al_get_time();
 	if (game->_priv.showconsole) {
@@ -572,7 +594,11 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 		return;
 	}
 	game->_priv.paused = true;
-	al_detach_voice(game->audio.v);
+	if (game->audio.v) {
+		al_detach_voice(game->audio.v);
+	}
+	al_set_default_voice(NULL);
+	game->audio.v = NULL;
 	FreezeGamestates(game);
 	PrintConsole(game, "Engine halted.");
 }
@@ -606,7 +632,7 @@ SYMBOL_INTERNAL void ResumeExecution(struct Game* game) {
 		return;
 	}
 	UnfreezeGamestates(game);
-	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+	SetupAudio(game);
 	game->_priv.paused = false;
 	game->_priv.timestamp = al_get_time();
 	PrintConsole(game, "Engine resumed.");

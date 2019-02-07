@@ -283,20 +283,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 
 	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "44100"), NULL, 10);
-#ifdef __EMSCRIPTEN__
-	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-#else
-	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
-	if (!game->audio.v) {
-		// fallback
-		game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	}
-#endif
 	game->audio.mixer = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	game->audio.fx = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	game->audio.music = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	game->audio.voice = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
 	al_attach_mixer_to_mixer(game->audio.fx, game->audio.mixer);
 	al_attach_mixer_to_mixer(game->audio.music, game->audio.mixer);
 	al_attach_mixer_to_mixer(game->audio.voice, game->audio.mixer);
@@ -304,6 +294,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_mixer_gain(game->audio.music, game->config.music / 10.0);
 	al_set_mixer_gain(game->audio.voice, game->config.voice / 10.0);
 	al_set_mixer_gain(game->audio.mixer, game->config.mute ? 0.0 : 1.0);
+	SetupAudio(game);
 	al_set_default_mixer(game->audio.mixer);
 
 	setlocale(LC_NUMERIC, "C");
@@ -477,11 +468,12 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));
 	al_destroy_event_queue(game->_priv.event_queue);
+	al_set_default_mixer(NULL); // does not destroy anything
 	al_destroy_mixer(game->audio.fx);
 	al_destroy_mixer(game->audio.music);
 	al_destroy_mixer(game->audio.voice);
 	al_destroy_mixer(game->audio.mixer);
-	al_destroy_voice(game->audio.v);
+	al_set_default_voice(NULL); // destroys game->audio.v voice
 	al_destroy_cond(game->_priv.texture_sync_cond);
 	al_destroy_mutex(game->_priv.texture_sync_mutex);
 	al_destroy_cond(game->_priv.bsod_cond);

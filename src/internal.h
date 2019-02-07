@@ -101,6 +101,7 @@ void ReloadGamestates(struct Game* game);
 void FreezeGamestates(struct Game* game);
 void UnfreezeGamestates(struct Game* game);
 void ResizeGamestates(struct Game* game);
+int SetupAudio(struct Game* game);
 void DrawConsole(struct Game* game);
 void Console_Load(struct Game* game);
 void Console_Unload(struct Game* game);
