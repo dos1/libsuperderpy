@@ -215,7 +215,15 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set_property(CACHE LIBSUPERDERPY_EMSCRIPTEN_MODE PROPERTY STRINGS "asm.js;wasm")
 		if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
 			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=1")
-			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy -s MAIN_MODULE=2 -s EXPORTED_FUNCTIONS=@${CMAKE_BINARY_DIR}/emscripten-imports.json)
+			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy)
+
+			option(EMSCRIPTEN_DCE "Enable dead code elimination in WebAssembly build" OFF) # off by default due to issues with libc functions not getting exported
+			if (EMSCRIPTEN_DCE)
+				set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=2 -s EXPORTED_FUNCTIONS=@${CMAKE_BINARY_DIR}/emscripten-imports.json)
+			else (EMSCRIPTEN_DCE)
+				set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=1 -s EXPORT_ALL=1)
+			endif(EMSCRIPTEN_DCE)
+
 			set(CMAKE_SHARED_MODULE_SUFFIX ".wasm.so")
 			add_definitions(-DLIBSUPERDERPY_WASM=1)
 		else()
