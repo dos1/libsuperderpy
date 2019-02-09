@@ -1,7 +1,8 @@
 # libsuperderpy
-A multiplatform game engine for games written in C and Allegro 5. Supports GNU/Linux, Android, FreeBSD, macOS, Windows and asm.js
+A multiplatform game engine for games written in C and Allegro 5.
 
 Used by such games as:
+- ODGŁOS
 - [SUPERSMOG](https://github.com/dos1/supershod/tree/supersmog)
 - [Zjedz Trawkę 2](https://gitlab.com/dosowisko.net/zjedztrawke2)
 - [SUPERSHOD: Battle Royale](https://github.com/dos1/supershod/tree/battleroyale)
@@ -11,7 +12,7 @@ Used by such games as:
 - Rumina
 - [Non-Competitive Singing Potatoes](https://github.com/dos1/potatoes)
 - [Wakey Wakey](https://github.com/dos1/wakeywakey)
-- [Zenek i Gienek przejmują władzę nad światem](https://github.com/dos1/zenek-i-gienek-przejmuja-wladze-nad-swiatem)
+- [Zenek i Gienek przejmują władzę nad światem](https://github.com/dos1/zenek-i-gienek-przejmuja-wladze-nad-swiatem)
 - [Mouse Sensitivity](https://github.com/dos1/mousesensitivity)
 - [SUPERSHOD HD](https://github.com/dos1/supershod/tree/remake)
 - [Now and Then](https://github.com/dos1/nowandthen)
@@ -41,7 +42,29 @@ Used by such games as:
 - [Cadence Throw](https://github.com/dos1/CadenceThrow)
 - [Super Derpy: Muffin Attack](https://github.com/dos1/SuperDerpy)
 
-WIP: The engine is being separated from its games and modularized right now. Stay tuned for documentation and examples soon!
+See [the list of supported platforms](https://gitlab.com/dosowisko.net/libsuperderpy/wikis/Platforms).
+
+## Companion repos
+
+- [simple example](https://gitlab.com/dosowisko.net/libsuperderpy-examples)
+- [various utilities](https://gitlab.com/dosowisko.net/libsuperderpy-utils)
+- [containerized toolchains](https://gitlab.com/dosowisko.net/libsuperderpy-docker)
+
+## License
+
+The engine is available under the terms of GNU General Public License 3.0 or later.
+
+## Contributing
+
+Make sure to read the [code style guide](README_codestyle.md). By contributing,
+you agree to eventually relicense the code under the terms of GNU Lesser General
+Public License 3.0 or later.
+
+## Disclaimer
+
+The engine has been created out of its games, not as a general purpose util.
+In turn, it's not really documented, doesn't have stable API and isn't well
+suited to use by someone else than me yet. You have been warned ;)
 
 --
 by dos - Sebastian Krzyszkowiak
