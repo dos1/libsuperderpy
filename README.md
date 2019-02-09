@@ -44,6 +44,8 @@ Used by such games as:
 
 See [the list of supported platforms](https://gitlab.com/dosowisko.net/libsuperderpy/wikis/Platforms).
 
+You can play most of the games at [itch.io](https://dos.itch.io).
+
 ## Companion repos
 
 - [simple example](https://gitlab.com/dosowisko.net/libsuperderpy-examples)
@@ -66,5 +68,6 @@ The engine has been created out of its games, not as a general purpose util.
 In turn, it's not really documented, doesn't have stable API and isn't well
 suited to use by someone else than me yet. You have been warned ;)
 
---
-by dos - Sebastian Krzyszkowiak
+---
+by dos (Sebastian Krzyszkowiak)  
+https://dosowisko.net/
