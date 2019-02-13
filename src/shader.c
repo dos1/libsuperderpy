@@ -114,7 +114,7 @@ SYMBOL_EXPORT void DestroyShader(struct Game* game, ALLEGRO_SHADER* shader) {
 
 SYMBOL_INTERNAL void ReloadShaders(struct Game* game, bool force) {
 	struct List* list = game->_priv.shaders;
-	PrintConsole(game, "Reloading shaders...");
+	PrintConsole(game, force ? "Reloading shaders..." : "Loading shaders...");
 	while (list) {
 		struct ShaderListItem* item = list->data;
 		if (!item->loaded || force) {
@@ -127,11 +127,13 @@ SYMBOL_INTERNAL void ReloadShaders(struct Game* game, bool force) {
 				if (log) {
 					FatalError(game, false, "%s", log);
 				}
+			} else {
+				item->loaded = true;
 			}
 		}
 		list = list->next;
 	}
-	PrintConsole(game, "Shaders reloaded.");
+	PrintConsole(game, "Shaders loaded.");
 }
 
 SYMBOL_INTERNAL void DestroyShaders(struct Game* game) {
