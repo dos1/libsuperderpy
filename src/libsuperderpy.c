@@ -267,6 +267,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_inhibit_screensaver(true);
 
 	SetupViewport(game);
+	al_flip_display();
 
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
@@ -327,10 +328,6 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 #endif
 	}
 	al_register_event_source(game->_priv.event_queue, &(game->event_source));
-
-	al_clear_to_color(al_map_rgb(0, 0, 0));
-
-	al_flip_display();
 
 	{
 		struct Gamestate* tmp = game->_priv.gamestates;
