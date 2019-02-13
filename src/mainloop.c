@@ -365,6 +365,8 @@ static inline bool MainloopTick(struct Game* game) {
 
 				al_set_new_bitmap_flags(data.bitmap_flags);
 
+				ReloadShaders(game, false);
+
 				if (tmp->api->post_load) {
 					PrintConsole(game, "[%s] Post-loading...", tmp->name);
 					tmp->api->post_load(game, tmp->data);
@@ -400,7 +402,6 @@ static inline bool MainloopTick(struct Game* game) {
 	}
 
 	if (game->_priv.loading.loaded) {
-		ReloadShaders(game, false);
 		MainloopEvents(game); // consume queued events
 #ifdef __EMSCRIPTEN__
 		DrawGamestates(game);

@@ -330,7 +330,6 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-	ReloadShaders(game, false);
 	al_flip_display();
 
 	{
@@ -352,6 +351,10 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	PrintConsole(game, "Loading screen registered.");
 
 	ReloadShaders(game, false);
+
+	if (game->_priv.loading.gamestate->api->post_load) {
+		(*game->_priv.loading.gamestate->api->post_load)(game, game->_priv.loading.gamestate->data);
+	}
 
 	game->_priv.timestamp = al_get_time();
 	game->_priv.paused = false;
