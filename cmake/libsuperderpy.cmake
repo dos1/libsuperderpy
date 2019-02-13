@@ -142,7 +142,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 	endif()
 
-	if(POLICY CMP0069)
+	option(LIBSUPERDERPY_LTO "Use link-time optimization" OFF)
+	if(POLICY CMP0069 AND LIBSUPERDERPY_LTO)
 		if(NOT USE_CLANG_TIDY AND NOT MINGW) # clang-tidy + GCC + LTO = errors; also, MinGW crashes
 			cmake_policy(SET CMP0069 NEW)
 			include(CheckIPOSupported)
