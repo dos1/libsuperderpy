@@ -121,6 +121,9 @@ SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
+	if (game->_priv.loading.gamestate->api->reload) {
+		game->_priv.loading.gamestate->api->reload(game, game->_priv.loading.gamestate->data);
+	}
 }
 
 SYMBOL_INTERNAL void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev) {
