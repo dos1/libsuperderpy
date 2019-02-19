@@ -49,14 +49,16 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			break;
 
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
+			if ((ev->display.width != al_get_display_width(game->display)) || (ev->display.height != al_get_display_height(game->display))) {
 #ifdef LIBSUPERDERPY_IMGUI
-			ImGui_ImplAllegro5_InvalidateDeviceObjects();
+				ImGui_ImplAllegro5_InvalidateDeviceObjects();
 #endif
-			al_acknowledge_resize(game->display);
+				al_acknowledge_resize(game->display);
 #ifdef LIBSUPERDERPY_IMGUI
-			ImGui_ImplAllegro5_CreateDeviceObjects();
+				ImGui_ImplAllegro5_CreateDeviceObjects();
 #endif
-			SetupViewport(game);
+				SetupViewport(game);
+			}
 			break;
 
 		case ALLEGRO_EVENT_KEY_DOWN:
