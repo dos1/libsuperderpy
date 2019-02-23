@@ -238,7 +238,24 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 #endif
 
 	PrintConsole(game, "libsuperderpy 2 (rev " LIBSUPERDERPY_GIT_REV ")");
-	PrintConsole(game, "OpenGL%s (%08X)", al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? " ES" : "", al_get_opengl_version());
+	{
+		uint32_t version = al_get_allegro_version();
+		int major = version >> 24;
+		int minor = (version >> 16) & 255;
+		int revision = (version >> 8) & 255;
+		int release = version & 255;
+		if (release) {
+			PrintConsole(game, "Allegro %d.%d.%d.%d", major, minor, revision, release);
+		} else {
+			PrintConsole(game, "Allegro %d.%d.%d", major, minor, revision);
+		}
+	}
+	{
+		uint32_t version = al_get_opengl_version();
+		int major = version >> 24;
+		int minor = (version >> 16) & 255;
+		PrintConsole(game, "OpenGL%s %d.%d", al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? " ES" : "", major, minor);
+	}
 
 	PrintConsole(game, "Max bitmap size: %d", al_get_display_option(game->display, ALLEGRO_MAX_BITMAP_SIZE));
 	PrintConsole(game, "Color buffer bits: %d", al_get_display_option(game->display, ALLEGRO_COLOR_SIZE));
