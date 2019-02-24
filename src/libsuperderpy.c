@@ -346,6 +346,15 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	}
 	al_register_event_source(game->_priv.event_queue, &(game->event_source));
 
+	// HACK: some backends correct the window size only after the display has been already created.
+	// if we start loading with wrong size, it won't be corrected until the main loop is entered back,
+	// so the loading screen will stay at the wrong size.
+	// Turns out SDL/Wayland needs some help with emitting the resize event before it's too late.
+	ALLEGRO_EVENT event;
+	al_peek_next_event(game->_priv.event_queue, &event);
+	al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_flip_display();
+
 	{
 		struct Gamestate* tmp = game->_priv.gamestates;
 		while (tmp) {
