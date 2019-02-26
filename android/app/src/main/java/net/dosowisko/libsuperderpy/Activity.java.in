@@ -44,7 +44,7 @@ public class Activity extends AllegroActivity {
       loadLibrary("allegro_physfs");
       loadLibrary("allegro_video");
       loadLibrary("libsuperderpy");
-      loadLibrary("libsuperderpy-${LIBSUPERDERPY_GAMENAME}");
+      loadLibrary("lib${LIBSUPERDERPY_GAMENAME}");
    }
 
    /* By default, AllegroActivity.onCreate will cause Allegro to load the
@@ -52,7 +52,7 @@ public class Activity extends AllegroActivity {
     * overriding the constructor.
     */
    public Activity() {
-      super("libgame.so");
+      super("libsuperderpy-game.so");
    }
 
    /** Called when the activity is first created. */

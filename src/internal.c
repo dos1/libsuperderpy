@@ -334,7 +334,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestate) {
 	PrintConsole(game, "Opening gamestate \"%s\"...", gamestate->name);
 	char libname[1024];
-	snprintf(libname, 1024, "libsuperderpy-%s-%s" LIBRARY_EXTENSION, game->_priv.name, gamestate->name);
+	snprintf(libname, 1024, "lib%s-%s" LIBRARY_EXTENSION, game->_priv.name, gamestate->name);
 	gamestate->handle = dlopen(AddGarbage(game, GetLibraryPath(game, libname)), RTLD_NOW);
 	if (!gamestate->handle) {
 		FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror()); // TODO: move out

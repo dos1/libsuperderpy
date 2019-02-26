@@ -266,24 +266,24 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	MACRO(register_gamestate name sources)
 
-		add_library("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" MODULE ${sources})
+		add_library("lib${LIBSUPERDERPY_GAMENAME}-${name}" MODULE ${sources})
 
-		set_target_properties("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
+		set_target_properties("lib${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
 		if (NOT EMSCRIPTEN)
-			if (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
-				target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy-${LIBSUPERDERPY_GAMENAME})
-			else (TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
+			if (TARGET lib${LIBSUPERDERPY_GAMENAME})
+				target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" lib${LIBSUPERDERPY_GAMENAME})
+			else (TARGET lib${LIBSUPERDERPY_GAMENAME})
 				if (NOT LIBSUPERDERPY_STATIC)
-					target_link_libraries("libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy)
+					target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy)
 				endif (NOT LIBSUPERDERPY_STATIC)
-			endif(TARGET libsuperderpy-${LIBSUPERDERPY_GAMENAME})
+			endif(TARGET lib${LIBSUPERDERPY_GAMENAME})
 		endif (NOT EMSCRIPTEN)
 
-		install(TARGETS "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${GAMESTATE_INSTALL_DIR})
+		install(TARGETS "lib${LIBSUPERDERPY_GAMENAME}-${name}" DESTINATION ${GAMESTATE_INSTALL_DIR})
 
 		if (ANDROID)
-			add_dependencies(${LIBSUPERDERPY_GAMENAME}_apk "libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}")
+			add_dependencies(${LIBSUPERDERPY_GAMENAME}_apk "lib${LIBSUPERDERPY_GAMENAME}-${name}")
 		endif()
 
 		if (EMSCRIPTEN)
@@ -291,7 +291,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			string(REPLACE " " ";" CFLAGS_L ${CMAKE_C_FLAGS})
 			set(CFLAGS_LIST ${CFLAGS_L} ${${CFLAGS}})
 
-			install(FILES "${CMAKE_BINARY_DIR}/src/gamestates/libsuperderpy-${LIBSUPERDERPY_GAMENAME}-${name}${CMAKE_SHARED_MODULE_SUFFIX}" DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}/gamestates)
+			install(FILES "${CMAKE_BINARY_DIR}/src/gamestates/lib${LIBSUPERDERPY_GAMENAME}-${name}${CMAKE_SHARED_MODULE_SUFFIX}" DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}/gamestates)
 		endif()
 
 	ENDMACRO()
@@ -357,7 +357,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
 		if(ANDROID)
-			set(EXECUTABLE game)
+			set(EXECUTABLE superderpy-game)
 			add_library(${EXECUTABLE} SHARED ${EXECUTABLE_SRC_LIST})
 
 			set(APK_PATH ${CMAKE_BINARY_DIR}/android/bin/${LIBSUPERDERPY_GAMENAME}-debug.apk)
@@ -408,7 +408,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_js
 				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_opus ${LIBSUPERDERPY_GAMENAME}_img_to_webp ${CMAKE_BINARY_DIR}/emscripten-imports.json
 				WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../bin/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/libsuperderpy-${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -o ${LIBSUPERDERPY_GAMENAME}.html --pre-js ${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js --preload-file ../share/${LIBSUPERDERPY_GAMENAME}/data --preload-file gamestates@/
+				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../bin/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/lib${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -o ${LIBSUPERDERPY_GAMENAME}.html --pre-js ${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js --preload-file ../share/${LIBSUPERDERPY_GAMENAME}/data --preload-file gamestates@/
 				USES_TERMINAL
 				VERBATIM
 				)
