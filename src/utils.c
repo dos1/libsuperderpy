@@ -613,6 +613,18 @@ SYMBOL_EXPORT void SetFramebufferAsTarget(struct Game* game) {
 	}
 }
 
+SYMBOL_EXPORT void SetClippingRectangle(int x, int y, int width, int height) {
+	ALLEGRO_TRANSFORM transform = *al_get_current_transform();
+	float nx = x, ny = y, nx2 = x + width, ny2 = y + height;
+	al_transform_coordinates(&transform, &nx, &ny);
+	al_transform_coordinates(&transform, &nx2, &ny2);
+	al_set_clipping_rectangle(nx, ny, nx2 - nx, ny2 - ny);
+}
+
+SYMBOL_EXPORT void ResetClippingRectangle(void) {
+	al_reset_clipping_rectangle();
+}
+
 SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	int flags = al_get_new_bitmap_flags();
 	//al_set_new_bitmap_depth(24);

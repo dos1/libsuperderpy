@@ -72,8 +72,10 @@ void SetupViewport(struct Game* game);
 void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
 ALLEGRO_BITMAP* GetFramebuffer(struct Game* game);
-
 void SetFramebufferAsTarget(struct Game* game);
+
+void SetClippingRectangle(int x, int y, int width, int height);
+void ResetClippingRectangle(void);
 
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 
