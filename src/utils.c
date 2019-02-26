@@ -625,6 +625,23 @@ SYMBOL_EXPORT void ResetClippingRectangle(void) {
 	al_reset_clipping_rectangle();
 }
 
+SYMBOL_EXPORT void PushTransform(struct Game* game, ALLEGRO_TRANSFORM* t) {
+	ALLEGRO_TRANSFORM transform = *t;
+
+	if (game->_priv.transforms_no == game->_priv.transforms_alloc) {
+		game->_priv.transforms = realloc(game->_priv.transforms, sizeof(ALLEGRO_TRANSFORM) * ++game->_priv.transforms_alloc);
+	}
+
+	game->_priv.transforms[game->_priv.transforms_no++] = *al_get_current_transform();
+
+	al_compose_transform(&transform, al_get_current_transform());
+	al_use_transform(&transform);
+}
+
+SYMBOL_EXPORT void PopTransform(struct Game* game) {
+	al_use_transform(&game->_priv.transforms[--game->_priv.transforms_no]);
+}
+
 SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	int flags = al_get_new_bitmap_flags();
 	//al_set_new_bitmap_depth(24);

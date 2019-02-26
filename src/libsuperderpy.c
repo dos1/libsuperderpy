@@ -100,6 +100,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
 
+	game->_priv.transforms = NULL;
+	game->_priv.transforms_no = 0;
+
 	game->_priv.mutex = al_create_mutex();
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
@@ -489,6 +492,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		free(game->_priv.garbage->data);
 		game->_priv.garbage = game->_priv.garbage->next;
 	}
+	free(game->_priv.transforms);
 	Console_Unload(game);
 	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));

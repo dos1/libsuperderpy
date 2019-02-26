@@ -248,6 +248,9 @@ struct Game {
 
 		ALLEGRO_TRANSFORM projection; /*!< Projection of the game canvas into the actual game window. */
 
+		ALLEGRO_TRANSFORM* transforms;
+		int transforms_no, transforms_alloc;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif

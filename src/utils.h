@@ -77,6 +77,9 @@ void SetFramebufferAsTarget(struct Game* game);
 void SetClippingRectangle(int x, int y, int width, int height);
 void ResetClippingRectangle(void);
 
+void PushTransform(struct Game* game, ALLEGRO_TRANSFORM* transform);
+void PopTransform(struct Game* game);
+
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 
 void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb));
