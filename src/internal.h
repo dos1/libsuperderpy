@@ -148,5 +148,6 @@ void DestroyShaders(struct Game* game);
 __attribute__((__format__(__printf__, 2, 0))) char* GetGameName(struct Game* game, const char* format);
 ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename);
 void RemoveBitmap(struct Game* game, char* filename);
+void SetupViewport(struct Game* game);
 
 #endif /* LIBSUPERDERPY_INTERNAL_H */

@@ -702,3 +702,60 @@ SYMBOL_INTERNAL void RemoveBitmap(struct Game* game, char* filename) {
 		PrintConsole(game, "Tried to remove non-existent bitmap %s!", filename);
 	}
 }
+
+SYMBOL_INTERNAL void SetupViewport(struct Game* game) {
+	game->viewport.width = game->_priv.params.width;
+	game->viewport.height = game->_priv.params.height;
+
+	if ((game->viewport.width == 0) || (game->viewport.height == 0)) {
+		game->viewport.height = al_get_display_height(game->display);
+		game->viewport.width = (int)(game->_priv.params.aspect * game->viewport.height);
+		if (game->viewport.width > al_get_display_width(game->display)) {
+			game->viewport.width = al_get_display_width(game->display);
+			game->viewport.height = (int)(game->viewport.width / game->_priv.params.aspect);
+		}
+	}
+
+	al_set_target_backbuffer(game->display);
+	al_identity_transform(&game->_priv.projection);
+	al_use_transform(&game->_priv.projection);
+	al_reset_clipping_rectangle();
+
+	float resolution = al_get_display_height(game->display) / (float)game->viewport.height;
+	if (al_get_display_width(game->display) / (float)game->viewport.width < resolution) {
+		resolution = al_get_display_width(game->display) / (float)game->viewport.width;
+	}
+	if (game->_priv.params.integer_scaling) {
+		resolution = floorf(resolution);
+		if (floorf(resolution) == 0) {
+			resolution = 1;
+		}
+	}
+	if ((!strtol(GetConfigOptionDefault(game, "SuperDerpy", "downscale", "1"), NULL, 10)) && (resolution < 1)) {
+		resolution = 1;
+	}
+	if (!strtol(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"), NULL, 10)) {
+		resolution = 1;
+	}
+
+	int clipWidth = (int)(game->viewport.width * resolution);
+	int clipHeight = (int)(game->viewport.height * resolution);
+	if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"), NULL, 10)) {
+		int clipX = (al_get_display_width(game->display) - clipWidth) / 2;
+		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
+		al_build_transform(&game->_priv.projection, clipX, clipY, resolution, resolution, 0.0f);
+		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
+		game->clip_rect.x = clipX;
+		game->clip_rect.y = clipY;
+		game->clip_rect.w = clipWidth;
+		game->clip_rect.h = clipHeight;
+	} else if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"), NULL, 10)) {
+		al_build_transform(&game->_priv.projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
+	}
+	al_use_transform(&game->_priv.projection);
+	Console_Unload(game);
+	Console_Load(game);
+	ResizeGamestates(game);
+
+	PrintConsole(game, "Viewport %dx%d; display %dx%d", game->viewport.width, game->viewport.height, al_get_display_width(game->display), al_get_display_height(game->display));
+}

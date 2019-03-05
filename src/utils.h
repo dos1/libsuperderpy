@@ -67,8 +67,6 @@ __attribute__((__format__(__printf__, 5, 6))) void PrintConsoleWithContext(struc
 __attribute__((__format__(__printf__, 6, 7))) void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...);
 #define FatalError(game, exit, format, ...) FatalErrorWithContext(game, __LINE__, __FILE__, __func__, exit, format, ##__VA_ARGS__)
 
-void SetupViewport(struct Game* game);
-
 void WindowCoordsToViewport(struct Game* game, int* x, int* y);
 
 ALLEGRO_BITMAP* GetFramebuffer(struct Game* game);
