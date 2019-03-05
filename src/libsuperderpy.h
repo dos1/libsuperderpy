@@ -229,6 +229,7 @@ struct Game {
 		double timestamp;
 
 		bool paused;
+		bool started;
 
 		volatile bool texture_sync;
 		ALLEGRO_MUTEX* texture_sync_mutex;

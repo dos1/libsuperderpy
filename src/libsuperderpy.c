@@ -87,8 +87,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.garbage = NULL;
 	game->_priv.timelines = NULL;
 	game->_priv.shaders = NULL;
+	game->_priv.gamestates = NULL;
 
 	game->_priv.paused = false;
+	game->_priv.started = false;
 
 	game->_priv.texture_sync = false;
 	game->_priv.texture_sync_cond = al_create_cond();
@@ -291,8 +293,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
 
-	game->_priv.gamestates = NULL;
-
 	al_init_user_event_source(&(game->event_source));
 
 	game->_priv.event_queue = al_create_event_queue();
@@ -384,6 +384,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 
 	game->_priv.timestamp = al_get_time();
 	game->_priv.paused = false;
+	game->_priv.started = true;
 
 #ifdef LIBSUPERDERPY_IMGUI
 	igCreateContext(NULL);

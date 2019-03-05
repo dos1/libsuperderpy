@@ -178,6 +178,9 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 			game->_priv.loading.gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 		}
 	}
+	if (game->_priv.started) {
+		DrawGamestates(game);
+	}
 }
 
 SYMBOL_INTERNAL int SetupAudio(struct Game* game) {
