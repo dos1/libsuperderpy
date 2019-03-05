@@ -21,17 +21,17 @@
 #include "3rdparty/valgrind.h"
 #include <dlfcn.h>
 
-SYMBOL_INTERNAL void SimpleCompositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb) {
-	struct Gamestate* tmp = gamestates;
+SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
+	struct Gamestate* tmp = GetNextGamestate(game, NULL);
 	ClearToColor(game, al_map_rgb(0, 0, 0));
 	while (tmp) {
-		if ((tmp->loaded) && (tmp->started)) {
-			al_draw_bitmap(tmp->fb, game->clip_rect.x, game->clip_rect.y, 0);
+		if (IsGamestateVisible(game, tmp)) {
+			al_draw_bitmap(GetGamestateFramebuffer(game, tmp), game->clip_rect.x, game->clip_rect.y, 0);
 		}
-		tmp = tmp->next;
+		tmp = GetNextGamestate(game, tmp);
 	}
 	if (game->loading.shown) {
-		al_draw_bitmap(loading_fb, game->clip_rect.x, game->clip_rect.y, 0);
+		al_draw_bitmap(GetGamestateFramebuffer(game, GetGamestate(game, NULL)), game->clip_rect.x, game->clip_rect.y, 0);
 	}
 }
 
@@ -77,7 +77,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	al_reset_clipping_rectangle();
 
 	if (game->_priv.params.handlers.compositor) {
-		game->_priv.params.handlers.compositor(game, game->_priv.gamestates, game->_priv.loading.gamestate->fb);
+		game->_priv.params.handlers.compositor(game);
 	}
 
 	if (game->_priv.params.handlers.postdraw) {

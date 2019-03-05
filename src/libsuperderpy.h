@@ -112,7 +112,7 @@ int _libsuperderpy_main(int argc, char** argv);
 struct Handlers {
 	bool (*event)(struct Game* game, ALLEGRO_EVENT* ev);
 	void (*destroy)(struct Game* game);
-	void (*compositor)(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb);
+	void (*compositor)(struct Game* game);
 	void (*prelogic)(struct Game* game, double delta);
 	void (*postlogic)(struct Game* game, double delta);
 	void (*predraw)(struct Game* game);

@@ -82,7 +82,7 @@ void PopTransform(struct Game* game);
 
 ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 
-void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb));
+void EnableCompositor(struct Game* game, void compositor(struct Game* game));
 void DisableCompositor(struct Game* game);
 
 char* StrToLower(struct Game* game, char* text);

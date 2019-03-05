@@ -93,7 +93,24 @@ struct ScreenshotThreadData {
 	ALLEGRO_BITMAP* bitmap;
 };
 
-void SimpleCompositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb);
+struct Gamestate {
+	char* name;
+	void* handle;
+	bool loaded, pending_load, pending_unload;
+	bool started, pending_start, pending_stop;
+	bool frozen;
+	bool show_loading;
+	bool paused;
+	bool fromlib;
+	bool open;
+	struct Gamestate* next;
+	struct GamestateAPI* api;
+	ALLEGRO_BITMAP* fb;
+	int progress_count;
+	void* data;
+};
+
+void SimpleCompositor(struct Game* game);
 void DrawGamestates(struct Game* game);
 void LogicGamestates(struct Game* game, double delta);
 void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev);

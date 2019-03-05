@@ -127,7 +127,7 @@ SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLO
 
 SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
 	ALLEGRO_BITMAP* target = al_get_target_bitmap();
-	if (GetFramebuffer(game) == target && al_get_parent_bitmap(target) == al_get_backbuffer(game->display)) {
+	if (game->_priv.current_gamestate && GetFramebuffer(game) == target && al_get_parent_bitmap(target) == al_get_backbuffer(game->display)) {
 		al_set_target_backbuffer(game->display);
 	}
 	int x, y, w, h;
@@ -652,7 +652,7 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height) {
 	return bitmap;
 }
 
-SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game, struct Gamestate* gamestates, ALLEGRO_BITMAP* loading_fb)) {
+SYMBOL_EXPORT void EnableCompositor(struct Game* game, void compositor(struct Game* game)) {
 	PrintConsole(game, "Compositor enabled.");
 	game->_priv.params.handlers.compositor = compositor ? compositor : SimpleCompositor;
 	ResizeGamestates(game);
