@@ -716,3 +716,27 @@ SYMBOL_EXPORT void QuitGame(struct Game* game, bool allow_pausing) {
 #endif
 	UnloadAllGamestates(game);
 }
+
+SYMBOL_EXPORT bool ToggleFullscreen(struct Game* game) {
+	game->config.fullscreen = !game->config.fullscreen;
+	if (game->config.fullscreen) {
+		SetConfigOption(game, "SuperDerpy", "fullscreen", "1");
+	} else {
+		SetConfigOption(game, "SuperDerpy", "fullscreen", "0");
+	}
+#ifdef ALLEGRO_ANDROID
+	al_set_display_flag(game->display, ALLEGRO_FRAMELESS, game->config.fullscreen);
+#endif
+	al_set_display_flag(game->display, ALLEGRO_FULLSCREEN_WINDOW, game->config.fullscreen);
+	SetupViewport(game);
+	PrintConsole(game, "Fullscreen toggled");
+	return game->config.fullscreen;
+}
+
+SYMBOL_EXPORT bool ToggleMute(struct Game* game) {
+	game->config.mute = !game->config.mute;
+	al_set_mixer_gain(game->audio.mixer, game->config.mute ? 0.0 : 1.0);
+	SetConfigOption(game, "SuperDerpy", "mute", game->config.mute ? "1" : "0");
+	PrintConsole(game, "Mute: %d", game->config.mute);
+	return game->config.mute;
+}
