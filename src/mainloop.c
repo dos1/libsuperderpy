@@ -48,19 +48,23 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			}
 			break;
 
-		case ALLEGRO_EVENT_DISPLAY_RESIZE:
-			if ((ev->display.width != al_get_display_width(game->display)) || (ev->display.height != al_get_display_height(game->display))) {
+		case ALLEGRO_EVENT_DISPLAY_RESIZE: {
+			bool changed = (ev->display.width != al_get_display_width(game->display)) || (ev->display.height != al_get_display_height(game->display));
+
 #ifdef LIBSUPERDERPY_IMGUI
-				ImGui_ImplAllegro5_InvalidateDeviceObjects();
+			ImGui_ImplAllegro5_InvalidateDeviceObjects();
 #endif
-				al_acknowledge_resize(game->display);
+			al_acknowledge_resize(game->display);
 #ifdef LIBSUPERDERPY_IMGUI
-				ImGui_ImplAllegro5_CreateDeviceObjects();
+			ImGui_ImplAllegro5_CreateDeviceObjects();
 #endif
+			// SetupViewport can be expensive, so don't do it when the resize event is already outdated or doesn't change anything
+			if (changed && ((ev->display.width == al_get_display_width(game->display)) || (ev->display.height == al_get_display_height(game->display)))) {
 				SetupViewport(game);
 			}
-			break;
 
+			break;
+		}
 		case ALLEGRO_EVENT_KEY_DOWN:
 #ifdef ALLEGRO_ANDROID
 			if ((ev->keyboard.keycode == ALLEGRO_KEY_MENU) || (ev->keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev->keyboard.keycode == ALLEGRO_KEY_BACKQUOTE)) {
