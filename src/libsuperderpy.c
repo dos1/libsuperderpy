@@ -289,6 +289,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_inhibit_screensaver(true);
 
 	SetupViewport(game);
+	ClearScreen(game);
 	al_flip_display();
 
 	al_add_new_bitmap_flag(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
@@ -355,7 +356,7 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	// Turns out SDL/Wayland needs some help with emitting the resize event before it's too late.
 	ALLEGRO_EVENT event;
 	al_peek_next_event(game->_priv.event_queue, &event);
-	al_clear_to_color(al_map_rgb(0, 0, 0));
+	ClearScreen(game);
 	al_flip_display();
 
 	{
