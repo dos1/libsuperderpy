@@ -224,7 +224,7 @@ SYMBOL_EXPORT struct TM_Action* TM_AddNamedActionAfter(struct Timeline* timeline
 	return action;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, double delay, char* name) {
 	struct TM_Action* action = malloc(sizeof(struct TM_Action));
 	if (timeline->background) {
 		struct TM_Action* pom = timeline->background;
@@ -239,12 +239,12 @@ SYMBOL_EXPORT struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* tim
 	action->function = func;
 	action->arguments = args;
 	action->name = strdup(name);
-	action->delay = delay / 1000.0;
+	action->delay = delay;
 	action->id = ++timeline->lastid;
 	action->active = true;
 	action->started = false;
 	action->timeline = timeline;
-	PrintConsole(timeline->game, "Timeline Manager[%s]: background: init action with delay %d ms (%d - %s)", timeline->name, delay, action->id, action->name);
+	PrintConsole(timeline->game, "Timeline Manager[%s]: background: init action with delay %d ms (%d - %s)", timeline->name, (int)(delay * 1000), action->id, action->name);
 	action->state = TM_ACTIONSTATE_INIT;
 	(*action->function)(timeline->game, timeline->data, action);
 	return action;
@@ -271,17 +271,17 @@ static TM_ACTION(TM_RunInBackground) {
 	return true;
 }
 
-SYMBOL_EXPORT struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name) {
+SYMBOL_EXPORT struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, double delay, char* name) {
 	TM_WrapArg(int, del, delay);
 	TM_WrapArg(bool, used, false);
 	struct TM_Arguments* arguments = TM_Args(func, del, strdup(name), args, used);
 	return TM_AddAction(timeline, TM_RunInBackground, arguments);
 }
 
-SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, int delay) {
+SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, double delay) {
 	struct TM_Action* tmp = TM_AddNamedAction(timeline, NULL, NULL, "TM_Delay");
-	PrintConsole(timeline->game, "Timeline Manager[%s]: queue: adding delay %d ms (%d)", timeline->name, delay, tmp->id);
-	tmp->delay = delay / 1000.0;
+	PrintConsole(timeline->game, "Timeline Manager[%s]: queue: adding delay %d ms (%d)", timeline->name, (int)(delay * 1000), tmp->id);
+	tmp->delay = delay;
 }
 
 SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {

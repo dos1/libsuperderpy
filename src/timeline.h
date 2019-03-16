@@ -80,10 +80,10 @@ struct TM_Action* TM_AddNamedAction(struct Timeline* timeline, TM_ActionCallback
 struct TM_Action* TM_AddNamedActionAfter(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, struct TM_Action* after, char* name);
 
 /*! \brief Add new action to background queue, with specified name. */
-struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+struct TM_Action* TM_AddNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, double delay, char* name);
 
 /*! \brief Add new action to main queue, which adds specified action into background queue, with specified name. */
-struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, int delay, char* name);
+struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, TM_ActionCallback* func, struct TM_Arguments* args, double delay, char* name);
 
 /*! \brief Add new action to main queue. */
 #define TM_AddAction(timeline, func, args) TM_AddNamedAction(timeline, func, args, #func)
@@ -98,7 +98,7 @@ struct TM_Action* TM_AddQueuedNamedBackgroundAction(struct Timeline* timeline, T
 #define TM_AddQueuedBackgroundAction(timeline, func, args, delay) TM_AddQueuedNamedBackgroundAction(timeline, func, args, delay, #func)
 
 /*! \brief Add delay to main queue. */
-void TM_AddDelay(struct Timeline*, int delay);
+void TM_AddDelay(struct Timeline*, double delay);
 
 /*! \brief Remove all actions from main queue. */
 void TM_CleanQueue(struct Timeline*);
