@@ -81,9 +81,12 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 				}
 				timeline->queue->state = TM_ACTIONSTATE_RUNNING;
 				if ((*timeline->queue->function)(timeline->game, timeline->data, timeline->queue)) {
+					struct TM_Action* tmp = timeline->queue;
+					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: stop action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
+					tmp->state = TM_ACTIONSTATE_STOP;
+					(*tmp->function)(timeline->game, timeline->data, tmp);
 					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: destroy action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
 					delta -= timeline->queue->delta;
-					struct TM_Action* tmp = timeline->queue;
 					timeline->queue = timeline->queue->next;
 					tmp->state = TM_ACTIONSTATE_DESTROY;
 					(*tmp->function)(timeline->game, timeline->data, tmp);
@@ -124,6 +127,9 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 			if (pom->function) {
 				pom->state = TM_ACTIONSTATE_RUNNING;
 				if ((pom->function)(timeline->game, timeline->data, pom)) {
+					PrintConsole(timeline->game, "Timeline Manager[%s]: background: stop action (%d - %s)", timeline->name, pom->id, pom->name);
+					pom->state = TM_ACTIONSTATE_STOP;
+					(pom->function)(timeline->game, timeline->data, pom);
 					PrintConsole(timeline->game, "Timeline Manager[%s]: background: destroy action (%d - %s)", timeline->name, pom->id, pom->name);
 					pom->state = TM_ACTIONSTATE_DESTROY;
 					(pom->function)(timeline->game, timeline->data, pom);
@@ -283,6 +289,10 @@ SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {
 	struct TM_Action *tmp, *pom = timeline->queue;
 	while (pom != NULL) {
 		if (*pom->function) {
+			if (pom->active) {
+				pom->state = TM_ACTIONSTATE_STOP;
+				(*pom->function)(timeline->game, timeline->data, pom);
+			}
 			pom->state = TM_ACTIONSTATE_DESTROY;
 			(*pom->function)(timeline->game, timeline->data, pom);
 		}
@@ -300,6 +310,10 @@ SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	struct TM_Action *tmp, *pom = timeline->background;
 	while (pom != NULL) {
 		if (*pom->function) {
+			if (pom->active) {
+				pom->state = TM_ACTIONSTATE_STOP;
+				(*pom->function)(timeline->game, timeline->data, pom);
+			}
 			pom->state = TM_ACTIONSTATE_DESTROY;
 			(*pom->function)(timeline->game, timeline->data, pom);
 		}
