@@ -87,7 +87,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
-	int ticks = floor((game->time + delta) / ALLEGRO_BPS_TO_SECS(60.0)) - floor(game->time / ALLEGRO_BPS_TO_SECS(60.0));
+	int ticks = (int)(floor((game->time + delta) / ALLEGRO_BPS_TO_SECS(60.0)) - floor(game->time / ALLEGRO_BPS_TO_SECS(60.0)));
 	game->time += delta;
 	if (game->_priv.params.handlers.prelogic) {
 		game->_priv.params.handlers.prelogic(game, delta);

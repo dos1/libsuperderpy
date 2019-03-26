@@ -25,19 +25,19 @@
 
 SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
-		{.x = x, .y = y, .z = 0, .color = top},
-		{.x = x + w, .y = y, .z = 0, .color = top},
-		{.x = x, .y = y + h, .z = 0, .color = bottom},
-		{.x = x + w, .y = y + h, .z = 0, .color = bottom}};
+	  {.x = x, .y = y, .z = 0, .color = top},
+	  {.x = x + w, .y = y, .z = 0, .color = top},
+	  {.x = x, .y = y + h, .z = 0, .color = bottom},
+	  {.x = x + w, .y = y + h, .z = 0, .color = bottom}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
 SYMBOL_EXPORT void DrawHorizontalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR left, ALLEGRO_COLOR right) {
 	ALLEGRO_VERTEX v[] = {
-		{.x = x, .y = y, .z = 0, .color = left},
-		{.x = x + w, .y = y, .z = 0, .color = right},
-		{.x = x, .y = y + h, .z = 0, .color = left},
-		{.x = x + w, .y = y + h, .z = 0, .color = right}};
+	  {.x = x, .y = y, .z = 0, .color = left},
+	  {.x = x + w, .y = y, .z = 0, .color = right},
+	  {.x = x, .y = y + h, .z = 0, .color = left},
+	  {.x = x + w, .y = y + h, .z = 0, .color = right}};
 	al_draw_prim(v, NULL, NULL, 0, 4, ALLEGRO_PRIM_TRIANGLE_STRIP);
 }
 
@@ -122,7 +122,7 @@ SYMBOL_EXPORT void DrawCenteredScaled(ALLEGRO_BITMAP* bitmap, float x, float y, 
 
 SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLOR tint, float x, float y, double sx, double sy, int flags) {
 	al_draw_tinted_scaled_rotated_bitmap(bitmap, tint, al_get_bitmap_width(bitmap) / 2.0, al_get_bitmap_height(bitmap) / 2.0,
-		x, y, sx, sy, 0, flags);
+	  x, y, sx, sy, 0, flags);
 }
 
 SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
@@ -141,9 +141,9 @@ SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
 /* linear filtering code written by SiegeLord */
 SYMBOL_EXPORT ALLEGRO_COLOR InterpolateColor(ALLEGRO_COLOR c1, ALLEGRO_COLOR c2, float frac) {
 	return al_map_rgba_f(c1.r + frac * (c2.r - c1.r),
-		c1.g + frac * (c2.g - c1.g),
-		c1.b + frac * (c2.b - c1.b),
-		c1.a + frac * (c2.a - c1.a));
+	  c1.g + frac * (c2.g - c1.g),
+	  c1.b + frac * (c2.b - c1.b),
+	  c1.a + frac * (c2.a - c1.a));
 }
 
 /*! \brief Scales bitmap using software linear filtering method to current target. */
@@ -561,7 +561,7 @@ SYMBOL_EXPORT void SetClippingRectangle(int x, int y, int width, int height) {
 	float nx = x, ny = y, nx2 = x + width, ny2 = y + height;
 	al_transform_coordinates(&transform, &nx, &ny);
 	al_transform_coordinates(&transform, &nx2, &ny2);
-	al_set_clipping_rectangle(nx, ny, nx2 - nx, ny2 - ny);
+	al_set_clipping_rectangle((int)nx, (int)ny, (int)(nx2 - nx), (int)(ny2 - ny));
 }
 
 SYMBOL_EXPORT void ResetClippingRectangle(void) {
@@ -650,7 +650,7 @@ SYMBOL_EXPORT void QuitGame(struct Game* game, bool allow_pausing) {
 		JNIEnv* env = al_android_get_jni_env();
 		jclass class_id = (*env)->GetObjectClass(env, al_android_get_activity());
 		jmethodID method_id = (*env)->GetMethodID(env, class_id, "moveTaskToBack",
-			"(Z)Z");
+		  "(Z)Z");
 		jvalue jdata;
 		jdata.z = JNI_TRUE;
 		(*env)->CallBooleanMethodA(env, al_android_get_activity(), method_id, &jdata);
