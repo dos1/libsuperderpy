@@ -52,7 +52,7 @@ static char* GetDefaultWindowHeight(struct Game* game) {
 SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Params params) {
 	struct Game* game = calloc(1, sizeof(struct Game));
 
-	game->_priv.name = name;
+	game->_priv.name = strdup(name);
 	game->_priv.params = params;
 
 #ifdef ALLEGRO_MACOSX
@@ -516,6 +516,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_uninstall_system();
 	char** argv = game->_priv.argv;
 	bool restart = game->_priv.restart;
+	free(game->_priv.name);
 	free(game);
 	if (restart) {
 #ifdef ALLEGRO_MACOSX

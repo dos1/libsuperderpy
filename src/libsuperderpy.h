@@ -242,7 +242,7 @@ struct Game {
 
 		ALLEGRO_MUTEX* mutex;
 
-		const char* name;
+		char* name;
 
 		bool shutting_down; /*!< If true then shut down of the game is pending. */
 		bool restart; /*!< If true then restart of the game is pending. */
