@@ -710,6 +710,9 @@ SYMBOL_INTERNAL void SetupViewport(struct Game* game) {
 	game->viewport.width = game->_priv.params.width;
 	game->viewport.height = game->_priv.params.height;
 
+	game->_priv.window_width = al_get_display_width(game->display);
+	game->_priv.window_height = al_get_display_height(game->display);
+
 	if ((game->viewport.width == 0) || (game->viewport.height == 0)) {
 		game->viewport.height = al_get_display_height(game->display);
 		game->viewport.width = (int)(game->_priv.params.aspect * game->viewport.height);

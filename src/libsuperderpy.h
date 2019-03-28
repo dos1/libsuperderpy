@@ -252,6 +252,8 @@ struct Game {
 		ALLEGRO_TRANSFORM* transforms;
 		int transforms_no, transforms_alloc;
 
+		int window_width, window_height;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif
