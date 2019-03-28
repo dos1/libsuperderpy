@@ -22,6 +22,7 @@
 
 #include "internal.h"
 #include <dlfcn.h>
+#include <getopt.h>
 #include <libgen.h>
 #include <locale.h>
 #include <unistd.h>
@@ -51,6 +52,9 @@ static char* GetDefaultWindowHeight(struct Game* game) {
 
 SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char* name, struct Params params) {
 	struct Game* game = calloc(1, sizeof(struct Game));
+
+	game->_priv.argc = argc;
+	game->_priv.argv = argv;
 
 	game->_priv.name = strdup(name);
 	game->_priv.params = params;
@@ -125,6 +129,21 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 #ifdef __EMSCRIPTEN__
 	game->config.fullscreen = false; // we can't start fullscreen on emscripten
 #endif
+
+	static struct option long_options[] =
+		{
+			{"debug", no_argument, NULL, 'd'},
+			{NULL, 0, NULL, 0},
+		};
+
+	char opt;
+	while ((opt = getopt_long(argc, argv, "d", long_options, NULL)) != -1) {
+		switch (opt) {
+			case 'd':
+				game->config.debug.enabled = true;
+				break;
+		}
+	}
 
 	game->_priv.showconsole = game->config.debug.enabled;
 	game->_priv.showtimeline = false;
@@ -319,9 +338,6 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_set_default_mixer(game->audio.mixer);
 
 	setlocale(LC_NUMERIC, "C");
-
-	game->_priv.argc = argc;
-	game->_priv.argv = argv;
 
 	game->data = NULL;
 
