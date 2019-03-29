@@ -23,6 +23,8 @@
 
 // TODO: split to separate files
 
+ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
+
 SYMBOL_EXPORT void DrawVerticalGradientRect(float x, float y, float w, float h, ALLEGRO_COLOR top, ALLEGRO_COLOR bottom) {
 	ALLEGRO_VERTEX v[] = {
 		{.x = x, .y = y, .z = 0, .color = top},
@@ -369,7 +371,7 @@ static char* TestDataFilePath(struct Game* game, const char* filename) {
 	return NULL;
 }
 
-SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
+SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filename) {
 	char* result = 0;
 
 #ifdef ALLEGRO_ANDROID
@@ -477,14 +479,22 @@ SYMBOL_EXPORT char* GetDataFilePath(struct Game* game, const char* filename) {
 		return AddGarbage(game, result);
 	}
 
+	return NULL;
+}
+
+SYMBOL_EXPORT const char* GetDataFilePath(struct Game* game, const char* filename) {
+	const char* result = FindDataFilePath(game, filename);
+
+	if (result) {
+		return result;
+	}
+
 	FatalError(game, true, "Could not find data file: %s!", filename);
 #ifdef __EMSCRIPTEN__
 	emscripten_exit_with_live_runtime();
 #endif
 	exit(1);
 }
-
-ALLEGRO_DEBUG_CHANNEL("libsuperderpy")
 
 SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...) {
 	al_lock_mutex(game->_priv.mutex);
@@ -640,7 +650,7 @@ SYMBOL_EXPORT char* PunchNumber(struct Game* game, char* text, char ch, int numb
 			*tmp = '0' + (int)floorf(number / (float)num) % 10;
 			num *= 10;
 		}
-	};
+	}
 	return AddGarbage(game, txt);
 }
 

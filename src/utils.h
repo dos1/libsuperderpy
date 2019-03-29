@@ -52,8 +52,10 @@ void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height);
 
-/*! \brief Finds path for data file. */
-char* GetDataFilePath(struct Game* game, const char* filename);
+/*! \brief Finds the path for data file. Returns NULL when the file can't be found. */
+const char* FindDataFilePath(struct Game* game, const char* filename);
+/*! \brief Finds the path for data file. Triggers BSOD and quits when the file can't be found. */
+const char* GetDataFilePath(struct Game* game, const char* filename);
 
 __attribute__((__format__(__printf__, 5, 6))) void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...);
 /*! \brief Print some message on game console.
