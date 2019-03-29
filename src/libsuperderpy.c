@@ -84,7 +84,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.font_console = NULL;
 	game->_priv.font_bsod = NULL;
 	game->_priv.console_pos = 0;
-	for (unsigned int i = 0; i < (sizeof(game->_priv.console) / sizeof(game->_priv.console[0])); i++) {
+	for (size_t i = 0; i < (sizeof(game->_priv.console) / sizeof(game->_priv.console[0])); i++) {
 		game->_priv.console[i][0] = '\0';
 	}
 
@@ -442,7 +442,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, true);
 	return 0;
 #else
-	while (libsuperderpy_mainloop(game)) {};
+	while (libsuperderpy_mainloop(game)) {}
 	libsuperderpy_destroy(game);
 	return 0;
 #endif

@@ -456,7 +456,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	double delta = al_get_time() - game->_priv.timestamp;
 	game->_priv.timestamp += delta;
-	delta *= ALLEGRO_BPS_TO_SECS(game->_priv.speed / (1 / 60.f));
+	delta *= ALLEGRO_BPS_TO_SECS(game->_priv.speed / (1 / 60.0));
 
 #ifdef LIBSUPERDERPY_IMGUI
 	ImGui_ImplAllegro5_NewFrame();

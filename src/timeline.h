@@ -127,11 +127,11 @@ bool TM_IsBackgroundEmpty(struct Timeline* timeline);
 /*! \brief Allocates memory and sets given value. */
 #define TM_WrapArg(type, result, val)  \
 	type* result = malloc(sizeof(type)); \
-	*result = val;
+	*(result) = val
 
 /*! \brief Indicates that the action handles only TM_ACTIONSTATE_RUNNING state. */
 #define TM_RunningOnly \
-	if (action->state != TM_ACTIONSTATE_RUNNING) return false;
+	if (action->state != TM_ACTIONSTATE_RUNNING) return false
 
 /*! \brief Shorthand for creating list of arguments for action. */
 #define TM_Args(...) TM_AddToArgs(NULL, TM_NUMARGS(__VA_ARGS__), __VA_ARGS__)

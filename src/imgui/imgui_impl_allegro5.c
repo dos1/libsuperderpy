@@ -76,7 +76,7 @@ SYMBOL_INTERNAL void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
 		ALLEGRO_TRANSFORM transform;
 		al_identity_transform(&transform);
 		al_use_transform(&transform);
-		al_orthographic_transform(&transform, L, T, 1.0f, R, B, -1.0f);
+		al_orthographic_transform(&transform, L, T, 1.0F, R, B, -1.0F);
 		al_use_projection_transform(&transform);
 	}
 
@@ -212,11 +212,11 @@ SYMBOL_INTERNAL bool ImGui_ImplAllegro5_Init(ALLEGRO_DISPLAY* display) {
 	// Unfortunately Allegro doesn't support 32-bits packed colors so we have to convert them to 4 floats.
 	// We still use a custom declaration to use 'ALLEGRO_PRIM_TEX_COORD' instead of 'ALLEGRO_PRIM_TEX_COORD_PIXEL' else we can't do a reliable conversion.
 	ALLEGRO_VERTEX_ELEMENT elems[] =
-	  {
-	    {ALLEGRO_PRIM_POSITION, ALLEGRO_PRIM_FLOAT_2, offsetof(ImDrawVertAllegro, pos)},
-	    {ALLEGRO_PRIM_TEX_COORD, ALLEGRO_PRIM_FLOAT_2, offsetof(ImDrawVertAllegro, uv)},
-	    {ALLEGRO_PRIM_COLOR_ATTR, 0, offsetof(ImDrawVertAllegro, col)},
-	    {0, 0, 0}};
+		{
+			{ALLEGRO_PRIM_POSITION, ALLEGRO_PRIM_FLOAT_2, offsetof(ImDrawVertAllegro, pos)},
+			{ALLEGRO_PRIM_TEX_COORD, ALLEGRO_PRIM_FLOAT_2, offsetof(ImDrawVertAllegro, uv)},
+			{ALLEGRO_PRIM_COLOR_ATTR, 0, offsetof(ImDrawVertAllegro, col)},
+			{0, 0, 0}};
 	g_VertexDecl = al_create_vertex_decl(elems, sizeof(ImDrawVertAllegro));
 
 	io->KeyMap[ImGuiKey_Tab] = ALLEGRO_KEY_TAB;
@@ -368,7 +368,7 @@ SYMBOL_INTERNAL void ImGui_ImplAllegro5_NewFrame() {
 
 	// Setup time step
 	double current_time = al_get_time();
-	io->DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (1.0f / 60.0f);
+	io->DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (1.0F / 60.0F);
 	g_Time = current_time;
 
 	// Setup inputs

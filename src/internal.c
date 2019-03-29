@@ -358,7 +358,7 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 #define GS_ERROR                                                                                                            \
 	FatalError(game, false, "Error on resolving gamestate's %s symbol: %s", gamestate->name, dlerror()); /* TODO: move out */ \
 	free(gamestate->api);                                                                                                     \
-	return false;
+	return false
 
 	if (!(gamestate->api->draw = dlsym(gamestate->handle, "Gamestate_Draw"))) { GS_ERROR; }
 	if (!(gamestate->api->logic = dlsym(gamestate->handle, "Gamestate_Logic"))) { GS_ERROR; }
@@ -749,14 +749,14 @@ SYMBOL_INTERNAL void SetupViewport(struct Game* game) {
 	if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "letterbox", "1"), NULL, 10)) {
 		int clipX = (al_get_display_width(game->display) - clipWidth) / 2;
 		int clipY = (al_get_display_height(game->display) - clipHeight) / 2;
-		al_build_transform(&game->_priv.projection, clipX, clipY, resolution, resolution, 0.0f);
+		al_build_transform(&game->_priv.projection, clipX, clipY, resolution, resolution, 0.0);
 		al_set_clipping_rectangle(clipX, clipY, clipWidth, clipHeight);
 		game->clip_rect.x = clipX;
 		game->clip_rect.y = clipY;
 		game->clip_rect.w = clipWidth;
 		game->clip_rect.h = clipHeight;
 	} else if (strtol(GetConfigOptionDefault(game, "SuperDerpy", "scaling", "1"), NULL, 10)) {
-		al_build_transform(&game->_priv.projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0f);
+		al_build_transform(&game->_priv.projection, 0, 0, al_get_display_width(game->display) / (float)game->viewport.width, al_get_display_height(game->display) / (float)game->viewport.height, 0.0);
 	}
 	al_use_transform(&game->_priv.projection);
 	Console_Unload(game);
