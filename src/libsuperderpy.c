@@ -303,9 +303,12 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	ALLEGRO_BITMAP* icon = al_load_bitmap(GetDataFilePath(game, GetGameName(game, "icons/%s.png")));
-	al_set_display_icon(game->display, icon);
-	al_destroy_bitmap(icon);
+	const char* iconpath = FindDataFilePath(game, GetGameName(game, "icons/%s.png"));
+	if (iconpath) {
+		ALLEGRO_BITMAP* icon = al_load_bitmap(iconpath);
+		al_set_display_icon(game->display, icon);
+		al_destroy_bitmap(icon);
+	}
 
 	if (game->config.fullscreen) { al_hide_mouse_cursor(game->display); }
 	al_inhibit_screensaver(true);
