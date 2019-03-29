@@ -139,7 +139,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 			{NULL, 0, NULL, 0},
 		};
 
-	char opt;
+	int opt;
 	while ((opt = getopt_long(argc, argv, "d", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'd':
