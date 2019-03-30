@@ -135,7 +135,7 @@ void* RemoveFromList(struct List** list, void* data, bool (*identity)(struct Lis
 void AddTimeline(struct Game* game, struct Timeline* timeline);
 void RemoveTimeline(struct Game* game, struct Timeline* timeline);
 void DrawTimelines(struct Game* game);
-bool OpenGamestate(struct Game* game, struct Gamestate* gamestate);
+bool OpenGamestate(struct Game* game, struct Gamestate* gamestate, bool required);
 bool LinkGamestate(struct Game* game, struct Gamestate* gamestate);
 void CloseGamestate(struct Game* game, struct Gamestate* gamestate);
 struct Gamestate* AllocateGamestate(struct Game* game, const char* name);

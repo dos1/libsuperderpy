@@ -391,17 +391,17 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	}
 
 	game->_priv.loading.gamestate = AllocateGamestate(game, "loading");
-	if (!OpenGamestate(game, game->_priv.loading.gamestate) || !LinkGamestate(game, game->_priv.loading.gamestate)) {
-		// TODO: support loading-less scenario
-		return 2;
+	if (OpenGamestate(game, game->_priv.loading.gamestate, false) && LinkGamestate(game, game->_priv.loading.gamestate)) {
+		game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, NULL);
+		game->_priv.loading.gamestate->loaded = true;
+		PrintConsole(game, "Loading screen registered.");
+	} else {
+		PrintConsole(game, "No loading screen available.");
 	}
-	game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, NULL);
-	game->_priv.loading.gamestate->loaded = true;
-	PrintConsole(game, "Loading screen registered.");
 
 	ReloadShaders(game, false);
 
-	if (game->_priv.loading.gamestate->api->post_load) {
+	if (game->_priv.loading.gamestate->open && game->_priv.loading.gamestate->api->post_load) {
 		(*game->_priv.loading.gamestate->api->post_load)(game, game->_priv.loading.gamestate->data);
 	}
 
@@ -483,8 +483,10 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		tmp = pom;
 	}
 
-	(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
-	CloseGamestate(game, game->_priv.loading.gamestate);
+	if (game->_priv.loading.gamestate->open) {
+		(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
+		CloseGamestate(game, game->_priv.loading.gamestate);
+	}
 	free(game->_priv.loading.gamestate);
 
 	if (game->_priv.params.handlers.destroy) {

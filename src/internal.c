@@ -334,13 +334,15 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 #endif
 }
 
-SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestate) {
+SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestate, bool required) {
 	PrintConsole(game, "Opening gamestate \"%s\"...", gamestate->name);
 	char libname[1024];
 	snprintf(libname, 1024, "lib%s-%s" LIBRARY_EXTENSION, game->_priv.name, gamestate->name);
 	gamestate->handle = dlopen(AddGarbage(game, GetLibraryPath(game, libname)), RTLD_NOW);
 	if (!gamestate->handle) {
-		FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror()); // TODO: move out
+		if (required) {
+			FatalError(game, false, "Error while opening gamestate \"%s\": %s", gamestate->name, dlerror());
+		}
 		return false;
 	}
 	if (game->_priv.params.handlers.compositor) {
@@ -618,7 +620,7 @@ SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 			char* name = strdup(tmp->name);
 			CloseGamestate(game, tmp);
 			tmp->name = name;
-			if (OpenGamestate(game, tmp) && LinkGamestate(game, tmp) && tmp->loaded) {
+			if (OpenGamestate(game, tmp, true) && LinkGamestate(game, tmp) && tmp->loaded) {
 				if (tmp->api->reload) {
 					PrintConsole(game, "[%s] Reloading...", tmp->name);
 					tmp->api->reload(game, tmp->data);

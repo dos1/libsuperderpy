@@ -295,12 +295,12 @@ static inline bool MainloopTick(struct Game* game) {
 #ifdef __EMSCRIPTEN__
 			al_detach_voice(game->audio.v);
 #endif
-			if (tmp->show_loading) {
+			if (tmp->show_loading && game->_priv.loading.gamestate->open) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
 
 			if (!tmp->api) {
-				if (!OpenGamestate(game, tmp) || !LinkGamestate(game, tmp)) {
+				if (!OpenGamestate(game, tmp, true) || !LinkGamestate(game, tmp)) {
 					tmp->pending_load = false;
 					tmp->pending_start = false;
 					continue;
@@ -334,7 +334,7 @@ static inline bool MainloopTick(struct Game* game) {
 					double delta = al_get_time() - game->_priv.loading.time;
 					game->time += delta; // TODO: ability to disable passing time during loading
 					game->_priv.loading.time += delta;
-					if (game->loading.shown) {
+					if (game->loading.shown && game->_priv.loading.gamestate->open) {
 						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
 					}
 					DrawGamestates(game);
@@ -394,7 +394,7 @@ static inline bool MainloopTick(struct Game* game) {
 				tmp->loaded = true;
 				tmp->pending_load = false;
 			}
-			if (tmp->show_loading) {
+			if (tmp->show_loading && game->_priv.loading.gamestate->open) {
 				(*game->_priv.loading.gamestate->api->stop)(game, game->_priv.loading.gamestate->data);
 			}
 			tmp->show_loading = true;
