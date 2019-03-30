@@ -68,7 +68,7 @@ struct TM_Action {
 };
 
 /*! \brief Init timeline. */
-struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, char* name);
+struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, const char* name);
 
 /*! \brief Process current timeline actions. */
 void TM_Process(struct Timeline*, double delta);

@@ -26,7 +26,7 @@ static void DestroyArgs(struct TM_Arguments* args) {
 	}
 }
 
-SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, char* name) {
+SYMBOL_EXPORT struct Timeline* TM_Init(struct Game* game, struct GamestateResources* data, const char* name) {
 	PrintConsole(game, "Timeline Manager[%s]: init", name);
 	struct Timeline* timeline = malloc(sizeof(struct Timeline));
 	timeline->game = game;
@@ -373,8 +373,12 @@ SYMBOL_EXPORT struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int n
 }
 
 SYMBOL_EXPORT void* TM_GetArg(struct TM_Arguments* args, int num) {
+	if (!args) { return NULL; }
 	for (int i = 0; i < num; i++) {
 		args = args->next;
+		if (!args) {
+			return NULL;
+		}
 	}
 	return args->value;
 }
