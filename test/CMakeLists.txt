@@ -1,0 +1,9 @@
+find_package(CMocka)
+
+if (CMOCKA_FOUND)
+	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../src")
+	add_executable(engine-tests tests.c timeline.c)
+	target_link_libraries(engine-tests cmocka libsuperderpy)
+else(CMOCKA_FOUND)
+	message("CMocka not found; tests disabled.")
+endif(CMOCKA_FOUND)
