@@ -55,12 +55,11 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 	double origDelta = delta;
 	while (delta > 0.0) {
 		if (timeline->queue) {
-			timeline->queue->delta = delta;
-
 			if (timeline->queue->active && timeline->queue->delay > 0.0) {
 				timeline->queue->delay -= delta;
 				if (timeline->queue->delay <= 0.0) {
-					timeline->queue->started = true;
+					delta = -timeline->queue->delay;
+					timeline->queue->delta = delta;
 					if (timeline->queue->function) {
 						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: run action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
 						timeline->queue->state = TM_ACTIONSTATE_START;
@@ -68,16 +67,21 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 					} else {
 						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay reached (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
 					}
+					timeline->queue->started = true;
 					timeline->queue->delay = 0.0;
+				} else {
+					delta = 0.0;
 				}
 			}
 
+			timeline->queue->delta = delta;
 			if (timeline->queue->function) {
 				if (!timeline->queue->started) {
+					timeline->queue->active = true;
+					timeline->queue->started = true;
 					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: run action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
 					timeline->queue->state = TM_ACTIONSTATE_START;
 					(*timeline->queue->function)(timeline->game, timeline->data, timeline->queue);
-					timeline->queue->started = true;
 				}
 				timeline->queue->state = TM_ACTIONSTATE_RUNNING;
 				if ((*timeline->queue->function)(timeline->game, timeline->data, timeline->queue)) {
@@ -86,7 +90,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 					tmp->state = TM_ACTIONSTATE_STOP;
 					(*tmp->function)(timeline->game, timeline->data, tmp);
 					PrintConsole(timeline->game, "Timeline Manager[%s]: queue: destroy action (%d - %s)", timeline->name, timeline->queue->id, timeline->queue->name);
-					delta -= timeline->queue->delta;
+					delta = timeline->queue->delta;
 					timeline->queue = timeline->queue->next;
 					tmp->state = TM_ACTIONSTATE_DESTROY;
 					(*tmp->function)(timeline->game, timeline->data, tmp);
@@ -94,11 +98,19 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 					free(tmp->name);
 					free(tmp);
 				} else {
-					delta = 0.0;
+					SUPPRESS_WARNING("-Wfloat-equal") // we're literally checking if the value remained unchanged
+					if (delta == timeline->queue->delta) {
+						// an action that repeats itself but doesn't eat any delta may potentially run infinitely, so don't let it.
+						// actions that eat delta don't have this issue - eventually there will be no delta left.
+						delta = 0.0;
+					} else {
+						delta = timeline->queue->delta;
+					}
+					SUPPRESS_END
 				}
 			} else {
 				/* delay handling */
-				if (timeline->queue->started) {
+				if (timeline->queue->started) { // delay has ended (an action would start now)
 					struct TM_Action* tmp = timeline->queue;
 					timeline->queue = timeline->queue->next;
 					free(tmp->name);
@@ -108,7 +120,6 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 						PrintConsole(timeline->game, "Timeline Manager[%s]: queue: delay started %d ms (%d - %s)", timeline->name, (int)(timeline->queue->delay * 1000), timeline->queue->id, timeline->queue->name);
 						timeline->queue->active = true;
 					}
-					delta = 0.0;
 				}
 			}
 		} else {
