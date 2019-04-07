@@ -414,6 +414,8 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	ImGui_ImplAllegro5_Init(game->display);
 	igStyleColorsDark(NULL);
 	igGetStyle()->FrameBorderSize = 1.0;
+	ImGuiIO* io = igGetIO();
+	io->FontGlobalScale = strtod(GetConfigOptionDefault(game, "SuperDerpy", "scale", "1"), NULL);
 #endif
 
 	return 0;
