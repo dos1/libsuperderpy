@@ -525,7 +525,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));
 	al_destroy_event_queue(game->_priv.event_queue);
-	al_set_default_mixer(NULL); // does not destroy anything
+	al_restore_default_mixer();
 	al_destroy_mixer(game->audio.fx);
 	al_destroy_mixer(game->audio.music);
 	al_destroy_mixer(game->audio.voice);
