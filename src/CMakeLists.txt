@@ -53,4 +53,6 @@ if (ANDROID)
 	target_link_libraries("libsuperderpy" log)
 endif (ANDROID)
 
-install(TARGETS "libsuperderpy" DESTINATION ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+if (NOT LIBSUPERDERPY_STATIC)
+	install(TARGETS "libsuperderpy" DESTINATION ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+endif (NOT LIBSUPERDERPY_STATIC)
