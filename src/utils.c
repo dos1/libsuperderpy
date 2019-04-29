@@ -404,74 +404,80 @@ SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filena
 	}
 #endif
 
-#if (defined __EMSCRIPTEN__) || (defined ALLEGRO_ANDROID)
-	char* file = AddGarbage(game, strdup(filename));
-	char* sub = strstr(file, ".flac");
-	if (sub) {
-		sub[0] = '.';
-		sub[1] = 'o';
-		sub[2] = 'p';
-		sub[3] = 'u';
-		sub[4] = 's';
-		sub[5] = 0;
+#ifdef LIBSUPERDERPY_FLACTOLOSSY_EXT
+	{
+		char* file = AddGarbage(game, strdup(filename));
+		char* sub = strstr(file, ".flac");
+		if (sub) {
+			sub[0] = '.';
+			sub[1] = LIBSUPERDERPY_FLACTOLOSSY_EXT[0];
+			sub[2] = LIBSUPERDERPY_FLACTOLOSSY_EXT[1];
+			sub[3] = LIBSUPERDERPY_FLACTOLOSSY_EXT[2];
+			sub[4] = LIBSUPERDERPY_FLACTOLOSSY_EXT[3];
+			sub[5] = 0;
+		}
+		result = TestDataFilePath(game, file);
+		if (result) {
+			return AddGarbage(game, result);
+		}
 	}
-	result = TestDataFilePath(game, file);
-	if (result) {
-		return AddGarbage(game, result);
-	}
+#endif
 
-	sub = strstr(file, ".png");
-	if (sub) {
-		sub[0] = '.';
-		sub[1] = 'w';
-		sub[2] = 'b';
-		sub[3] = 'p';
-		sub[4] = 0;
-	}
-	result = TestDataFilePath(game, file);
-	if (result) {
-		return AddGarbage(game, result);
-	}
+#ifdef LIBSUPERDERPY_IMGTOWEBP
+	{
+		char* file = AddGarbage(game, strdup(filename));
+		char* sub = strstr(file, ".png");
+		if (sub) {
+			sub[0] = '.';
+			sub[1] = 'w';
+			sub[2] = 'b';
+			sub[3] = 'p';
+			sub[4] = 0;
+		}
+		result = TestDataFilePath(game, file);
+		if (result) {
+			return AddGarbage(game, result);
+		}
 
-	sub = strstr(file, ".jpg");
-	if (sub) {
-		sub[0] = '.';
-		sub[1] = 'w';
-		sub[2] = 'b';
-		sub[3] = 'p';
-		sub[4] = 0;
-	}
-	result = TestDataFilePath(game, file);
-	if (result) {
-		return AddGarbage(game, result);
-	}
+		sub = strstr(file, ".jpg");
+		if (sub) {
+			sub[0] = '.';
+			sub[1] = 'w';
+			sub[2] = 'b';
+			sub[3] = 'p';
+			sub[4] = 0;
+		}
+		result = TestDataFilePath(game, file);
+		if (result) {
+			return AddGarbage(game, result);
+		}
 
-	sub = strstr(file, ".JPG");
-	if (sub) {
-		sub[0] = '.';
-		sub[1] = 'w';
-		sub[2] = 'b';
-		sub[3] = 'p';
-		sub[4] = 0;
-	}
-	result = TestDataFilePath(game, file);
-	if (result) {
-		return AddGarbage(game, result);
-	}
+		sub = strstr(file, ".JPG");
+		if (sub) {
+			sub[0] = '.';
+			sub[1] = 'w';
+			sub[2] = 'b';
+			sub[3] = 'p';
+			sub[4] = 0;
+		}
+		result = TestDataFilePath(game, file);
+		if (result) {
+			return AddGarbage(game, result);
+		}
 
-	sub = strstr(file, ".webp");
-	if (sub) {
-		sub[0] = '.';
-		sub[1] = 'w';
-		sub[2] = 'b';
-		sub[3] = 'p';
-		sub[4] = 0;
+		sub = strstr(file, ".webp");
+		if (sub) {
+			sub[0] = '.';
+			sub[1] = 'w';
+			sub[2] = 'b';
+			sub[3] = 'p';
+			sub[4] = 0;
+		}
+		result = TestDataFilePath(game, file);
+		if (result) {
+			return AddGarbage(game, result);
+		}
 	}
-	result = TestDataFilePath(game, file);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-
 #endif
 
 	result = TestDataFilePath(game, filename);
