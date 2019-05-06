@@ -103,8 +103,8 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 			}
 			tmp->bitmap = AddBitmap(game, filename);
 			tmp->filepath = strdup(filename);
-			tmp->width = al_get_bitmap_width(tmp->bitmap) / tmp->cols;
-			tmp->height = al_get_bitmap_height(tmp->bitmap) / tmp->rows;
+			tmp->width = (al_get_bitmap_width(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->cols;
+			tmp->height = (al_get_bitmap_height(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->rows;
 		}
 		for (int i = 0; i < tmp->frame_count; i++) {
 			if ((!tmp->frames[i].source) && (tmp->frames[i].file)) {
@@ -120,15 +120,15 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 				tmp->frames[i].source = AddBitmap(game, filename);
 				tmp->frames[i].filepath = strdup(filename);
 			} else if (!tmp->frames[i].source) {
-				tmp->frames[i].source = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width, tmp->frames[i].row * tmp->height, tmp->width, tmp->height);
+				tmp->frames[i].source = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].row * tmp->height * LIBSUPERDERPY_IMAGE_SCALE, tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->height * LIBSUPERDERPY_IMAGE_SCALE);
 			}
-			tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->frames[i].source, tmp->frames[i].sx, tmp->frames[i].sy, (tmp->frames[i].sw > 0) ? tmp->frames[i].sw : al_get_bitmap_width(tmp->frames[i].source), (tmp->frames[i].sh > 0) ? tmp->frames[i].sh : al_get_bitmap_height(tmp->frames[i].source));
+			tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->frames[i].source, tmp->frames[i].sx * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].sy * LIBSUPERDERPY_IMAGE_SCALE, (tmp->frames[i].sw > 0) ? (tmp->frames[i].sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(tmp->frames[i].source), (tmp->frames[i].sh > 0) ? (tmp->frames[i].sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(tmp->frames[i].source));
 
-			int width = al_get_bitmap_width(tmp->frames[i].bitmap) + tmp->frames[i].x;
+			int width = al_get_bitmap_width(tmp->frames[i].bitmap) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].x;
 			if (width > tmp->width) {
 				tmp->width = width;
 			}
-			int height = al_get_bitmap_height(tmp->frames[i].bitmap) + tmp->frames[i].y;
+			int height = al_get_bitmap_height(tmp->frames[i].bitmap) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].y;
 			if (height > tmp->height) {
 				tmp->height = height;
 			}
@@ -528,6 +528,7 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 		al_compose_transform(&transform, &parent);
 		// FIXME: position should be calculated in relation to parents pivot point
 	}
+
 	return transform;
 }
 
@@ -561,9 +562,14 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_compose_transform(&transform, &current);
 	al_use_transform(&transform);
 
-	al_draw_tinted_bitmap(character->frame->bitmap, GetCharacterTint(game, character), character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y, 0);
+	al_draw_tinted_scaled_bitmap(character->frame->bitmap, GetCharacterTint(game, character),
+		0, 0,
+		al_get_bitmap_width(character->frame->bitmap), al_get_bitmap_height(character->frame->bitmap),
+		character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y,
+		al_get_bitmap_width(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE, al_get_bitmap_height(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE,
+		0);
 
-	/*	al_hold_bitmap_drawing(false);
+	/*al_hold_bitmap_drawing(false);
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
 		character->spritesheet->height * character->spritesheet->pivotY - 5,
 		character->spritesheet->width * character->spritesheet->pivotX + 5,
@@ -645,10 +651,10 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
 		int xpos = (int)x - character->spritesheet->frames[character->pos].x, ypos = (int)y - character->spritesheet->frames[character->pos].y;
-		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->bitmap) || ypos >= al_get_bitmap_height(character->frame->bitmap)) {
+		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE || ypos >= al_get_bitmap_height(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) {
 			return false;
 		}
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, xpos, ypos);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, xpos * LIBSUPERDERPY_IMAGE_SCALE, ypos * LIBSUPERDERPY_IMAGE_SCALE);
 		return (color.a > 0.0);
 	}
 
