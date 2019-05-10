@@ -485,10 +485,10 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		tmp = pom;
 	}
 
-	if (game->_priv.loading.gamestate->open) {
+	if (game->_priv.loading.gamestate->api) {
 		(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
-		CloseGamestate(game, game->_priv.loading.gamestate);
 	}
+	CloseGamestate(game, game->_priv.loading.gamestate);
 	free(game->_priv.loading.gamestate);
 
 	if (game->_priv.params.handlers.destroy) {
