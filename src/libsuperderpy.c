@@ -32,7 +32,7 @@
 
 static char* GetDefaultWindowWidth(struct Game* game) {
 	char* buf = malloc(sizeof(char) * 255);
-	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.width / (double)game->_priv.params.height);
+	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.height ? (game->_priv.params.width / (double)game->_priv.params.height) : 1.0);
 	if (aspect < 1.0) {
 		aspect = 1.0;
 	}
@@ -42,7 +42,7 @@ static char* GetDefaultWindowWidth(struct Game* game) {
 
 static char* GetDefaultWindowHeight(struct Game* game) {
 	char* buf = malloc(sizeof(char) * 255);
-	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.width / (double)game->_priv.params.height);
+	double aspect = game->_priv.params.aspect ? game->_priv.params.aspect : (game->_priv.params.height ? (game->_priv.params.width / (double)game->_priv.params.height) : 1.0);
 	if (aspect > 1.0) {
 		aspect = 1.0;
 	}
