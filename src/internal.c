@@ -413,7 +413,6 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 }
 
 SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamestate) {
-	free(gamestate->name);
 	if (!gamestate->open) {
 		return;
 	}
@@ -421,12 +420,15 @@ SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamesta
 #ifndef LEAK_SANITIZER
 		PrintConsole(game, "Closing gamestate \"%s\"...", gamestate->name);
 		dlclose(gamestate->handle);
+		gamestate->handle = NULL;
 #endif
 	}
 	if (gamestate->api) {
 		free(gamestate->api);
+		gamestate->api = NULL;
 	}
 	al_destroy_bitmap(gamestate->fb);
+	gamestate->fb = NULL;
 }
 
 SYMBOL_INTERNAL struct List* AddToList(struct List* list, void* data) {
@@ -619,9 +621,7 @@ SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
 		if (tmp->open && tmp->fromlib) {
-			char* name = strdup(tmp->name);
 			CloseGamestate(game, tmp);
-			tmp->name = name;
 			if (OpenGamestate(game, tmp, true) && LinkGamestate(game, tmp) && tmp->loaded) {
 				if (tmp->api->reload) {
 					PrintConsole(game, "[%s] Reloading...", tmp->name);
