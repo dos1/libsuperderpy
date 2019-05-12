@@ -52,8 +52,14 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 	# TODO: add -fvisibility=hidden, but only to libsuperderpy target
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math -fstack-protector")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math -fstack-protector")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
+
+	if (NOT MAEMO5)
+		# stack protector causes segfaults on Maemo
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector")
+	endif(NOT MAEMO5)
 
 	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage")
