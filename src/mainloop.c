@@ -105,8 +105,8 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			break;
 	}
 
-#ifdef MAEMO5
-	// on Maemo we get mouse events instead of touch ones, so we'll rewrite them by ourselves
+#ifdef LIBSUPERDERPY_EMULATE_TOUCH
+	// on some platforms (like Maemo or Pocket C.H.I.P) we get mouse events instead of touch ones, so we'll rewrite them by ourselves
 
 	if ((ev->type == ALLEGRO_EVENT_MOUSE_AXES) || (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) || (ev->type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)) {
 		switch (ev->type) {
