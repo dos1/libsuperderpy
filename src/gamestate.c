@@ -41,7 +41,8 @@ SYMBOL_EXPORT void RegisterGamestate(struct Game* game, const char* name, struct
 		PrintConsole(game, "Trying to register already registered gamestate \"%s\"!", name);
 		return;
 	}
-	gs->api = api;
+	gs->api = malloc(sizeof(struct GamestateAPI));
+	*gs->api = *api;
 	gs->fromlib = false;
 	PrintConsole(game, "Gamestate \"%s\" registered.", name);
 }

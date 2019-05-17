@@ -169,9 +169,20 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 	endif()
 
-	option(LIBSUPERDERPY_STATIC "Compile and link libsuperderpy as a static library." OFF)
+	option(BUILD_SHARED_LIBS "Use dynamic linking" ON)
+	if (NOT BUILD_SHARED_LIBS)
+		set(STATIC_DEFAULT ON)
+	else()
+		set(STATIC_DEFAULT OFF)
+	endif()
 
-	option(LIBSUPERDERPY_STATIC_DEPS "Link dependencies (e.g. Allegro) statically." OFF)
+	option(LIBSUPERDERPY_STATIC "Compile and link libsuperderpy as a static library." ${STATIC_DEFAULT})
+	option(LIBSUPERDERPY_STATIC_GAMESTATES "Compile and link gamestates as static libraries" ${STATIC_DEFAULT})
+	if(LIBSUPERDERPY_STATIC_GAMESTATES)
+		add_definitions("-DLIBSUPERDERPY_STATIC_GAMESTATES")
+	endif(LIBSUPERDERPY_STATIC_GAMESTATES)
+
+	option(LIBSUPERDERPY_STATIC_DEPS "Link dependencies (e.g. Allegro) statically." ${STATIC_DEFAULT})
 	if(LIBSUPERDERPY_STATIC_DEPS)
 		SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a)
 	endif(LIBSUPERDERPY_STATIC_DEPS)
@@ -188,6 +199,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	if(MAEMO5 OR POCKETCHIP)
 		add_definitions(-DLIBSUPERDERPY_EMULATE_TOUCH=1)
 	endif(MAEMO5 OR POCKETCHIP)
+
+	if(EMSCRIPTEN OR SWITCH)
+		add_definitions(-DLIBSUPERDERPY_NO_RESTART=1)
+	endif(EMSCRIPTEN OR SWITCH)
 
 	set(GAMESTATE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 
@@ -285,16 +300,22 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	MACRO(register_gamestate name sources)
 
-		add_library("lib${LIBSUPERDERPY_GAMENAME}-${name}" MODULE ${sources})
+		if (LIBSUPERDERPY_STATIC_GAMESTATES)
+			add_library("lib${LIBSUPERDERPY_GAMENAME}-${name}" STATIC ${sources})
+		else(LIBSUPERDERPY_STATIC_GAMESTATES)
+			add_library("lib${LIBSUPERDERPY_GAMENAME}-${name}" MODULE ${sources})
+		endif(LIBSUPERDERPY_STATIC_GAMESTATES)
+
+		target_compile_definitions("lib${LIBSUPERDERPY_GAMENAME}-${name}" PRIVATE LIBSUPERDERPY_GAMESTATE=${name})
 
 		set_target_properties("lib${LIBSUPERDERPY_GAMENAME}-${name}" PROPERTIES PREFIX "")
 
 		if (NOT EMSCRIPTEN)
 			if (TARGET lib${LIBSUPERDERPY_GAMENAME})
-				target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" lib${LIBSUPERDERPY_GAMENAME})
+				target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" lib${LIBSUPERDERPY_GAMENAME} ${LIBSUPERDERPY_EXTRA_LIBS})
 			else (TARGET lib${LIBSUPERDERPY_GAMENAME})
 				if (NOT LIBSUPERDERPY_STATIC)
-					target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy)
+					target_link_libraries("lib${LIBSUPERDERPY_GAMENAME}-${name}" libsuperderpy ${LIBSUPERDERPY_EXTRA_LIBS})
 				endif (NOT LIBSUPERDERPY_STATIC)
 			endif(TARGET lib${LIBSUPERDERPY_GAMENAME})
 		endif (NOT EMSCRIPTEN)
@@ -418,9 +439,15 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif (ANDROID OR EMSCRIPTEN)
 
 	MACRO(add_libsuperderpy_target EXECUTABLE_SRC_LIST)
+		if (LIBSUPERDERPY_STATIC_GAMESTATES)
+			set(SRC_LIST ${EXECUTABLE_SRC_LIST} "${LIBSUPERDERPY_DIR}/src/gamestates-force-inclusion.c")
+		else()
+			set(SRC_LIST ${EXECUTABLE_SRC_LIST})
+		endif()
+
 		if(ANDROID)
 			set(EXECUTABLE superderpy-game)
-			add_library(${EXECUTABLE} SHARED ${EXECUTABLE_SRC_LIST})
+			add_library(${EXECUTABLE} SHARED ${SRC_LIST})
 
 			set(APK_PATH ${CMAKE_BINARY_DIR}/android/bin/${LIBSUPERDERPY_GAMENAME}-debug.apk)
 
@@ -447,7 +474,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 				)
 
 		else(ANDROID)
-			add_executable(${EXECUTABLE} WIN32 MACOSX_BUNDLE ${EXECUTABLE_SRC_LIST})
+			add_executable(${EXECUTABLE} WIN32 MACOSX_BUNDLE ${SRC_LIST})
 		endif(ANDROID)
 
 		if(EMSCRIPTEN)

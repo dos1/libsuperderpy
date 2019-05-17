@@ -21,7 +21,6 @@
 #endif
 
 #include "internal.h"
-#include <dlfcn.h>
 #include <getopt.h>
 #include <libgen.h>
 #include <locale.h>
@@ -352,8 +351,14 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->loading.progress = 0;
 
+#ifdef LIBSUPERDERPY_STATIC_GAMESTATES
+	__libsuperderpy_register_gamestate(NULL, NULL, game);
+#endif
+
 	return game;
 }
+
+static void ProgressStub(struct Game* game) {}
 
 SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
@@ -383,16 +388,31 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 
 	{
 		struct Gamestate* tmp = game->_priv.gamestates;
+#ifdef LIBSUPERDERPY_STATIC_GAMESTATES
+		if (tmp && strcmp(tmp->name, "loading") == 0) {
+			game->_priv.gamestates = tmp->next;
+			game->_priv.loading.gamestate = tmp;
+			tmp = game->_priv.gamestates;
+		}
+#endif
 		while (tmp) {
 			// don't show loading screen on init if requested
 			tmp->show_loading = game->_priv.params.show_loading_on_launch;
+#ifdef LIBSUPERDERPY_STATIC_GAMESTATES
+			if (tmp->next && strcmp(tmp->next->name, "loading") == 0) {
+				game->_priv.loading.gamestate = tmp->next;
+				tmp->next = tmp->next->next;
+			}
+#endif
 			tmp = tmp->next;
 		}
 	}
 
-	game->_priv.loading.gamestate = AllocateGamestate(game, "loading");
+	if (!game->_priv.loading.gamestate) {
+		game->_priv.loading.gamestate = AllocateGamestate(game, "loading");
+	}
 	if (OpenGamestate(game, game->_priv.loading.gamestate, false) && LinkGamestate(game, game->_priv.loading.gamestate)) {
-		game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, NULL);
+		game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, ProgressStub);
 		game->_priv.loading.gamestate->loaded = true;
 		PrintConsole(game, "Loading screen registered.");
 	} else {
@@ -486,7 +506,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		tmp = pom;
 	}
 
-	if (game->_priv.loading.gamestate->api) {
+	if (game->_priv.loading.gamestate->open && game->_priv.loading.gamestate->api) {
 		(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
 	}
 	CloseGamestate(game, game->_priv.loading.gamestate);
@@ -540,8 +560,11 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_mutex(game->_priv.mutex);
 	al_uninstall_audio();
 	DeinitConfig(game);
-#ifndef __EMSCRIPTEN__
+#ifndef __EMSCRIPTEN__ // ???
 	al_uninstall_system();
+#endif
+
+#ifndef LIBSUPERDERPY_NO_RESTART
 	char** argv = game->_priv.argv;
 	bool restart = game->_priv.restart;
 	free(game->_priv.name);

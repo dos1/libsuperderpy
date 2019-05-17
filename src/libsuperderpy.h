@@ -278,4 +278,8 @@ int libsuperderpy_start(struct Game* game);
 int libsuperderpy_run(struct Game* game);
 void libsuperderpy_destroy(struct Game* game);
 
+#ifdef LIBSUPERDERPY_STATIC_GAMESTATES
+void __libsuperderpy_register_gamestate(const char* name, struct GamestateAPI* api, struct Game* game);
+#endif
+
 #endif /* LIBSUPERDERPY_MAIN_H */

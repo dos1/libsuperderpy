@@ -19,7 +19,10 @@
 
 #include "internal.h"
 #include "3rdparty/valgrind.h"
+
+#ifndef LIBSUPERDERPY_STATIC_GAMESTATES
 #include <dlfcn.h>
+#endif
 
 SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 	struct Gamestate* tmp = GetNextGamestate(game, NULL);
@@ -338,6 +341,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 
 SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestate, bool required) {
 	PrintConsole(game, "Opening gamestate \"%s\"...", gamestate->name);
+#ifndef LIBSUPERDERPY_STATIC_GAMESTATES
 	char libname[1024];
 	snprintf(libname, 1024, "lib%s-%s" LIBRARY_EXTENSION, game->_priv.name, gamestate->name);
 	gamestate->handle = dlopen(AddGarbage(game, GetLibraryPath(game, libname)), RTLD_NOW);
@@ -347,6 +351,12 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 		}
 		return false;
 	}
+#else
+	if (gamestate->fromlib) {
+		FatalError(game, false, "Tried to open a not registered gamestate \"%s\"!", gamestate->name);
+		return false;
+	}
+#endif
 	if (game->_priv.params.handlers.compositor) {
 		gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
 	} else {
@@ -357,6 +367,8 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 }
 
 SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestate) {
+	PrintConsole(game, "Linking gamestate \"%s\"...", gamestate->name);
+#ifndef LIBSUPERDERPY_STATIC_GAMESTATES
 	gamestate->api = calloc(1, sizeof(struct GamestateAPI));
 
 #define GS_ERROR                                                                                                            \
@@ -380,11 +392,17 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 	gamestate->api->reload = dlsym(gamestate->handle, "Gamestate_Reload");
 	gamestate->api->progress_count = dlsym(gamestate->handle, "Gamestate_ProgressCount");
 
+#undef GS_ERROR
+
+#else
+	if (!gamestate->api) {
+		return false;
+	}
+#endif
+
 	if (gamestate->api->progress_count) {
 		gamestate->progress_count = *gamestate->api->progress_count;
 	}
-
-#undef GS_ERROR
 
 	return true;
 }
@@ -413,22 +431,26 @@ SYMBOL_INTERNAL struct Gamestate* AllocateGamestate(struct Game* game, const cha
 }
 
 SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamestate) {
-	if (!gamestate->open) {
-		return;
-	}
-	if (gamestate->handle && !RUNNING_ON_VALGRIND) {
-#ifndef LEAK_SANITIZER
-		PrintConsole(game, "Closing gamestate \"%s\"...", gamestate->name);
-		dlclose(gamestate->handle);
-		gamestate->handle = NULL;
-#endif
-	}
+	PrintConsole(game, "Closing gamestate \"%s\"...", gamestate->name);
 	if (gamestate->api) {
 		free(gamestate->api);
 		gamestate->api = NULL;
 	}
+	if (!gamestate->open) {
+		PrintConsole(game, "Gamestate \"%s\" already closed.", gamestate->name);
+		return;
+	}
+#ifndef LIBSUPERDERPY_STATIC_GAMESTATES
+	if (gamestate->handle && !RUNNING_ON_VALGRIND) {
+#ifndef LEAK_SANITIZER
+		dlclose(gamestate->handle);
+		gamestate->handle = NULL;
+#endif
+	}
+#endif
 	al_destroy_bitmap(gamestate->fb);
 	gamestate->fb = NULL;
+	gamestate->open = false;
 }
 
 SYMBOL_INTERNAL struct List* AddToList(struct List* list, void* data) {
@@ -772,3 +794,24 @@ SYMBOL_INTERNAL void SetupViewport(struct Game* game) {
 
 	PrintConsole(game, "Viewport %dx%d; display %dx%d", game->viewport.width, game->viewport.height, al_get_display_width(game->display), al_get_display_height(game->display));
 }
+
+#ifdef LIBSUPERDERPY_STATIC_GAMESTATES
+
+SYMBOL_EXPORT void __libsuperderpy_register_gamestate(const char* name, struct GamestateAPI* api, struct Game* game) {
+	static int counter = 0;
+	static struct GamestateAPI apis[256];
+	static const char* names[256];
+	if (counter == 255) {
+		return;
+	}
+	if (api) {
+		names[counter] = name;
+		apis[counter++] = *api;
+	}
+	if (game) {
+		for (int i = 0; i < counter; i++) {
+			RegisterGamestate(game, names[i], &apis[i]);
+		}
+	}
+}
+#endif

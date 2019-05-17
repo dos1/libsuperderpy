@@ -1,4 +1,21 @@
 FILE (GLOB gamestates "*.c")
+
+if(LIBSUPERDERPY_STATIC_GAMESTATES)
+	set(LIBSUPERDERPY_GAMESTATES_CONSTRUCTOR "")
+	set(LIBSUPERDERPY_GAMESTATES_STUB "")
+
+	FOREACH(gamestate ${gamestates})
+		get_filename_component(gamestate_name ${gamestate} NAME_WE)
+		set(LIBSUPERDERPY_GAMESTATES_CONSTRUCTOR "${LIBSUPERDERPY_GAMESTATES_CONSTRUCTOR} void __libsuperderpy_init_${gamestate_name}_gamestate(void); __libsuperderpy_init_${gamestate_name}_gamestate();")
+		set(LIBSUPERDERPY_GAMESTATES_STUB "${LIBSUPERDERPY_GAMESTATES_STUB} GAMESTATE_STUB(${gamestate_name}) ")
+	ENDFOREACH(gamestate)
+
+	configure_file("${LIBSUPERDERPY_DIR}/src/gamestates-constructor.c.in" "${CMAKE_BINARY_DIR}/gen/gamestates-constructor.c")
+	configure_file("${LIBSUPERDERPY_DIR}/src/gamestates-stub.c.in" "${CMAKE_BINARY_DIR}/gen/gamestates-stub.c")
+	add_library(libsuperderpy-gamestates STATIC "${CMAKE_BINARY_DIR}/gen/gamestates-constructor.c")
+	add_library(libsuperderpy-gamestates-stub STATIC "${CMAKE_BINARY_DIR}/gen/gamestates-stub.c")
+endif(LIBSUPERDERPY_STATIC_GAMESTATES)
+
 FOREACH(gamestate ${gamestates})
 	get_filename_component(gamestate_name ${gamestate} NAME_WE)
 	set(sources "${gamestate_name}.c")
@@ -8,4 +25,11 @@ FOREACH(gamestate ${gamestates})
 		list(APPEND sources "${gamestate_name}/${submodule_name}.c")
 	ENDFOREACH(submodule)
 	register_gamestate(${gamestate_name} "${sources}")
+	if (LIBSUPERDERPY_STATIC_GAMESTATES)
+		target_link_libraries("libsuperderpy-gamestates" lib${LIBSUPERDERPY_GAMENAME}-${gamestate_name})
+	endif (LIBSUPERDERPY_STATIC_GAMESTATES)
 ENDFOREACH(gamestate)
+
+if (LIBSUPERDERPY_STATIC_GAMESTATES)
+	target_link_libraries("libsuperderpy-gamestates" "-Wl,--allow-multiple" libsuperderpy-gamestates-stub)
+endif (LIBSUPERDERPY_STATIC_GAMESTATES)

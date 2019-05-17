@@ -303,7 +303,7 @@ static inline bool MainloopTick(struct Game* game) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
 
-			if (!tmp->api) {
+			if (!tmp->open) {
 				if (!OpenGamestate(game, tmp, true) || !LinkGamestate(game, tmp)) {
 					tmp->pending_load = false;
 					tmp->pending_start = false;
