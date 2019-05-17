@@ -169,23 +169,28 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 	endif()
 
-	option(BUILD_SHARED_LIBS "Use dynamic linking" ON)
+	option(BUILD_SHARED_LIBS "Build as dynamic libraries" ON)
+
+	option(LIBSUPERDERPY_STATIC "Compile and link libsuperderpy as a static library" OFF)
+	option(LIBSUPERDERPY_STATIC_COMMON "Compile and link common routines as a static library" OFF)
+	option(LIBSUPERDERPY_STATIC_GAMESTATES "Compile and link gamestates as static libraries" OFF)
+
 	if (NOT BUILD_SHARED_LIBS)
-		set(STATIC_DEFAULT ON)
-	else()
-		set(STATIC_DEFAULT OFF)
+		set(LIBSUPERDERPY_STATIC ON)
+		set(LIBSUPERDERPY_STATIC_COMMON ON)
+		set(LIBSUPERDERPY_STATIC_GAMESTATES ON)
 	endif()
 
-	option(LIBSUPERDERPY_STATIC "Compile and link libsuperderpy as a static library." ${STATIC_DEFAULT})
-	option(LIBSUPERDERPY_STATIC_GAMESTATES "Compile and link gamestates as static libraries" ${STATIC_DEFAULT})
 	if(LIBSUPERDERPY_STATIC_GAMESTATES)
 		add_definitions("-DLIBSUPERDERPY_STATIC_GAMESTATES")
 	endif(LIBSUPERDERPY_STATIC_GAMESTATES)
 
-	option(LIBSUPERDERPY_STATIC_DEPS "Link dependencies (e.g. Allegro) statically." ${STATIC_DEFAULT})
+	option(LIBSUPERDERPY_STATIC_DEPS "Link dependencies (e.g. Allegro) statically." OFF)
 	if(LIBSUPERDERPY_STATIC_DEPS)
 		SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a)
 	endif(LIBSUPERDERPY_STATIC_DEPS)
+
+	set(LIBSUPERDERPY_EXTRA_LIBS "${LIBSUPERDERPY_EXTRA_LIBS_INIT}" CACHE STRING "Additional platform libraries to link to")
 
 	if(MAEMO5)
 		add_definitions(-DMAEMO5=1)
