@@ -8,7 +8,7 @@ See [the configuration file](.clang-format).
 
 See [the configuration file](.clang-tidy).
 
-*Note:* clang-tidy runs automatically during compilation if found by CMake (can be disabled with `-DUSE_CLANG_TIDY=no`)
+*Note:* clang-tidy can run automatically during compilation by enabling it with `-DUSE_CLANG_TIDY=ON`
 
 ## Qt Creator's Code Model
 
