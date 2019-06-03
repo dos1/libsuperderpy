@@ -305,6 +305,64 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	al_destroy_config(config);
 }
 
+SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Character* character, char* name, ALLEGRO_BITMAP* bitmap) {
+	struct Spritesheet* s = character->spritesheets;
+	while (s) {
+		if (!strcmp(s->name, name)) {
+			//PrintConsole(game, "%s spritesheet %s already registered!", character->name, name);
+			return;
+		}
+		s = s->next;
+	}
+	PrintConsole(game, "Registering %s spritesheet: %s (from bitmap)", character->name, name);
+	s = malloc(sizeof(struct Spritesheet));
+	s->name = strdup(name);
+	s->bitmap = bitmap;
+	s->frame_count = 1;
+	s->rows = 1;
+	s->cols = 1;
+	s->flipX = false;
+	s->flipY = false;
+	s->bidir = false;
+	s->reversed = false;
+	s->duration = 16.66;
+	s->width = al_get_bitmap_width(bitmap);
+	s->height = al_get_bitmap_height(bitmap);
+	s->repeats = -1;
+	s->successor = NULL;
+	s->predecessor = NULL;
+	s->filepath = NULL;
+	s->file = NULL;
+	s->pivotX = 0.5;
+	s->pivotY = 0.5;
+	s->offsetX = 0;
+	s->offsetY = 0;
+
+	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
+
+	for (int i = 0; i < s->frame_count; i++) {
+		s->frames[i].duration = 16.66;
+		s->frames[i].source = NULL;
+		s->frames[i].bitmap = NULL;
+		s->frames[i].x = 0;
+		s->frames[i].y = 0;
+		s->frames[i].sx = 0;
+		s->frames[i].sy = 0;
+		s->frames[i].sw = 0;
+		s->frames[i].sh = 0;
+		s->frames[i].flipX = false;
+		s->frames[i].flipY = false;
+		s->frames[i].tint = al_premul_rgba_f(1.0, 1.0, 1.0, 1.0);
+		s->frames[i].file = NULL;
+		s->frames[i].filepath = NULL;
+		s->frames[i].col = i % s->cols;
+		s->frames[i].row = i / s->cols;
+	}
+
+	s->next = character->spritesheets;
+	character->spritesheets = s;
+}
+
 SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	if (name) {
 		PrintConsole(game, "Creating character %s...", name);

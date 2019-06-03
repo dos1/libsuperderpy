@@ -119,6 +119,7 @@ void SelectSpritesheet(struct Game* game, struct Character* character, char* nam
 void SwitchSpritesheet(struct Game* game, struct Character* character, char* name);
 void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name);
 void RegisterSpritesheet(struct Game* game, struct Character* character, char* name);
+void RegisterSpritesheetFromBitmap(struct Game* game, struct Character* character, char* name, ALLEGRO_BITMAP* bitmap);
 struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
 
 ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* character);
