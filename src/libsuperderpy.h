@@ -140,6 +140,7 @@ struct Params {
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
+	int samplerate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
 	struct Handlers handlers; /*!< A list of user callbacks to register. */
 };
@@ -170,6 +171,7 @@ struct Game {
 		int music; /*!< Music volume. */
 		int voice; /*!< Voice volume. */
 		bool mute; /*!< Whether audio should be muted globally. */
+		int samplerate; /*!< Sample rate of audio output. */
 		bool fullscreen; /*!< Fullscreen toggle. */
 		int width; /*!< Width of window as being set in configuration. */
 		int height; /*!< Height of window as being set in configuration. */
@@ -265,6 +267,8 @@ struct Game {
 		int transforms_no, transforms_alloc;
 
 		int window_width, window_height;
+
+		int samplerate;
 
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];

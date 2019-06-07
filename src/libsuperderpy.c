@@ -118,6 +118,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);
 	game->config.mute = strtol(GetConfigOptionDefault(game, "SuperDerpy", "mute", "0"), NULL, 10);
+	game->config.samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "0"), NULL, 10);
 	game->config.width = strtol(GetConfigOptionDefault(game, "SuperDerpy", "width", GetDefaultWindowWidth(game)), NULL, 10);
 	if (game->config.width < 100) { game->config.width = 100; }
 	game->config.height = strtol(GetConfigOptionDefault(game, "SuperDerpy", "height", GetDefaultWindowHeight(game)), NULL, 10);
@@ -327,11 +328,17 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		return NULL;
 	}
 
-	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "48000"), NULL, 10);
-	game->audio.mixer = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.fx = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.music = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
-	game->audio.voice = al_create_mixer(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->_priv.samplerate = game->config.samplerate;
+	if (!game->_priv.samplerate) {
+		game->_priv.samplerate = params.samplerate;
+		if (!game->_priv.samplerate) {
+			game->_priv.samplerate = 44100;
+		}
+	}
+	game->audio.mixer = al_create_mixer(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.fx = al_create_mixer(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.music = al_create_mixer(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.voice = al_create_mixer(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	al_attach_mixer_to_mixer(game->audio.fx, game->audio.mixer);
 	al_attach_mixer_to_mixer(game->audio.music, game->audio.mixer);
 	al_attach_mixer_to_mixer(game->audio.voice, game->audio.mixer);

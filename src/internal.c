@@ -189,14 +189,13 @@ SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 }
 
 SYMBOL_INTERNAL int SetupAudio(struct Game* game) {
-	int samplerate = strtol(GetConfigOptionDefault(game, "SuperDerpy", "samplerate", "48000"), NULL, 10);
 #ifdef __EMSCRIPTEN__
-	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.v = al_create_voice(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 #else
-	game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+	game->audio.v = al_create_voice(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
 	if (!game->audio.v) {
 		// fallback
-		game->audio.v = al_create_voice(samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
+		game->audio.v = al_create_voice(game->_priv.samplerate, ALLEGRO_AUDIO_DEPTH_FLOAT32, ALLEGRO_CHANNEL_CONF_2);
 	}
 #endif
 	al_set_default_voice(game->audio.v);
