@@ -404,7 +404,9 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 #endif
 		while (tmp) {
 			// don't show loading screen on init if requested
-			tmp->show_loading = game->_priv.params.show_loading_on_launch;
+			if (tmp->pending_load) {
+				tmp->show_loading = game->_priv.params.show_loading_on_launch;
+			}
 #ifdef LIBSUPERDERPY_STATIC_GAMESTATES
 			if (tmp->next && strcmp(tmp->next->name, "loading") == 0) {
 				game->_priv.loading.gamestate = tmp->next;
