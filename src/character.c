@@ -192,6 +192,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	snprintf(filename, 255, "sprites/%s/%s.ini", character->name, name);
 	ALLEGRO_CONFIG* config = al_load_config_file(GetDataFilePath(game, filename));
 	s = malloc(sizeof(struct Spritesheet));
+	s->shared = false;
 	s->name = strdup(name);
 	s->bitmap = NULL;
 	s->frame_count = strtolnull(al_get_config_value(config, "animation", "frames"), 0);
@@ -337,6 +338,7 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 	s->pivotY = 0.5;
 	s->offsetX = 0;
 	s->offsetY = 0;
+	s->shared = true;
 
 	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
 
@@ -426,7 +428,7 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 				free(tmp->file);
 			}
 			for (int i = 0; i < tmp->frame_count; i++) {
-				if (tmp->frames[i].filepath) {
+				if (tmp->frames[i].filepath && !tmp->shared) {
 					RemoveBitmap(game, tmp->frames[i].filepath);
 				} else {
 					al_destroy_bitmap(tmp->frames[i].bitmap);
@@ -438,7 +440,7 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 					free(tmp->frames[i].filepath);
 				}
 			}
-			if (tmp->bitmap) {
+			if (tmp->bitmap && !tmp->shared) {
 				RemoveBitmap(game, tmp->filepath);
 			}
 			if (tmp->filepath) {

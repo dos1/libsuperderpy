@@ -63,6 +63,7 @@ struct Spritesheet {
 	bool flipX;
 	bool flipY;
 	struct SpritesheetFrame* frames;
+	bool shared; /*!< Marks the spritesheet bitmaps as shared, so they won't be freed together with the spritesheet. */
 
 	int width;
 	int height;
