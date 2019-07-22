@@ -90,6 +90,10 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 
 SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+	if (delta > 1) {
+		PrintConsole(game, "delta > 1 second!");
+		delta = 1;
+	}
 	int ticks = (int)(floor((game->time + delta) / ALLEGRO_BPS_TO_SECS(60.0)) - floor(game->time / ALLEGRO_BPS_TO_SECS(60.0)));
 	game->time += delta;
 	if (game->_priv.params.handlers.prelogic) {
