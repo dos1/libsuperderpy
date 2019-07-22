@@ -19,7 +19,7 @@
 
 #include "internal.h"
 
-static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
+static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
 		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:
 			PauseExecution(game);
@@ -99,7 +99,30 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 				ScreenshotThread(data);
 #endif
 			}
-
+			break;
+		case ALLEGRO_EVENT_JOYSTICK_AXIS:
+#ifdef ALLEGRO_WITH_XWINDOWS
+			// XBox pads on GNU/Linux have messed up stick/axis ordering
+			if (ev->joystick.axis == 0) {
+				if (ev->joystick.stick == 2) {
+					ev->joystick.stick = 1;
+				} else if (ev->joystick.stick == 1) {
+					ev->joystick.stick = 2;
+				}
+			}
+			if (ev->joystick.stick == 1) {
+				ev->joystick.axis = 1 - ev->joystick.axis;
+			}
+#endif
+			break;
+		case ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN:
+		case ALLEGRO_EVENT_JOYSTICK_BUTTON_UP:
+#ifdef __SWITCH__
+			// ignore button events coming form analog movement
+			if (ev->joystick.button > 15) {
+				return true;
+			}
+#endif
 			break;
 		default:
 			break;
@@ -140,6 +163,7 @@ static inline void HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 		ev->touch.y = y;
 	}
 #endif
+	return false;
 }
 
 static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
@@ -226,18 +250,19 @@ static inline bool MainloopEvents(struct Game* game) {
 			}
 		}
 
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			EventGamestates(game, &ev);
-			return false;
+		if (HandleEvent(game, &ev)) {
+			continue;
 		}
-
-		HandleEvent(game, &ev);
 
 		if (game->config.debug.enabled) {
 			HandleDebugEvent(game, &ev);
 		}
 
 		EventGamestates(game, &ev);
+
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+			return false;
+		}
 
 		if (ALLEGRO_EVENT_TYPE_IS_USER(ev.type)) {
 			al_unref_user_event(&ev.user);
