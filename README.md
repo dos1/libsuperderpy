@@ -2,6 +2,7 @@
 A multiplatform game engine for games written in C and Allegro 5.
 
 Used by such games as:
+- [Bob](https://gitlab.com/dosowisko.net/bob)
 - ODGŁOS
 - [SUPERSMOG](https://github.com/dos1/supershod/tree/supersmog)
 - [Zjedz Trawkę 2](https://gitlab.com/dosowisko.net/zjedztrawke2)
