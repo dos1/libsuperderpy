@@ -100,6 +100,9 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 #endif
 			}
 			break;
+		case ALLEGRO_EVENT_JOYSTICK_CONFIGURATION:
+			al_reconfigure_joysticks();
+			break;
 		case ALLEGRO_EVENT_JOYSTICK_AXIS:
 #ifdef ALLEGRO_WITH_XWINDOWS
 			// XBox pads on GNU/Linux have messed up stick/axis ordering
