@@ -291,6 +291,16 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	PrintConsole(game, "NPOT bitmaps: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_NPOT_BITMAP));
 	PrintConsole(game, "Separate alpha blender: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_SEPARATE_ALPHA));
 
+	PrintConsole(game, "Connected joysticks:");
+	for (int i = 0; i < al_get_num_joysticks(); i++) {
+		ALLEGRO_JOYSTICK* joystick = al_get_joystick(i);
+		PrintConsole(game, " - %d: %s", i, al_get_joystick_name(joystick));
+		PrintConsole(game, "   - buttons: %d", al_get_joystick_num_buttons(joystick));
+		for (int j = 0; j < al_get_joystick_num_sticks(joystick); j++) {
+			PrintConsole(game, "   - stick %d: %d axes", j, al_get_joystick_num_axes(joystick, j));
+		}
+	}
+
 	if (!al_get_display_option(game->display, ALLEGRO_COMPATIBLE_DISPLAY)) {
 		al_destroy_display(game->display);
 		fprintf(stderr, "Created display is Allegro incompatible!\n");
@@ -361,6 +371,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 #ifdef LIBSUPERDERPY_STATIC_GAMESTATES
 	__libsuperderpy_register_gamestate(NULL, NULL, game);
 #endif
+
+	PrintConsole(game, "Engine initialized.");
 
 	return game;
 }
@@ -446,6 +458,8 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	ImGuiIO* io = igGetIO();
 	io->FontGlobalScale = strtod(GetConfigOptionDefault(game, "SuperDerpy", "scale", "1"), NULL);
 #endif
+
+	PrintConsole(game, "Engine started.");
 
 	return 0;
 }
