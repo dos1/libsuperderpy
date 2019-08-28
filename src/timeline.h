@@ -142,4 +142,7 @@ bool TM_IsBackgroundEmpty(struct Timeline* timeline);
 /*! \brief Macro for easy timeline action definition. */
 #define TM_ACTION(name) bool name(struct Game* game, struct GamestateResources* data, struct TM_Action* action)
 
+#define TM_END true
+#define TM_REPEAT false
+
 #endif /* LIBSUPERDERPY_TIMELINE_H */
