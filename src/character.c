@@ -132,6 +132,9 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 			if (height > tmp->height) {
 				tmp->height = height;
 			}
+			if (character->detailedProgress && progress) {
+				progress(game);
+			}
 		}
 		if (progress) {
 			progress(game);
@@ -400,6 +403,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->callback = NULL;
 	character->callback_data = NULL;
 	character->destructor = NULL;
+	character->detailedProgress = false;
 
 	return character;
 }

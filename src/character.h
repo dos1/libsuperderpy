@@ -112,6 +112,7 @@ struct Character {
 	void* callback_data;
 	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
+	bool detailedProgress; /*!< Reports progress of loading individual frames. */
 };
 
 // TODO: document functions
