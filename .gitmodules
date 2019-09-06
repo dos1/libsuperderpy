@@ -4,3 +4,6 @@
 [submodule "src/3rdparty/dlfcn-win32"]
 	path = src/3rdparty/dlfcn-win32
 	url = https://gitlab.com/dosowisko.net/dlfcn-win32.git
+[submodule "src/3rdparty/allegro5"]
+	path = src/3rdparty/allegro5
+	url = https://gitlab.com/dosowisko.net/allegro5.git
