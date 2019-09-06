@@ -698,7 +698,7 @@ SYMBOL_EXPORT bool ToggleFullscreen(struct Game* game) {
 #endif
 	al_set_display_flag(game->display, ALLEGRO_FULLSCREEN_WINDOW, game->config.fullscreen);
 	SetupViewport(game);
-	PrintConsole(game, "Fullscreen toggled");
+	PrintConsole(game, "Fullscreen toggled: %s", game->config.fullscreen ? "on" : "off");
 	return game->config.fullscreen;
 }
 
