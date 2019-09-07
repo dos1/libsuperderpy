@@ -17,7 +17,7 @@ if (EMSCRIPTEN)
 endif()
 
 if (LIBSUPERDERPY_EMBEDDED_ALLEGRO)
-	set(SHARED OFF) # Allegro doesn't namespace this...
+	option(SHARED "Build embedded Allegro as a shared library" OFF) # Allegro doesn't namespace this...
 	add_subdirectory("3rdparty/allegro5" EXCLUDE_FROM_ALL)
 	set_property(TARGET "allegro" PROPERTY POSITION_INDEPENDENT_CODE ON)
 	set_property(TARGET "allegro_font" PROPERTY POSITION_INDEPENDENT_CODE ON)
