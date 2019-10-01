@@ -633,7 +633,7 @@ SYMBOL_EXPORT void DisableCompositor(struct Game* game) {
 	ResizeGamestates(game);
 }
 
-SYMBOL_EXPORT char* StrToLower(struct Game* game, char* text) {
+SYMBOL_EXPORT char* StrToLower(struct Game* game, const char* text) {
 	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
@@ -643,7 +643,7 @@ SYMBOL_EXPORT char* StrToLower(struct Game* game, char* text) {
 	return AddGarbage(game, res);
 }
 
-SYMBOL_EXPORT char* StrToUpper(struct Game* game, char* text) {
+SYMBOL_EXPORT char* StrToUpper(struct Game* game, const char* text) {
 	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
@@ -653,7 +653,7 @@ SYMBOL_EXPORT char* StrToUpper(struct Game* game, char* text) {
 	return AddGarbage(game, res);
 }
 
-SYMBOL_EXPORT char* PunchNumber(struct Game* game, char* text, char ch, int number) {
+SYMBOL_EXPORT char* PunchNumber(struct Game* game, const char* text, char ch, int number) {
 	char* txt = strdup(text);
 	char* tmp = txt;
 	while (*tmp) {

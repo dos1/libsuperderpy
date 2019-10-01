@@ -52,9 +52,9 @@ void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height);
 
-/*! \brief Finds the path for data file. Returns NULL when the file can't be found. */
+/*! \brief Finds the path for data file. Returns NULL when the file can't be found, or ephemeral string otherwise. */
 const char* FindDataFilePath(struct Game* game, const char* filename);
-/*! \brief Finds the path for data file. Triggers BSOD and quits when the file can't be found. */
+/*! \brief Finds the path for data file. Triggers BSOD and quits when the file can't be found, returns ephemeral string otherwise. */
 const char* GetDataFilePath(struct Game* game, const char* filename);
 
 __attribute__((__format__(__printf__, 5, 6))) void PrintConsoleWithContext(struct Game* game, int line, const char* file, const char* func, char* format, ...);
@@ -85,10 +85,13 @@ ALLEGRO_BITMAP* CreateNotPreservedBitmap(int width, int height);
 void EnableCompositor(struct Game* game, void compositor(struct Game* game));
 void DisableCompositor(struct Game* game);
 
-char* StrToLower(struct Game* game, char* text);
-char* StrToUpper(struct Game* game, char* text);
+/*! \brief Converts given string to lowercase. Returns ephemeral string. */
+char* StrToLower(struct Game* game, const char* text);
+/*! \brief Converts given string to uppercase. Returns ephemeral string. */
+char* StrToUpper(struct Game* game, const char* text);
 
-char* PunchNumber(struct Game* game, char* text, char ch, int number);
+/*! \brief Puts a given number into places in given string marked by given character. Returns ephemeral string. */
+char* PunchNumber(struct Game* game, const char* text, char ch, int number);
 
 /*! \brief Quits the game. On platforms that allow it, brings the game to the background without quiting if <allow_pausing> is true. */
 void QuitGame(struct Game* game, bool allow_pausing);
