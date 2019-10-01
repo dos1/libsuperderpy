@@ -260,10 +260,16 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void Console_Load(struct Game* game) {
-	game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->clip_rect.h * 0.025), 0);
-	if (game->clip_rect.h * 0.025 >= 16) {
-		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"), 16 * ((game->clip_rect.h > 1080) ? 2 : 1), 0);
+	if (FindDataFilePath(game, "fonts/DejaVuSansMono.ttf")) {
+		game->_priv.font_console = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->clip_rect.h * 0.025), 0);
 	} else {
+		PrintConsole(game, "Could not load console font - using built-in fallback.");
+		game->_priv.font_console = al_create_builtin_font();
+	}
+
+	if (FindDataFilePath(game, "fonts/PerfectDOSVGA437.ttf") && game->clip_rect.h * 0.025 >= 16) {
+		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/PerfectDOSVGA437.ttf"), 16 * ((game->clip_rect.h > 1080) ? 2 : 1), 0);
+	} else if (FindDataFilePath(game, "fonts/DejaVuSansMono.ttf")) {
 		game->_priv.font_bsod = al_load_ttf_font(GetDataFilePath(game, "fonts/DejaVuSansMono.ttf"), (int)(game->clip_rect.h * 0.025), 0);
 	}
 }
