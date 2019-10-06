@@ -531,7 +531,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 				} else {
 					if (character->repeats == 0) {
 						if (character->reversed) {
-							character->pos = 1;
+							character->pos = 0;
 						} else {
 							character->pos = character->spritesheet->frame_count - 1;
 						}

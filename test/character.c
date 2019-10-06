@@ -68,9 +68,27 @@ static void character_spritesheet_stops(void** state) {
 	assert_int_equal(character->pos, 2);
 }
 
+static void character_spritesheet_reversed_stops(void** state) {
+	struct Game* game = *state;
+	struct Character* character = CreateCharacter(game, "test");
+	RegisterSpritesheet(game, character, "animation");
+	SelectSpritesheet(game, character, "-animation");
+
+	assert_int_equal(character->pos, 2);
+	AnimateCharacter(game, character, 0.1, 1.0);
+	assert_int_equal(character->pos, 1);
+	AnimateCharacter(game, character, 0.1, 1.0);
+	assert_int_equal(character->pos, 0);
+	AnimateCharacter(game, character, 0.1, 1.0);
+	assert_int_equal(character->pos, 0);
+	AnimateCharacter(game, character, 0.1, 1.0);
+	assert_int_equal(character->pos, 0);
+}
+
 int test_character(void) {
 	const struct CMUnitTest character_tests[] = {
 		cmocka_unit_test(character_spritesheet_stops),
+		cmocka_unit_test(character_spritesheet_reversed_stops),
 	};
 	return cmocka_run_group_tests(character_tests, character_setup, character_teardown);
 }
