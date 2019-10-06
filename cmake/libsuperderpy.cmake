@@ -180,6 +180,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	option(LIBSUPERDERPY_STATIC_COMMON "Compile and link common routines as a static library" OFF)
 	option(LIBSUPERDERPY_STATIC_GAMESTATES "Compile and link gamestates as static libraries" OFF)
 
+	option(LIBSUPERDERPY_EMBEDDED_ALLEGRO "Compile an embedded copy of Allegro" OFF)
+
 	if (NOT BUILD_SHARED_LIBS)
 		set(LIBSUPERDERPY_STATIC ON)
 		set(LIBSUPERDERPY_STATIC_COMMON ON)
