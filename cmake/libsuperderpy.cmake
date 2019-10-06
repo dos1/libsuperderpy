@@ -265,7 +265,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set_property(CACHE LIBSUPERDERPY_EMSCRIPTEN_MODE PROPERTY STRINGS "asm.js;wasm")
 		if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
 			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=1")
-			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy)
+			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy -s BINARYEN_TRAP_MODE=\"clamp\")
 
 			option(EMSCRIPTEN_DCE "Enable dead code elimination in WebAssembly build" OFF) # off by default due to issues with libc functions not getting exported
 			if (EMSCRIPTEN_DCE)
