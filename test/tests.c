@@ -17,18 +17,23 @@
 
 #include "tests.h"
 
+static struct Game* game = NULL;
+
 int engine_setup(void** state) {
-	char* args[2] = {"", "--debug"};
-	*state = libsuperderpy_init(2, args, "test", (struct Params){});
-	libsuperderpy_start(*state);
+	*state = game;
 	return 0;
 }
 
 int engine_teardown(void** state) {
-	libsuperderpy_destroy(*state);
 	return 0;
 }
 
 int main(int argc, char** argv) {
-	return test_timeline();
+	al_set_app_name("libsuperderpy");
+	char* args[2] = {"", "--debug"};
+	game = libsuperderpy_init(2, args, "test", (struct Params){});
+	libsuperderpy_start(game);
+	int ret = test_timeline() || test_character();
+	libsuperderpy_destroy(game);
+	return ret;
 }

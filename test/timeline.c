@@ -412,8 +412,6 @@ static void timeline_destroyed_while_running(void** state) {
 }
 
 int test_timeline(void) {
-	al_set_app_name("libsuperderpy");
-
 	const struct CMUnitTest timeline_tests[] = {
 		cmocka_unit_test(timeline_action),
 		cmocka_unit_test(timeline_action_lifecycle),

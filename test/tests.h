@@ -33,5 +33,6 @@
 int engine_setup(void** state);
 int engine_teardown(void** state);
 int test_timeline(void);
+int test_character(void);
 
 #endif
