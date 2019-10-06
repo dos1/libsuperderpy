@@ -37,7 +37,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	)
 	add_definitions(-DLIBSUPERDERPY_GIT_REV="${LIBSUPERDERPY_GIT_REV}")
 
-	add_definitions(-D_XOPEN_SOURCE=600)
+	add_definitions(-D_POSIX_C_SOURCE=200809L)
+	if (MAEMO5)
+		add_definitions(-D_GNU_SOURCE)
+	endif (MAEMO5)
 
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
 
