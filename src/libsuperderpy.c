@@ -136,14 +136,26 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	static struct option long_options[] =
 		{
 			{"debug", no_argument, NULL, 'd'},
+			{"fullscreen", no_argument, NULL, 'f'},
+			{"windowed", no_argument, NULL, 'w'},
 			{NULL, 0, NULL, 0},
 		};
 
 	int opt;
-	while ((opt = getopt_long(argc, argv, "d", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "dfw", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'd':
 				game->config.debug.enabled = true;
+				break;
+			case 'f':
+				if (!game->config.fullscreen) {
+					game->config.fullscreen = true;
+				}
+				break;
+			case 'w':
+				if (game->config.fullscreen) {
+					game->config.fullscreen = false;
+				}
 				break;
 		}
 	}
