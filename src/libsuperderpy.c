@@ -246,6 +246,11 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_set_new_window_title(game->_priv.params.window_title ? game->_priv.params.window_title : al_get_app_name());
 
+#ifdef __EMSCRIPTEN__
+	game->config.width *= emscripten_get_device_pixel_ratio();
+	game->config.height *= emscripten_get_device_pixel_ratio();
+#endif
+
 	game->display = al_create_display(game->config.width, game->config.height);
 	if (!game->display) {
 		fprintf(stderr, "Failed to create display!\n");
