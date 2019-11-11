@@ -347,6 +347,7 @@ static char* TestDataFilePath(struct Game* game, const char* filename) {
 
 	TestPath(filename, "data/", &result);
 	TestPath(filename, GetGameName(game, "../share/%s/data/"), &result);
+	TestPath(filename, GetGameName(game, "../share/games/%s/data/"), &result);
 
 #ifdef ALLEGRO_MACOSX
 	TestPath(filename, "../Resources/data/", &result);
