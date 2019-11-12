@@ -26,8 +26,12 @@ static char* tmpdir = NULL;
 
 static int character_setup(void** state) {
 	char dir[255] = "libsuperderpy-XXXXXX";
-	mkdtemp(dir);
-	chdir(dir);
+	if (!mkdtemp(dir)) {
+		exit(1);
+	}
+	if (chdir(dir)) {
+		exit(2);
+	}
 	mkdir("data", 0700);
 	mkdir("data/sprites", 0700);
 	mkdir("data/sprites/test", 0700);
@@ -43,7 +47,9 @@ static int character_teardown(void** state) {
 	rmdir("data/sprites/test");
 	rmdir("data/sprites");
 	rmdir("data");
-	chdir("..");
+	if (chdir("..")) {
+		exit(3);
+	}
 	rmdir(tmpdir);
 	free(tmpdir);
 	return engine_teardown(state);
