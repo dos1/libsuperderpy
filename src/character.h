@@ -75,6 +75,7 @@ struct Spritesheet {
 	int offsetY;
 	bool flipX;
 	bool flipY;
+	double scale;
 	struct SpritesheetFrame* frames;
 	bool shared; /*!< Marks the spritesheet bitmaps as shared, so they won't be freed together with the spritesheet. */
 	SpritesheetStream* stream;
