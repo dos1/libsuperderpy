@@ -399,8 +399,8 @@ static inline bool MainloopTick(struct Game* game) {
 #ifdef __EMSCRIPTEN__
 				emscripten_sleep(0);
 #endif
-				al_convert_memory_bitmaps();
 #endif
+				al_convert_memory_bitmaps();
 
 				al_set_new_bitmap_flags(data.bitmap_flags);
 
