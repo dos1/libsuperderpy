@@ -118,15 +118,15 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			}
 #endif
 			break;
+#ifdef __SWITCH__
 		case ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN:
 		case ALLEGRO_EVENT_JOYSTICK_BUTTON_UP:
-#ifdef __SWITCH__
 			// ignore button events coming form analog movement
 			if (ev->joystick.button > 15) {
 				return true;
 			}
-#endif
 			break;
+#endif
 		default:
 			break;
 	}
