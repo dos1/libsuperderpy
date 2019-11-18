@@ -107,6 +107,7 @@ struct Character {
 	bool reversing; /*!< Whether the animation is currently played backwards. */
 	bool reversed; /*!< Whether the current animation has been requested as reversed. */
 	bool hidden;
+	bool finished;
 	void* data; /*!< Additional, custom character data (HP etc.). */
 	CharacterCallback* callback;
 	void* callback_data;

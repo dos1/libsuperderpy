@@ -54,6 +54,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			character->reversing = tmp->reversed ^ reversed;
 			character->frame = &tmp->frames[character->pos];
 			//character->bitmap = tmp->frames[character->pos].bitmap;
+			character->finished = false;
 			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, character->spritesheet->width, character->spritesheet->height);
 			return;
 		}
@@ -473,6 +474,10 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 		return;
 	}
 
+	if (character->finished) {
+		return;
+	}
+
 	delta *= speed_modifier;
 	character->delta += delta * 1000;
 
@@ -535,6 +540,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 						} else {
 							character->pos = character->spritesheet->frame_count - 1;
 						}
+						character->finished = true;
 						if (character->callback) {
 							character->callback(game, character, NULL, character->spritesheet, character->callback_data);
 						}
