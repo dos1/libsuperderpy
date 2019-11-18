@@ -31,7 +31,6 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 	}
 	while (tmp) {
 		if (!strcmp(tmp->name, name)) {
-			character->spritesheet = tmp;
 			if (character->successor) {
 				free(character->successor);
 			}
@@ -52,9 +51,27 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			character->pos = reversed ? (tmp->frame_count - 1) : 0;
 			character->reversed = reversed;
 			character->reversing = tmp->reversed ^ reversed;
-			character->frame = &tmp->frames[character->pos];
-			//character->bitmap = tmp->frames[character->pos].bitmap;
+			if (tmp->stream) {
+				if (character->spritesheet && character->spritesheet->stream && character->frame) {
+					al_destroy_bitmap(character->frame->bitmap);
+					al_destroy_bitmap(character->frame->_priv.image);
+					free(character->frame);
+				}
+				character->frame = malloc(sizeof(struct SpritesheetFrame));
+				*(character->frame) = tmp->stream(game, 0.0, tmp->stream_data);
+				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * LIBSUPERDERPY_IMAGE_SCALE, character->frame->sy * LIBSUPERDERPY_IMAGE_SCALE, (character->frame->sw > 0) ? (character->frame->sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(character->frame->bitmap));
+
+				tmp->width = al_get_bitmap_width(character->frame->bitmap);
+				tmp->height = al_get_bitmap_height(character->frame->bitmap);
+
+				if (character->frame->end) {
+					tmp->frame_count = character->pos + 1;
+				}
+			} else {
+				character->frame = &tmp->frames[character->pos];
+			}
 			character->finished = false;
+			character->spritesheet = tmp;
 			PrintConsole(game, "SUCCESS: Spritesheet for %s activated: %s (%dx%d)", character->name, character->spritesheet->name, character->spritesheet->width, character->spritesheet->height);
 			return;
 		}
@@ -66,7 +83,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 SYMBOL_EXPORT void SwitchSpritesheet(struct Game* game, struct Character* character, char* name) {
 	int pos = character->pos;
 	SelectSpritesheet(game, character, name);
-	if (pos < character->spritesheets->frame_count) {
+	if (pos < character->spritesheets->frame_count && !character->spritesheet->stream) {
 		character->pos = pos;
 		character->frame = &character->spritesheet->frames[character->pos];
 	}
@@ -95,46 +112,48 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
 		PrintConsole(game, "- %s", tmp->name);
-		if ((!tmp->bitmap) && (tmp->file)) {
-			char filename[255] = {0};
-			if (strstr(tmp->file, "../") == tmp->file) {
-				snprintf(filename, 255, "sprites/%s", tmp->file + 3);
-			} else {
-				snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
-			}
-			tmp->bitmap = AddBitmap(game, filename);
-			tmp->filepath = strdup(filename);
-			tmp->width = (al_get_bitmap_width(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->cols;
-			tmp->height = (al_get_bitmap_height(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->rows;
-		}
-		for (int i = 0; i < tmp->frame_count; i++) {
-			if ((!tmp->frames[i].source) && (tmp->frames[i].file)) {
-				if (game->config.debug.enabled) {
-					PrintConsole(game, "  - %s", tmp->frames[i].file);
-				}
+		if (!tmp->stream) {
+			if ((!tmp->bitmap) && (tmp->file)) {
 				char filename[255] = {0};
-				if (strstr(tmp->frames[i].file, "../") == tmp->frames[i].file) {
-					snprintf(filename, 255, "sprites/%s", tmp->frames[i].file + 3);
+				if (strstr(tmp->file, "../") == tmp->file) {
+					snprintf(filename, 255, "sprites/%s", tmp->file + 3);
 				} else {
-					snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
+					snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->file);
 				}
-				tmp->frames[i].source = AddBitmap(game, filename);
-				tmp->frames[i].filepath = strdup(filename);
-			} else if (!tmp->frames[i].source) {
-				tmp->frames[i].source = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].row * tmp->height * LIBSUPERDERPY_IMAGE_SCALE, tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->height * LIBSUPERDERPY_IMAGE_SCALE);
+				tmp->filepath = strdup(filename);
+				tmp->bitmap = AddBitmap(game, filename);
+				tmp->width = (al_get_bitmap_width(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->cols;
+				tmp->height = (al_get_bitmap_height(tmp->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) / tmp->rows;
 			}
-			tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->frames[i].source, tmp->frames[i].sx * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].sy * LIBSUPERDERPY_IMAGE_SCALE, (tmp->frames[i].sw > 0) ? (tmp->frames[i].sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(tmp->frames[i].source), (tmp->frames[i].sh > 0) ? (tmp->frames[i].sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(tmp->frames[i].source));
+			for (int i = 0; i < tmp->frame_count; i++) {
+				if ((!tmp->frames[i].bitmap) && (tmp->frames[i].file)) {
+					if (game->config.debug.enabled) {
+						PrintConsole(game, "  - %s", tmp->frames[i].file);
+					}
+					char filename[255] = {0};
+					if (strstr(tmp->frames[i].file, "../") == tmp->frames[i].file) {
+						snprintf(filename, 255, "sprites/%s", tmp->frames[i].file + 3);
+					} else {
+						snprintf(filename, 255, "sprites/%s/%s", character->name, tmp->frames[i].file);
+					}
+					tmp->frames[i].bitmap = AddBitmap(game, filename);
+					tmp->frames[i]._priv.filepath = strdup(filename);
+				} else if (!tmp->frames[i].bitmap) {
+					tmp->frames[i].bitmap = al_create_sub_bitmap(tmp->bitmap, tmp->frames[i].col * tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].row * tmp->height * LIBSUPERDERPY_IMAGE_SCALE, tmp->width * LIBSUPERDERPY_IMAGE_SCALE, tmp->height * LIBSUPERDERPY_IMAGE_SCALE);
+				}
+				tmp->frames[i]._priv.image = al_create_sub_bitmap(tmp->frames[i].bitmap, tmp->frames[i].sx * LIBSUPERDERPY_IMAGE_SCALE, tmp->frames[i].sy * LIBSUPERDERPY_IMAGE_SCALE, (tmp->frames[i].sw > 0) ? (tmp->frames[i].sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(tmp->frames[i].bitmap), (tmp->frames[i].sh > 0) ? (tmp->frames[i].sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(tmp->frames[i].bitmap));
 
-			int width = al_get_bitmap_width(tmp->frames[i].bitmap) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].x;
-			if (width > tmp->width) {
-				tmp->width = width;
-			}
-			int height = al_get_bitmap_height(tmp->frames[i].bitmap) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].y;
-			if (height > tmp->height) {
-				tmp->height = height;
-			}
-			if (character->detailedProgress && progress) {
-				progress(game);
+				int width = al_get_bitmap_width(tmp->frames[i]._priv.image) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].x;
+				if (width > tmp->width) {
+					tmp->width = width;
+				}
+				int height = al_get_bitmap_height(tmp->frames[i]._priv.image) / LIBSUPERDERPY_IMAGE_SCALE + tmp->frames[i].y;
+				if (height > tmp->height) {
+					tmp->height = height;
+				}
+				if (character->detailed_progress && progress) {
+					progress(game);
+				}
 			}
 		}
 		if (progress) {
@@ -153,12 +172,12 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
 		for (int i = 0; i < tmp->frame_count; i++) {
-			if (tmp->frames[i].filepath) {
-				RemoveBitmap(game, tmp->frames[i].filepath);
+			if (tmp->frames[i]._priv.filepath) {
+				RemoveBitmap(game, tmp->frames[i]._priv.filepath);
 			} else {
-				al_destroy_bitmap(tmp->frames[i].source);
+				al_destroy_bitmap(tmp->frames[i].bitmap);
 			}
-			al_destroy_bitmap(tmp->frames[i].bitmap);
+			al_destroy_bitmap(tmp->frames[i]._priv.image);
 		}
 		if (tmp->bitmap) {
 			RemoveBitmap(game, tmp->filepath);
@@ -182,11 +201,68 @@ static double strtodnull(const char* _nptr, double val) {
 	return strtod(_nptr, NULL);
 }
 
+SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Character* character, char* name) {
+	struct Spritesheet* spritesheet = GetSpritesheet(game, character, name);
+	if (!spritesheet->stream) {
+		PrintConsole(game, "%s: tried to preload non-streaming spritesheet %s!", character->name, name);
+		return;
+	}
+
+	for (int i = 0; i < spritesheet->frame_count; i++) {
+		if (spritesheet->frames[i].file) {
+			free(spritesheet->frames[i].file);
+		}
+		if (spritesheet->frames[i]._priv.filepath) {
+			free(spritesheet->frames[i]._priv.filepath);
+		}
+	}
+	free(spritesheet->frames);
+
+	PrintConsole(game, "Preloading %s streaming spritesheet: %s", character->name, name);
+	int size = 255, i = 0;
+	double delta = 0;
+	spritesheet->frames = malloc(sizeof(struct SpritesheetFrame) * size);
+	while (true) {
+		PrintConsole(game, " - frame %d", i);
+		spritesheet->frames[i] = spritesheet->stream(game, delta, spritesheet->stream_data);
+
+		spritesheet->frames[i]._priv.image = al_create_sub_bitmap(spritesheet->frames[i].bitmap, spritesheet->frames[i].sx * LIBSUPERDERPY_IMAGE_SCALE, spritesheet->frames[i].sy * LIBSUPERDERPY_IMAGE_SCALE, (spritesheet->frames[i].sw > 0) ? (spritesheet->frames[i].sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(spritesheet->frames[i].bitmap), (spritesheet->frames[i].sh > 0) ? (spritesheet->frames[i].sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(spritesheet->frames[i].bitmap));
+
+		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / LIBSUPERDERPY_IMAGE_SCALE + spritesheet->frames[i].x;
+		if (width > spritesheet->width) {
+			spritesheet->width = width;
+		}
+		int height = al_get_bitmap_height(spritesheet->frames[i]._priv.image) / LIBSUPERDERPY_IMAGE_SCALE + spritesheet->frames[i].y;
+		if (height > spritesheet->height) {
+			spritesheet->height = height;
+		}
+
+		if (spritesheet->frames[i].end) {
+			spritesheet->frame_count = i + 1;
+			break;
+		}
+
+		delta = spritesheet->frames[i].duration / 1000.0;
+		i++;
+		if (i == size) {
+			size += 255;
+			spritesheet->frames = realloc(spritesheet->frames, sizeof(struct SpritesheetFrame) * size);
+		}
+	}
+	spritesheet->frames = realloc(spritesheet->frames, sizeof(struct SpritesheetFrame) * spritesheet->frame_count);
+	if (spritesheet->stream_destructor) {
+		spritesheet->stream_destructor(game, spritesheet->stream_data);
+	}
+	spritesheet->stream = NULL;
+	spritesheet->stream_data = NULL;
+	spritesheet->stream_destructor = NULL;
+}
+
 SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* character, char* name) {
 	struct Spritesheet* s = character->spritesheets;
 	while (s) {
 		if (!strcmp(s->name, name)) {
-			//PrintConsole(game, "%s spritesheet %s already registered!", character->name, name);
+			PrintConsole(game, "%s: spritesheet %s already registered!", character->name, name);
 			return;
 		}
 		s = s->next;
@@ -263,8 +339,8 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		snprintf(framename, 255, "frame%d", i);
 		s->frames[i].duration = strtodnull(al_get_config_value(config, framename, "duration"), s->duration);
 
-		s->frames[i].source = NULL;
 		s->frames[i].bitmap = NULL;
+		s->frames[i]._priv.image = NULL;
 		s->frames[i].x = strtolnull(al_get_config_value(config, framename, "x"), 0);
 		s->frames[i].y = strtolnull(al_get_config_value(config, framename, "y"), 0);
 		s->frames[i].sx = strtolnull(al_get_config_value(config, framename, "sx"), 0);
@@ -288,7 +364,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 			s->frames[i].file = malloc(len * sizeof(char));
 			strncpy(s->frames[i].file, file, len);
 		}
-		s->frames[i].filepath = NULL;
+		s->frames[i]._priv.filepath = NULL;
 
 		if (!file) {
 			s->frames[i].col = i % s->cols;
@@ -303,18 +379,32 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 				s->frames[i].row = strtol(row_str, NULL, 10);
 			}
 		}
+		s->frames[i].start = i == 0 ? true : false;
+		s->frames[i].end = i == (s->frame_count - 1) ? true : false;
 	}
+
+	s->stream = NULL;
+	s->stream_data = NULL;
+	s->stream_destructor = NULL;
 
 	s->next = character->spritesheets;
 	character->spritesheets = s;
 	al_destroy_config(config);
 }
 
+SYMBOL_EXPORT void RegisterStreamedSpritesheet(struct Game* game, struct Character* character, char* name, SpritesheetStream* callback, SpritesheetStreamDestructor* destructor, void* data) {
+	RegisterSpritesheet(game, character, name);
+	struct Spritesheet* spritesheet = GetSpritesheet(game, character, name);
+	spritesheet->stream = callback;
+	spritesheet->stream_data = data;
+	spritesheet->stream_destructor = destructor;
+}
+
 SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Character* character, char* name, ALLEGRO_BITMAP* bitmap) {
 	struct Spritesheet* s = character->spritesheets;
 	while (s) {
 		if (!strcmp(s->name, name)) {
-			//PrintConsole(game, "%s spritesheet %s already registered!", character->name, name);
+			PrintConsole(game, "%s: spritesheet %s already registered!", character->name, name);
 			return;
 		}
 		s = s->next;
@@ -343,13 +433,16 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 	s->offsetX = 0;
 	s->offsetY = 0;
 	s->shared = true;
+	s->stream = NULL;
+	s->stream_data = NULL;
+	s->stream_destructor = NULL;
 
 	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
 
 	for (int i = 0; i < s->frame_count; i++) {
 		s->frames[i].duration = 16.66;
-		s->frames[i].source = NULL;
 		s->frames[i].bitmap = NULL;
+		s->frames[i]._priv.image = NULL;
 		s->frames[i].x = 0;
 		s->frames[i].y = 0;
 		s->frames[i].sx = 0;
@@ -360,7 +453,7 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 		s->frames[i].flipY = false;
 		s->frames[i].tint = al_premul_rgba_f(1.0, 1.0, 1.0, 1.0);
 		s->frames[i].file = NULL;
-		s->frames[i].filepath = NULL;
+		s->frames[i]._priv.filepath = NULL;
 		s->frames[i].col = i % s->cols;
 		s->frames[i].row = i / s->cols;
 	}
@@ -385,8 +478,6 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->x = -1;
 	character->y = -1;
 	character->tint = al_map_rgb(255, 255, 255);
-	//character->pivotX = 0.5;
-	//character->pivotY = 0.5;
 	character->scaleX = 1.0;
 	character->scaleY = 1.0;
 	character->angle = 0;
@@ -404,7 +495,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->callback = NULL;
 	character->callback_data = NULL;
 	character->destructor = NULL;
-	character->detailedProgress = false;
+	character->detailed_progress = false;
 
 	return character;
 }
@@ -416,6 +507,14 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 
 	if (character->destructor) {
 		character->destructor(game, character);
+	}
+
+	if (character->spritesheet && character->spritesheet->stream) {
+		if (character->frame) {
+			al_destroy_bitmap(character->frame->bitmap);
+			al_destroy_bitmap(character->frame->_priv.image);
+			free(character->frame);
+		}
 	}
 
 	if (!character->shared) {
@@ -433,17 +532,20 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 				free(tmp->file);
 			}
 			for (int i = 0; i < tmp->frame_count; i++) {
-				if (tmp->frames[i].filepath && !tmp->shared) {
-					RemoveBitmap(game, tmp->frames[i].filepath);
+				if (tmp->frames[i]._priv.filepath && !tmp->shared) {
+					RemoveBitmap(game, tmp->frames[i]._priv.filepath);
 				} else {
-					al_destroy_bitmap(tmp->frames[i].bitmap);
+					al_destroy_bitmap(tmp->frames[i]._priv.image);
 				}
 				if (tmp->frames[i].file) {
 					free(tmp->frames[i].file);
 				}
-				if (tmp->frames[i].filepath) {
-					free(tmp->frames[i].filepath);
+				if (tmp->frames[i]._priv.filepath) {
+					free(tmp->frames[i]._priv.filepath);
 				}
+			}
+			if (tmp->stream && tmp->stream_destructor) {
+				tmp->stream_destructor(game, tmp->stream_data);
 			}
 			if (tmp->bitmap && !tmp->shared) {
 				RemoveBitmap(game, tmp->filepath);
@@ -481,36 +583,52 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 	delta *= speed_modifier;
 	character->delta += delta * 1000;
 
+	int pos = character->pos;
+
 	while (character->delta >= character->frame->duration) {
 		bool reachedEnd = false;
 		character->delta -= character->frame->duration;
+
 		if (character->reversing) {
-			character->pos--;
-		} else {
-			character->pos++;
-		}
-		if (character->pos >= character->spritesheet->frame_count) {
-			if (character->spritesheet->bidir) {
-				character->pos -= 2;
-				character->reversing = true;
-				if (character->reversed) {
-					reachedEnd = true;
-				}
-			} else {
-				character->pos = 0;
-				reachedEnd = true;
+			if (character->spritesheet->stream) {
+				FatalError(game, true, "Tried to animate streaming spritesheet '%s' of character '%s' in reverse", character->spritesheet->name, character->name);
+				QuitGame(game, false);
+				return;
 			}
-		}
-		if (character->pos < 0) {
-			if (character->spritesheet->bidir) {
-				character->pos += 2;
-				character->reversing = false;
-				if (!character->reversed) {
+
+			if (character->frame->start) {
+				if (character->spritesheet->bidir) {
+					character->pos++;
+					character->reversing = false;
+					if (!character->reversed) {
+						reachedEnd = true;
+					}
+				} else {
+					character->pos = character->spritesheet->frame_count - 1;
 					reachedEnd = true;
 				}
 			} else {
-				character->pos = character->spritesheet->frame_count - 1;
-				reachedEnd = true;
+				character->pos--;
+			}
+		} else {
+			if (character->frame->end) {
+				if (character->spritesheet->bidir) {
+					if (character->spritesheet->stream) {
+						FatalError(game, true, "Tried to animate streaming spritesheet '%s' of character '%s' in bidir", character->spritesheet->name, character->name);
+						QuitGame(game, false);
+						return;
+					}
+					character->pos--;
+					character->reversing = true;
+					if (character->reversed) {
+						reachedEnd = true;
+					}
+				} else {
+					character->pos = 0;
+					reachedEnd = true;
+				}
+			} else {
+				character->pos++;
 			}
 		}
 
@@ -552,9 +670,22 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 		if (character->spritesheet->frame_count == 1) {
 			character->pos = 0;
 		}
-	}
 
-	character->frame = &character->spritesheet->frames[character->pos];
+		if (character->spritesheet->stream) {
+			if (!reachedEnd && pos != character->pos) {
+				pos = character->pos;
+				double duration = character->frame->duration;
+				al_destroy_bitmap(character->frame->bitmap);
+				al_destroy_bitmap(character->frame->_priv.image);
+				free(character->frame);
+				character->frame = malloc(sizeof(struct SpritesheetFrame));
+				*(character->frame) = character->spritesheet->stream(game, duration, character->spritesheet->stream_data);
+				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * LIBSUPERDERPY_IMAGE_SCALE, character->frame->sy * LIBSUPERDERPY_IMAGE_SCALE, (character->frame->sw > 0) ? (character->frame->sw * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * LIBSUPERDERPY_IMAGE_SCALE) : al_get_bitmap_height(character->frame->bitmap));
+			}
+		} else {
+			character->frame = &character->spritesheet->frames[character->pos];
+		}
+	}
 }
 
 SYMBOL_EXPORT void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle) {
@@ -632,11 +763,11 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_compose_transform(&transform, &current);
 	al_use_transform(&transform);
 
-	al_draw_tinted_scaled_bitmap(character->frame->bitmap, GetCharacterTint(game, character),
+	al_draw_tinted_scaled_bitmap(character->frame->_priv.image, GetCharacterTint(game, character),
 		0, 0,
-		al_get_bitmap_width(character->frame->bitmap), al_get_bitmap_height(character->frame->bitmap),
-		character->spritesheet->frames[character->pos].x, character->spritesheet->frames[character->pos].y,
-		al_get_bitmap_width(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE, al_get_bitmap_height(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE,
+		al_get_bitmap_width(character->frame->_priv.image), al_get_bitmap_height(character->frame->_priv.image),
+		character->frame->x, character->frame->y,
+		al_get_bitmap_width(character->frame->_priv.image) / LIBSUPERDERPY_IMAGE_SCALE, al_get_bitmap_height(character->frame->_priv.image) / LIBSUPERDERPY_IMAGE_SCALE,
 		0);
 
 	/*al_hold_bitmap_drawing(false);
@@ -720,11 +851,11 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
-		int xpos = (int)x - character->spritesheet->frames[character->pos].x, ypos = (int)y - character->spritesheet->frames[character->pos].y;
-		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE || ypos >= al_get_bitmap_height(character->frame->bitmap) / LIBSUPERDERPY_IMAGE_SCALE) {
+		int xpos = (int)x - character->frame->x, ypos = (int)y - character->frame->y;
+		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->_priv.image) / LIBSUPERDERPY_IMAGE_SCALE || ypos >= al_get_bitmap_height(character->frame->_priv.image) / LIBSUPERDERPY_IMAGE_SCALE) {
 			return false;
 		}
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->bitmap, xpos * LIBSUPERDERPY_IMAGE_SCALE, ypos * LIBSUPERDERPY_IMAGE_SCALE);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->_priv.image, xpos * LIBSUPERDERPY_IMAGE_SCALE, ypos * LIBSUPERDERPY_IMAGE_SCALE);
 		return (color.a > 0.0);
 	}
 

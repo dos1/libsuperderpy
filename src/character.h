@@ -24,9 +24,8 @@
 #include "libsuperderpy.h"
 
 struct SpritesheetFrame {
+	ALLEGRO_BITMAP* bitmap;
 	char* file;
-	char* filepath;
-	ALLEGRO_BITMAP *bitmap, *source;
 	double duration;
 	ALLEGRO_COLOR tint;
 	int row;
@@ -39,7 +38,21 @@ struct SpritesheetFrame {
 	int sh;
 	bool flipX;
 	bool flipY;
+	bool start;
+	bool end;
+	bool shared;
+
+	struct {
+		ALLEGRO_BITMAP* image;
+		char* filepath;
+	} _priv;
 };
+
+typedef struct SpritesheetFrame SpritesheetStream(struct Game*, double, void*);
+#define SPRITESHEET_STREAM(x) struct SpritesheetFrame x(struct Game* game, double delta, void* data)
+
+typedef void SpritesheetStreamDestructor(struct Game*, void*);
+#define SPRITESHEET_STREAM_DESCTRUCTOR(x) void x(struct Game* game, void* data)
 
 /*! \brief Structure representing one spritesheet for character animation. */
 struct Spritesheet {
@@ -64,6 +77,9 @@ struct Spritesheet {
 	bool flipY;
 	struct SpritesheetFrame* frames;
 	bool shared; /*!< Marks the spritesheet bitmaps as shared, so they won't be freed together with the spritesheet. */
+	SpritesheetStream* stream;
+	SpritesheetStreamDestructor* stream_destructor;
+	void* stream_data;
 
 	int width;
 	int height;
@@ -113,7 +129,7 @@ struct Character {
 	void* callback_data;
 	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
-	bool detailedProgress; /*!< Reports progress of loading individual frames. */
+	bool detailed_progress; /*!< Reports progress of loading individual frames. */
 };
 
 // TODO: document functions
@@ -122,6 +138,7 @@ void SelectSpritesheet(struct Game* game, struct Character* character, char* nam
 void SwitchSpritesheet(struct Game* game, struct Character* character, char* name);
 void EnqueueSpritesheet(struct Game* game, struct Character* character, char* name);
 void RegisterSpritesheet(struct Game* game, struct Character* character, char* name);
+void RegisterStreamedSpritesheet(struct Game* game, struct Character* character, char* name, SpritesheetStream* callback, SpritesheetStreamDestructor* destructor, void* data);
 void RegisterSpritesheetFromBitmap(struct Game* game, struct Character* character, char* name, ALLEGRO_BITMAP* bitmap);
 struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
 
@@ -137,6 +154,7 @@ void DestroyCharacter(struct Game* game, struct Character* character);
 
 void LoadSpritesheets(struct Game* game, struct Character* character, void (*progress)(struct Game*));
 void UnloadSpritesheets(struct Game* game, struct Character* character);
+void PreloadStreamedSpritesheet(struct Game* game, struct Character* character, char* name);
 
 void AnimateCharacter(struct Game* game, struct Character* character, float delta, float speed_modifier);
 void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle);
