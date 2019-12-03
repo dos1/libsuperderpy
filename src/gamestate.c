@@ -178,7 +178,7 @@ SYMBOL_EXPORT void UnloadAllGamestates(struct Game* game) {
 SYMBOL_EXPORT void PauseAllGamestates(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (tmp->started || !tmp->paused) {
+		if (tmp->started && !tmp->paused) {
 			PauseGamestate(game, tmp->name);
 		}
 		tmp = tmp->next;
