@@ -169,7 +169,7 @@ SYMBOL_INTERNAL void UnfreezeGamestates(struct Game* game) {
 SYMBOL_INTERNAL void ResizeGamestates(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
 	while (tmp) {
-		if (tmp->open) {
+		if (tmp->started) {
 			al_destroy_bitmap(tmp->fb);
 			if (game->_priv.params.handlers.compositor) {
 				tmp->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
@@ -366,11 +366,6 @@ SYMBOL_INTERNAL bool OpenGamestate(struct Game* game, struct Gamestate* gamestat
 		return false;
 	}
 #endif
-	if (game->_priv.params.handlers.compositor) {
-		gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
-	} else {
-		gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
-	}
 	gamestate->open = true;
 	return true;
 }
@@ -457,8 +452,6 @@ SYMBOL_INTERNAL void CloseGamestate(struct Game* game, struct Gamestate* gamesta
 #endif
 	}
 #endif
-	al_destroy_bitmap(gamestate->fb);
-	gamestate->fb = NULL;
 	gamestate->open = false;
 }
 

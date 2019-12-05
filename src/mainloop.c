@@ -299,6 +299,8 @@ static inline bool MainloopTick(struct Game* game) {
 			(*tmp->api->stop)(game, tmp->data);
 			tmp->started = false;
 			tmp->pending_stop = false;
+			al_destroy_bitmap(tmp->fb);
+			tmp->fb = NULL;
 			PrintConsole(game, "Gamestate \"%s\" stopped successfully.", tmp->name);
 		}
 
@@ -459,6 +461,11 @@ static inline bool MainloopTick(struct Game* game) {
 			game->_priv.current_gamestate = tmp;
 			tmp->started = true;
 			tmp->pending_start = false;
+			if (game->_priv.params.handlers.compositor) {
+				tmp->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
+			} else {
+				tmp->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
+			}
 
 			(*tmp->api->start)(game, tmp->data);
 			game->_priv.timestamp = al_get_time();

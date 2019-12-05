@@ -450,6 +450,12 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 		game->_priv.loading.gamestate = AllocateGamestate(game, "loading");
 	}
 	if (OpenGamestate(game, game->_priv.loading.gamestate, false) && LinkGamestate(game, game->_priv.loading.gamestate)) {
+		if (game->_priv.params.handlers.compositor) {
+			game->_priv.loading.gamestate->fb = CreateNotPreservedBitmap(game->clip_rect.w, game->clip_rect.h);
+		} else {
+			game->_priv.loading.gamestate->fb = al_create_sub_bitmap(al_get_backbuffer(game->display), game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
+		}
+
 		game->_priv.loading.gamestate->data = (*game->_priv.loading.gamestate->api->load)(game, ProgressStub);
 		game->_priv.loading.gamestate->loaded = true;
 		PrintConsole(game, "Loading screen registered.");
@@ -548,6 +554,10 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 
 	if (game->_priv.loading.gamestate->open && game->_priv.loading.gamestate->api) {
 		(*game->_priv.loading.gamestate->api->unload)(game, game->_priv.loading.gamestate->data);
+	}
+	if (game->_priv.loading.gamestate->fb) {
+		al_destroy_bitmap(game->_priv.loading.gamestate->fb);
+		game->_priv.loading.gamestate->fb = NULL;
 	}
 	CloseGamestate(game, game->_priv.loading.gamestate);
 	free(game->_priv.loading.gamestate->name);
