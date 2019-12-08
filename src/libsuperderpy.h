@@ -143,6 +143,7 @@ struct Params {
 	int samplerate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
 	struct Handlers handlers; /*!< A list of user callbacks to register. */
+	bool fixed_size; /*!< If set to true, the game's window with not be resizable. */
 };
 
 /*! \brief Main struct of the game. */

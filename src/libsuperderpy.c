@@ -234,7 +234,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	if (!game->config.fullscreen) {
 		windowMode = ALLEGRO_WINDOWED;
 	}
-	windowMode |= ALLEGRO_RESIZABLE;
+	if (!params.fixed_size) {
+		windowMode |= ALLEGRO_RESIZABLE;
+	}
 
 	al_set_new_display_flags(windowMode | ALLEGRO_OPENGL | ALLEGRO_PROGRAMMABLE_PIPELINE);
 	al_set_new_display_option(ALLEGRO_VSYNC, 2 - strtol(GetConfigOptionDefault(game, "SuperDerpy", "vsync", "1"), NULL, 10), ALLEGRO_SUGGEST);
