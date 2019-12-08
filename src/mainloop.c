@@ -72,9 +72,9 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 #else
 			if ((ev->keyboard.keycode == ALLEGRO_KEY_TILDE) || (ev->keyboard.keycode == ALLEGRO_KEY_BACKQUOTE)) {
 #endif
-				game->_priv.showconsole = !game->_priv.showconsole;
+				game->show_console = !game->show_console;
 				if ((ev->keyboard.modifiers & ALLEGRO_KEYMOD_CTRL) && (game->config.debug.enabled)) {
-					game->_priv.showtimeline = game->_priv.showconsole;
+					game->_priv.show_timeline = game->show_console;
 				}
 			}
 
@@ -183,7 +183,7 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 					break;
 				case ALLEGRO_KEY_F9:
 					game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
-					game->_priv.showconsole = true;
+					game->show_console = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: 1.00x");
 					break;
 				case ALLEGRO_KEY_F10: {
@@ -191,7 +191,7 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 					speed -= 10;
 					if (speed < 10) { speed = 10; }
 					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
-					game->_priv.showconsole = true;
+					game->show_console = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
 				} break;
 				case ALLEGRO_KEY_F11: {
@@ -199,7 +199,7 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 					speed += 10;
 					if (speed > 600) { speed = 600; }
 					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
-					game->_priv.showconsole = true;
+					game->show_console = true;
 					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
 				} break;
 			}

@@ -183,6 +183,8 @@ struct Game {
 		} debug; /*!< Debug mode settings. */
 	} config; /*!< Configuration values from the config file. */
 
+	bool show_console; /*!< If true, game console is rendered on screen. */
+
 	struct {
 		int x, y;
 		int w, h;
@@ -211,8 +213,7 @@ struct Game {
 		char console[5][1024];
 		unsigned int console_pos;
 		ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
-		bool showconsole; /*!< If true, game console is rendered on screen. */
-		bool showtimeline;
+		bool show_timeline;
 
 		double speed; /*!< Speed of the game in FPS. 60 == 1x */
 

@@ -160,8 +160,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		}
 	}
 
-	game->_priv.showconsole = game->config.debug.enabled;
-	game->_priv.showtimeline = false;
+	game->show_console = game->config.debug.enabled;
+	game->_priv.show_timeline = false;
 
 	if (!al_init_image_addon()) {
 		fprintf(stderr, "failed to initialize image addon!\n");

@@ -215,7 +215,7 @@ SYMBOL_INTERNAL int SetupAudio(struct Game* game) {
 
 SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 	double game_time = al_get_time();
-	if (game->_priv.showconsole) {
+	if (game->show_console) {
 		al_set_target_backbuffer(game->display);
 		ALLEGRO_TRANSFORM trans;
 		al_identity_transform(&trans);
@@ -290,7 +290,7 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 		if (data->game->config.debug.enabled) {
 			PrintConsole(data->game, "(sleeping for 3 seconds...)");
-			data->game->_priv.showconsole = true;
+			data->game->show_console = true;
 			al_rest(3.0);
 		}
 #endif
@@ -595,7 +595,7 @@ static void DrawTimeline(struct Game* game, struct Timeline* timeline, int pos) 
 }
 
 SYMBOL_INTERNAL void DrawTimelines(struct Game* game) {
-	if (!game->_priv.showtimeline) {
+	if (!game->_priv.show_timeline) {
 		return;
 	}
 	struct List* tmp = game->_priv.timelines;
