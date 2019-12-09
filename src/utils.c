@@ -688,6 +688,12 @@ SYMBOL_EXPORT void QuitGame(struct Game* game, bool allow_pausing) {
 }
 
 SYMBOL_EXPORT bool ToggleFullscreen(struct Game* game) {
+	if (IS_EMSCRIPTEN && game->_priv.params.fixed_size) {
+		al_set_display_flag(game->display, ALLEGRO_FULLSCREEN_WINDOW, true);
+		SetupViewport(game);
+		PrintConsole(game, "Fullscreen toggled");
+		return true;
+	}
 	game->config.fullscreen = !game->config.fullscreen;
 	if (game->config.fullscreen) {
 		SetConfigOption(game, "SuperDerpy", "fullscreen", "1");

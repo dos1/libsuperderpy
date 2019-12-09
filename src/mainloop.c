@@ -50,7 +50,6 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 			PrintConsole(game, "Resize event: %dx%d", ev->display.width, ev->display.height);
-
 #ifdef LIBSUPERDERPY_IMGUI
 			ImGui_ImplAllegro5_InvalidateDeviceObjects();
 #endif
@@ -62,6 +61,9 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			// SetupViewport can be expensive, so don't do it when the resize event is already outdated or doesn't change anything
 			if (((ev->display.width != game->_priv.window_width) || (ev->display.height != game->_priv.window_height)) &&
 				(ev->display.width == al_get_display_width(game->display)) && (ev->display.height == al_get_display_height(game->display))) {
+				if (game->_priv.params.fixed_size) {
+					al_resize_display(game->display, game->_priv.params.width, game->_priv.params.height);
+				}
 				SetupViewport(game);
 			}
 
