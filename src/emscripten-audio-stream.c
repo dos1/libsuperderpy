@@ -60,6 +60,7 @@ SYMBOL_EXPORT ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream(const char* fil
 	stream->sample = al_load_sample(filename);
 	stream->instance = al_create_sample_instance(stream->sample);
 	stream->old_pos = 0.0;
+	stream->pause_pos = 0.0;
 	al_set_sample_instance_playing(stream->instance, true);
 	return (ALLEGRO_AUDIO_STREAM*)stream;
 }
@@ -69,6 +70,7 @@ SYMBOL_EXPORT ALLEGRO_AUDIO_STREAM *emscripten_load_audio_stream_f(ALLEGRO_FILE 
 	stream->sample = al_load_sample_f(file, ident);
 	stream->instance = al_create_sample_instance(stream->sample);
 	stream->old_pos = 0.0;
+	stream->pause_pos = 0.0;
 	al_set_sample_instance_playing(stream->instance, true);
 	return (ALLEGRO_AUDIO_STREAM*)stream;
 }
@@ -80,6 +82,11 @@ SYMBOL_EXPORT bool emscripten_set_audio_stream_gain(ALLEGRO_AUDIO_STREAM *stream
 
 SYMBOL_EXPORT bool emscripten_set_audio_stream_playing(ALLEGRO_AUDIO_STREAM *stream, bool val) {
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
+	if (val && s->pause_pos) {
+		al_set_sample_instance_position(s->instance, s->pause_pos);
+	} else {
+		s->pause_pos = al_get_sample_instance_position(s->instance);
+	}
 	return al_set_sample_instance_playing(s->instance, val);
 }
 
@@ -101,6 +108,7 @@ SYMBOL_EXPORT bool emscripten_get_audio_stream_playing(ALLEGRO_AUDIO_STREAM *str
 
 SYMBOL_EXPORT bool emscripten_rewind_audio_stream(ALLEGRO_AUDIO_STREAM *stream) {
 	EMSCRIPTEN_AUDIO_STREAM *s = (EMSCRIPTEN_AUDIO_STREAM*)stream;
+	s->pause_pos = 0.0;
 	return al_set_sample_instance_position(s->instance, 0);
 }
 

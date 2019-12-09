@@ -26,7 +26,7 @@
 typedef struct {
 	ALLEGRO_SAMPLE* sample;
 	ALLEGRO_SAMPLE_INSTANCE* instance;
-	double old_pos;
+	double old_pos, pause_pos;
 } EMSCRIPTEN_AUDIO_STREAM;
 
 ALLEGRO_AUDIO_STREAM* emscripten_load_audio_stream(const char* filename, size_t buffer_count, unsigned int samples);
