@@ -436,6 +436,7 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 	s->offsetX = 0;
 	s->offsetY = 0;
 	s->shared = true;
+	s->scale = LIBSUPERDERPY_IMAGE_SCALE;
 	s->stream = NULL;
 	s->stream_data = NULL;
 	s->stream_destructor = NULL;
