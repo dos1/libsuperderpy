@@ -57,7 +57,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 					al_destroy_bitmap(character->frame->_priv.image);
 					free(character->frame);
 				}
-				character->frame = malloc(sizeof(struct SpritesheetFrame));
+				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
 				*(character->frame) = tmp->stream(game, 0.0, tmp->stream_data);
 				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * tmp->scale, character->frame->sy * tmp->scale, (character->frame->sw > 0) ? (character->frame->sw * tmp->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * tmp->scale) : al_get_bitmap_height(character->frame->bitmap));
 
@@ -221,7 +221,7 @@ SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Characte
 	PrintConsole(game, "Preloading %s streaming spritesheet: %s", character->name, name);
 	int size = 255, i = 0;
 	double delta = 0;
-	spritesheet->frames = malloc(sizeof(struct SpritesheetFrame) * size);
+	spritesheet->frames = calloc(size, sizeof(struct SpritesheetFrame));
 	while (true) {
 		PrintConsole(game, " - frame %d", i);
 		spritesheet->frames[i] = spritesheet->stream(game, delta, spritesheet->stream_data);
@@ -271,7 +271,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	char filename[255] = {0};
 	snprintf(filename, 255, "sprites/%s/%s.ini", character->name, name);
 	ALLEGRO_CONFIG* config = al_load_config_file(GetDataFilePath(game, filename));
-	s = malloc(sizeof(struct Spritesheet));
+	s = calloc(1, sizeof(struct Spritesheet));
 	s->shared = false;
 	s->name = strdup(name);
 	s->bitmap = NULL;
@@ -332,7 +332,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->offsetX = strtolnull(al_get_config_value(config, "offset", "x"), 0);
 	s->offsetY = strtolnull(al_get_config_value(config, "offset", "y"), 0);
 
-	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
+	s->frames = calloc(s->frame_count, sizeof(struct SpritesheetFrame));
 
 	for (int i = 0; i < s->frame_count; i++) {
 		char framename[255];
@@ -413,7 +413,7 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 		s = s->next;
 	}
 	PrintConsole(game, "Registering %s spritesheet: %s (from bitmap)", character->name, name);
-	s = malloc(sizeof(struct Spritesheet));
+	s = calloc(1, sizeof(struct Spritesheet));
 	s->name = strdup(name);
 	s->bitmap = bitmap;
 	s->frame_count = 1;
@@ -441,26 +441,26 @@ SYMBOL_EXPORT void RegisterSpritesheetFromBitmap(struct Game* game, struct Chara
 	s->stream_data = NULL;
 	s->stream_destructor = NULL;
 
-	s->frames = malloc(sizeof(struct SpritesheetFrame) * s->frame_count);
+	s->frames = calloc(1, sizeof(struct SpritesheetFrame));
 
-	for (int i = 0; i < s->frame_count; i++) {
-		s->frames[i].duration = 16.66;
-		s->frames[i].bitmap = NULL;
-		s->frames[i]._priv.image = NULL;
-		s->frames[i].x = 0;
-		s->frames[i].y = 0;
-		s->frames[i].sx = 0;
-		s->frames[i].sy = 0;
-		s->frames[i].sw = 0;
-		s->frames[i].sh = 0;
-		s->frames[i].flipX = false;
-		s->frames[i].flipY = false;
-		s->frames[i].tint = al_premul_rgba_f(1.0, 1.0, 1.0, 1.0);
-		s->frames[i].file = NULL;
-		s->frames[i]._priv.filepath = NULL;
-		s->frames[i].col = i % s->cols;
-		s->frames[i].row = i / s->cols;
-	}
+	s->frames[0].duration = 16.66;
+	s->frames[0].bitmap = NULL;
+	s->frames[0]._priv.image = NULL;
+	s->frames[0].x = 0;
+	s->frames[0].y = 0;
+	s->frames[0].sx = 0;
+	s->frames[0].sy = 0;
+	s->frames[0].sw = 0;
+	s->frames[0].sh = 0;
+	s->frames[0].flipX = false;
+	s->frames[0].flipY = false;
+	s->frames[0].tint = al_premul_rgba_f(1.0, 1.0, 1.0, 1.0);
+	s->frames[0].file = NULL;
+	s->frames[0]._priv.filepath = NULL;
+	s->frames[0].col = 0;
+	s->frames[0].row = 0;
+	s->frames[0].start = true;
+	s->frames[0].end = true;
 
 	s->next = character->spritesheets;
 	character->spritesheets = s;
@@ -470,7 +470,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	if (name) {
 		PrintConsole(game, "Creating character %s...", name);
 	}
-	struct Character* character = malloc(sizeof(struct Character));
+	struct Character* character = calloc(1, sizeof(struct Character));
 	character->name = name ? strdup(name) : NULL;
 	character->frame = NULL;
 	character->spritesheet = NULL;
@@ -682,7 +682,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 				al_destroy_bitmap(character->frame->bitmap);
 				al_destroy_bitmap(character->frame->_priv.image);
 				free(character->frame);
-				character->frame = malloc(sizeof(struct SpritesheetFrame));
+				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
 				*(character->frame) = character->spritesheet->stream(game, duration, character->spritesheet->stream_data);
 				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * character->spritesheet->scale, character->frame->sy * character->spritesheet->scale, (character->frame->sw > 0) ? (character->frame->sw * character->spritesheet->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * character->spritesheet->scale) : al_get_bitmap_height(character->frame->bitmap));
 			}
