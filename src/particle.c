@@ -144,7 +144,7 @@ SYMBOL_EXPORT struct ParticleState SpawnParticleIn(float x, float y) {
 }
 
 SYMBOL_EXPORT struct ParticleState SpawnParticleBetween(float x1, float y1, float x2, float y2) {
-	float x = x1 + (x2 - x1) * rand() / RAND_MAX, y = y1 + (y2 - y1) * rand() / RAND_MAX;
+	float x = x1 + (x2 - x1) * rand() / (float)RAND_MAX, y = y1 + (y2 - y1) * rand() / (float)RAND_MAX;
 	return SpawnParticleIn(x, y);
 }
 
