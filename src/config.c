@@ -47,10 +47,31 @@ static void StoreConfig(struct Game* game) {
 
 SYMBOL_EXPORT void SetConfigOption(struct Game* game, char* section, char* name, char* value) {
 	al_set_config_value(game->_priv.config, section, name, value);
+#ifdef __EMSCRIPTEN__
+	EM_ASM({
+		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
+		window.localStorage.setItem(key, UTF8ToString($2));
+	},
+		section, name, value);
+#endif
 	StoreConfig(game);
 }
 
 SYMBOL_EXPORT const char* GetConfigOption(struct Game* game, char* section, char* name) {
+#ifdef __EMSCRIPTEN__
+	char* buf = (char*)EM_ASM_INT({
+		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
+		var value = window.localStorage.getItem(key);
+		if (value) {
+			var buf = _malloc(255);
+			stringToUTF8(value, buf, 255);
+			return buf;
+		}
+		return 0;
+	},
+		section, name);
+	return buf ? AddGarbage(game, buf) : NULL;
+#endif
 	return al_get_config_value(game->_priv.config, section, name);
 }
 
@@ -64,6 +85,13 @@ SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game* game, char* sectio
 
 SYMBOL_EXPORT void DeleteConfigOption(struct Game* game, char* section, char* name) {
 	al_remove_config_key(game->_priv.config, section, name);
+#ifdef __EMSCRIPTEN__
+	EM_ASM({
+		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
+		window.localStorage.removeItem(key);
+	},
+		section, name);
+#endif
 	StoreConfig(game);
 }
 
