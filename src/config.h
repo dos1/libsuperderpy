@@ -27,10 +27,12 @@
 void InitConfig(struct Game* game);
 /*! \brief Returns value of requested config entry. */
 const char* GetConfigOption(struct Game* game, char* section, char* name);
-/*! \brief Returns value of requested config entry, or def if no such entry exists. */
+/*! \brief Returns value of requested config entry, or `def` if no such entry exists. */
 const char* GetConfigOptionDefault(struct Game* game, char* section, char* name, const char* def);
-/*! \brief Sets new value of requested config entry, or created new if no such entry exists. */
+/*! \brief Sets a new value of requested config entry, or creates a new one if no such entry exists. */
 void SetConfigOption(struct Game* game, char* section, char* name, char* value);
+/*! \brief Deletes an existing config entry. */
+void DeleteConfigOption(struct Game* game, char* section, char* name);
 /*! \brief Writes config from memory to file. */
 void DeinitConfig(struct Game* game);
 

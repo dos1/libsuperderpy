@@ -62,6 +62,11 @@ SYMBOL_EXPORT const char* GetConfigOptionDefault(struct Game* game, char* sectio
 	return ret;
 }
 
+SYMBOL_EXPORT void DeleteConfigOption(struct Game* game, char* section, char* name) {
+	al_remove_config_key(game->_priv.config, section, name);
+	StoreConfig(game);
+}
+
 SYMBOL_EXPORT void DeinitConfig(struct Game* game) {
 	al_destroy_config(game->_priv.config);
 }
