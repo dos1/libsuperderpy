@@ -41,6 +41,7 @@ struct SpritesheetFrame {
 	bool start;
 	bool end;
 	bool shared;
+	bool owned;
 
 	struct {
 		ALLEGRO_BITMAP* image;

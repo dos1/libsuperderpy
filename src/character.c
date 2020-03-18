@@ -53,7 +53,9 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			character->reversing = tmp->reversed ^ reversed;
 			if (tmp->stream) {
 				if (character->spritesheet && character->spritesheet->stream && character->frame) {
-					al_destroy_bitmap(character->frame->bitmap);
+					if (character->frame->owned) {
+						al_destroy_bitmap(character->frame->bitmap);
+					}
 					al_destroy_bitmap(character->frame->_priv.image);
 					free(character->frame);
 				}
@@ -175,7 +177,9 @@ SYMBOL_EXPORT void UnloadSpritesheets(struct Game* game, struct Character* chara
 			if (tmp->frames[i]._priv.filepath) {
 				RemoveBitmap(game, tmp->frames[i]._priv.filepath);
 			} else {
-				al_destroy_bitmap(tmp->frames[i].bitmap);
+				if (tmp->frames[i].owned) {
+					al_destroy_bitmap(tmp->frames[i].bitmap);
+				}
 			}
 			al_destroy_bitmap(tmp->frames[i]._priv.image);
 		}
@@ -515,7 +519,9 @@ SYMBOL_EXPORT void DestroyCharacter(struct Game* game, struct Character* charact
 
 	if (character->spritesheet && character->spritesheet->stream) {
 		if (character->frame) {
-			al_destroy_bitmap(character->frame->bitmap);
+			if (character->frame->owned) {
+				al_destroy_bitmap(character->frame->bitmap);
+			}
 			al_destroy_bitmap(character->frame->_priv.image);
 			free(character->frame);
 		}
@@ -679,7 +685,9 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			if (!reachedEnd && pos != character->pos) {
 				pos = character->pos;
 				double duration = character->frame->duration;
-				al_destroy_bitmap(character->frame->bitmap);
+				if (character->frame->owned) {
+					al_destroy_bitmap(character->frame->bitmap);
+				}
 				al_destroy_bitmap(character->frame->_priv.image);
 				free(character->frame);
 				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
