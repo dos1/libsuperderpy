@@ -230,6 +230,11 @@ SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Characte
 		PrintConsole(game, " - frame %d", i);
 		spritesheet->frames[i] = spritesheet->stream(game, delta, spritesheet->stream_data);
 
+		if (!spritesheet->frames[i].owned) {
+			spritesheet->frames[i].bitmap = al_clone_bitmap(spritesheet->frames[i].bitmap);
+			spritesheet->frames[i].owned = true;
+		}
+
 		spritesheet->frames[i]._priv.image = al_create_sub_bitmap(spritesheet->frames[i].bitmap, spritesheet->frames[i].sx * spritesheet->scale, spritesheet->frames[i].sy * spritesheet->scale, (spritesheet->frames[i].sw > 0) ? (spritesheet->frames[i].sw * spritesheet->scale) : al_get_bitmap_width(spritesheet->frames[i].bitmap), (spritesheet->frames[i].sh > 0) ? (spritesheet->frames[i].sh * spritesheet->scale) : al_get_bitmap_height(spritesheet->frames[i].bitmap));
 
 		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].x;
