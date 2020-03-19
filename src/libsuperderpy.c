@@ -212,7 +212,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	}
 
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
-	if (game->touch) {
+	if (game->input.available.touch) {
 		al_set_mouse_emulation_mode(ALLEGRO_MOUSE_EMULATION_TRANSPARENT);
 	}
 #endif
