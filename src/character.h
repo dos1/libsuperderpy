@@ -49,8 +49,8 @@ struct SpritesheetFrame {
 	} _priv;
 };
 
-typedef struct SpritesheetFrame SpritesheetStream(struct Game*, double, void*);
-#define SPRITESHEET_STREAM(x) struct SpritesheetFrame x(struct Game* game, double delta, void* data)
+typedef struct SpritesheetFrame SpritesheetStream(struct Game*, double, int, void*);
+#define SPRITESHEET_STREAM(x) struct SpritesheetFrame x(struct Game* game, double delta, int frame, void* data)
 
 typedef void SpritesheetStreamDestructor(struct Game*, void*);
 #define SPRITESHEET_STREAM_DESCTRUCTOR(x) void x(struct Game* game, void* data)

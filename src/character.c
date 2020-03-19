@@ -60,7 +60,7 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 					free(character->frame);
 				}
 				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
-				*(character->frame) = tmp->stream(game, 0.0, tmp->stream_data);
+				*(character->frame) = tmp->stream(game, 0.0, character->pos, tmp->stream_data);
 				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * tmp->scale, character->frame->sy * tmp->scale, (character->frame->sw > 0) ? (character->frame->sw * tmp->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * tmp->scale) : al_get_bitmap_height(character->frame->bitmap));
 
 				tmp->width = al_get_bitmap_width(character->frame->bitmap);
@@ -228,7 +228,7 @@ SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Characte
 	spritesheet->frames = calloc(size, sizeof(struct SpritesheetFrame));
 	while (true) {
 		PrintConsole(game, " - frame %d", i);
-		spritesheet->frames[i] = spritesheet->stream(game, delta, spritesheet->stream_data);
+		spritesheet->frames[i] = spritesheet->stream(game, delta, i, spritesheet->stream_data);
 
 		if (!spritesheet->frames[i].owned) {
 			spritesheet->frames[i].bitmap = al_clone_bitmap(spritesheet->frames[i].bitmap);
@@ -696,7 +696,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 				al_destroy_bitmap(character->frame->_priv.image);
 				free(character->frame);
 				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
-				*(character->frame) = character->spritesheet->stream(game, duration, character->spritesheet->stream_data);
+				*(character->frame) = character->spritesheet->stream(game, duration, pos, character->spritesheet->stream_data);
 				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * character->spritesheet->scale, character->frame->sy * character->spritesheet->scale, (character->frame->sw > 0) ? (character->frame->sw * character->spritesheet->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * character->spritesheet->scale) : al_get_bitmap_height(character->frame->bitmap));
 			}
 		} else {
