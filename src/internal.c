@@ -283,7 +283,7 @@ SYMBOL_INTERNAL void Console_Unload(struct Game* game) {
 SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 	struct GamestateLoadingThreadData* data = arg;
 	data->game->_priv.loading.in_progress = true;
-	al_set_new_bitmap_flags(data->bitmap_flags);
+	al_restore_state(&data->state);
 	data->gamestate->data = data->gamestate->api->load(data->game, &GamestateProgress);
 	if (data->game->_priv.loading.progress != data->gamestate->progress_count) {
 		PrintConsole(data->game, "[%s] WARNING: Gamestate_ProgressCount does not match the number of progress invokations (%d)!", data->gamestate->name, data->game->_priv.loading.progress);
@@ -295,7 +295,8 @@ SYMBOL_INTERNAL void* GamestateLoadingThread(void* arg) {
 		}
 #endif
 	}
-	data->bitmap_flags = al_get_new_bitmap_flags();
+	al_store_state(&data->state, ALLEGRO_STATE_NEW_FILE_INTERFACE | ALLEGRO_STATE_NEW_BITMAP_PARAMETERS | ALLEGRO_STATE_BLENDER);
+
 	data->game->_priv.loading.in_progress = false;
 	return NULL;
 }

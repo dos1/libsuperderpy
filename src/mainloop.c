@@ -349,7 +349,8 @@ static inline bool MainloopTick(struct Game* game) {
 				game->_priv.loading.current = tmp;
 				game->_priv.current_gamestate = tmp;
 
-				struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp, .bitmap_flags = al_get_new_bitmap_flags()};
+				struct GamestateLoadingThreadData data = {.game = game, .gamestate = tmp};
+				al_store_state(&data.state, ALLEGRO_STATE_NEW_FILE_INTERFACE | ALLEGRO_STATE_NEW_BITMAP_PARAMETERS | ALLEGRO_STATE_BLENDER);
 				game->_priv.loading.in_progress = true;
 				double time = al_get_time();
 				game->_priv.loading.time = time;
@@ -406,7 +407,7 @@ static inline bool MainloopTick(struct Game* game) {
 #endif
 				al_convert_memory_bitmaps();
 
-				al_set_new_bitmap_flags(data.bitmap_flags);
+				al_restore_state(&data.state);
 
 				ReloadShaders(game, false);
 

@@ -73,7 +73,7 @@ struct List {
 struct GamestateLoadingThreadData {
 	struct Game* game;
 	struct Gamestate* gamestate;
-	int bitmap_flags;
+	ALLEGRO_STATE state;
 };
 
 struct ScreenshotThreadData {
