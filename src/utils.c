@@ -289,7 +289,7 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 
 		++row;
 		if (exit) {
-			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2.0, (int)(offsety + row * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "This is fatal error. My bad.");
+			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx - head2w / 2.0, (int)(offsety + row * fonth * 1.25), ALLEGRO_ALIGN_LEFT, "This is a fatal error. My bad.");
 
 			al_draw_text(game->_priv.font_bsod, al_map_rgb(255, 255, 255), offsetx, (int)(offsety + (row + 2) * fonth * 1.25), ALLEGRO_ALIGN_CENTRE, "Press any key to quit _");
 		} else {
