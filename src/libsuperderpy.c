@@ -141,6 +141,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 			{NULL, 0, NULL, 0},
 		};
 
+	optind = 1;
 	int opt;
 	while ((opt = getopt_long(argc, argv, "dfw", long_options, NULL)) != -1) {
 		switch (opt) {
@@ -159,6 +160,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 				break;
 		}
 	}
+	optind = 1;
 
 	game->show_console = game->config.debug.enabled;
 	game->_priv.show_timeline = false;
