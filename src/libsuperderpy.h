@@ -216,7 +216,7 @@ struct Game {
 		ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
 		bool show_timeline;
 
-		double speed; /*!< Speed of the game in FPS. 60 == 1x */
+		double speed; /*!< Speed of the game */
 
 		struct {
 			double old_time, fps, time;

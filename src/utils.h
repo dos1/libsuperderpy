@@ -99,4 +99,6 @@ void QuitGame(struct Game* game, bool allow_pausing);
 bool ToggleFullscreen(struct Game* game);
 bool ToggleMute(struct Game* game);
 
+double GetGameSpeed(struct Game* game);
+
 #endif /* LIBSUPERDERPY_UTILS_H */

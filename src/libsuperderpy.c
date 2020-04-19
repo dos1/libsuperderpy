@@ -103,7 +103,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.bsod_cond = al_create_cond();
 	game->_priv.bsod_mutex = al_create_mutex();
 
-	game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
+	game->_priv.speed = 1.0;
 
 	game->_priv.transforms = NULL;
 	game->_priv.transforms_no = 0;

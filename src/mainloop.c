@@ -184,25 +184,21 @@ static inline void HandleDebugEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 					}
 					break;
 				case ALLEGRO_KEY_F9:
-					game->_priv.speed = ALLEGRO_BPS_TO_SECS(60.0);
+					game->_priv.speed = 1.0;
 					game->show_console = true;
-					PrintConsole(game, "DEBUG: Gameplay speed: 1.00x");
+					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", game->_priv.speed);
 					break;
 				case ALLEGRO_KEY_F10: {
-					double speed = ALLEGRO_BPS_TO_SECS(game->_priv.speed); // inverting
-					speed -= 10;
-					if (speed < 10) { speed = 10; }
-					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
+					game->_priv.speed -= 1.0 / 6.0;
+					if (game->_priv.speed < 0.1666) { game->_priv.speed = 0.1666; }
 					game->show_console = true;
-					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
+					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", game->_priv.speed);
 				} break;
 				case ALLEGRO_KEY_F11: {
-					double speed = ALLEGRO_BPS_TO_SECS(game->_priv.speed); // inverting
-					speed += 10;
-					if (speed > 600) { speed = 600; }
-					game->_priv.speed = ALLEGRO_BPS_TO_SECS(speed);
+					game->_priv.speed += 1.0 / 6.0;
+					if (game->_priv.speed > 10.0) { game->_priv.speed = 10.0; }
 					game->show_console = true;
-					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", speed / 60.0);
+					PrintConsole(game, "DEBUG: Gameplay speed: %.2fx", game->_priv.speed);
 				} break;
 			}
 
@@ -498,7 +494,7 @@ static inline bool MainloopTick(struct Game* game) {
 
 	double delta = al_get_time() - game->_priv.timestamp;
 	game->_priv.timestamp += delta;
-	delta *= ALLEGRO_BPS_TO_SECS(game->_priv.speed / (1 / 60.0));
+	delta *= game->_priv.speed;
 
 #ifdef LIBSUPERDERPY_IMGUI
 	ImGui_ImplAllegro5_NewFrame();

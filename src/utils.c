@@ -716,3 +716,7 @@ SYMBOL_EXPORT bool ToggleMute(struct Game* game) {
 	PrintConsole(game, "Mute: %d", game->config.mute);
 	return game->config.mute;
 }
+
+SYMBOL_EXPORT double GetGameSpeed(struct Game* game) {
+	return game->_priv.speed;
+}
