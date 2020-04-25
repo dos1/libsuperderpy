@@ -1,23 +1,23 @@
 # Try to find allegro 5
 #
-#  ALLEGRO5_COLOR_FOUND - system has allegro5
-#  ALLEGRO5_COLOR_INCLUDE_DIR - the allrgo5 include directory
-#  ALLEGRO5_COLOR_LIBRARIES - Link these to use allegro5
+#  Allegro5Color_FOUND - system has allegro5
+#  Allegro5Color_INCLUDE_DIR - the allrgo5 include directory
+#  Allegro5Color_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_COLOR_INCLUDE_DIR allegro5/allegro_color.h HINTS ${ALLEGRO5_INCLUDE_DIR})
+FIND_PATH(Allegro5Color_INCLUDE_DIR allegro5/allegro_color.h HINTS ${Allegro5_INCLUDE_DIR})
 
-SET(ALLEGRO5_COLOR_NAMES ${ALLEGRO5_COLOR_NAMES} allegro_color liballegro_color AllegroColor-5.2 allegro_color-debug allegro_color-static allegro_color_static liballegro_color_static)
-FIND_LIBRARY(ALLEGRO5_COLOR_LIBRARY NAMES ${ALLEGRO5_COLOR_NAMES} HINTS ${ALLEGRO5_DIRECTORY})
+SET(Allegro5Color_NAMES ${Allegro5Color_NAMES} allegro_color liballegro_color AllegroColor-5.2 allegro_color-debug allegro_color-static allegro_color_static liballegro_color_static)
+FIND_LIBRARY(Allegro5Color_LIBRARY NAMES ${Allegro5Color_NAMES} HINTS ${Allegro5_DIRECTORY})
 
-# handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_COLOR_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set Allegro5Color_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALLEGRO5_COLOR DEFAULT_MSG ALLEGRO5_COLOR_LIBRARY ALLEGRO5_COLOR_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Allegro5Color DEFAULT_MSG Allegro5Color_LIBRARY Allegro5Color_INCLUDE_DIR)
 
-IF(ALLEGRO5_COLOR_FOUND)
-	SET(ALLEGRO5_COLOR_LIBRARIES ${ALLEGRO5_COLOR_LIBRARY})
-	SET(ALLEGRO5_LIBS ${ALLEGRO5_LIBS} ${ALLEGRO5_COLOR_LIBRARIES})
-ENDIF(ALLEGRO5_COLOR_FOUND)
+IF(Allegro5Color_FOUND)
+	SET(Allegro5Color_LIBRARIES ${Allegro5Color_LIBRARY})
+	SET(Allegro5_LIBS ${Allegro5_LIBS} ${Allegro5Color_LIBRARIES})
+ENDIF(Allegro5Color_FOUND)
 
-MARK_AS_ADVANCED(ALLEGRO5_COLOR_LIBRARY ALLEGRO5_COLOR_INCLUDE_DIR )
+MARK_AS_ADVANCED(Allegro5Color_LIBRARY Allegro5Color_INCLUDE_DIR )

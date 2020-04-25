@@ -311,16 +311,16 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif()
 
 	if (LIBSUPERDERPY_EMBEDDED_ALLEGRO)
-		set(ALLEGRO5_LIBRARIES "allegro")
-		set(ALLEGRO5_FONT_LIBRARIES "allegro_font")
-		set(ALLEGRO5_TTF_LIBRARIES "allegro_ttf")
-		set(ALLEGRO5_PRIMITIVES_LIBRARIES "allegro_primitives")
-		set(ALLEGRO5_AUDIO_LIBRARIES "allegro_audio")
-		set(ALLEGRO5_ACODEC_LIBRARIES "allegro_acodec")
-		set(ALLEGRO5_IMAGE_LIBRARIES "allegro_image")
-		set(ALLEGRO5_COLOR_LIBRARIES "allegro_color")
-		set(ALLEGRO5_VIDEO_LIBRARIES "allegro_video")
-		set(ALLEGRO5_MAIN_LIBRARIES "allegro_main")
+		set(Allegro5_LIBRARIES "allegro")
+		set(Allegro5Font_LIBRARIES "allegro_font")
+		set(Allegro5TTF_LIBRARIES "allegro_ttf")
+		set(Allegro5Primitives_LIBRARIES "allegro_primitives")
+		set(Allegro5Audio_LIBRARIES "allegro_audio")
+		set(Allegro5ACodec_LIBRARIES "allegro_acodec")
+		set(Allegro5Image_LIBRARIES "allegro_image")
+		set(Allegro5Color_LIBRARIES "allegro_color")
+		set(Allegro5Video_LIBRARIES "allegro_video")
+		set(Allegro5Main_LIBRARIES "allegro_main")
 		include_directories("${LIBSUPERDERPY_DIR}/src/3rdparty/allegro5/include")
 		include_directories("${LIBSUPERDERPY_DIR}/src/3rdparty/allegro5/addons/font")
 		include_directories("${LIBSUPERDERPY_DIR}/src/3rdparty/allegro5/addons/ttf")
@@ -346,7 +346,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif(APPLE)
 	endif()
 
-	include_directories(${ALLEGRO5_INCLUDE_DIR} ${ALLEGRO5_FONT_INCLUDE_DIR} ${ALLEGRO5_TTF_INCLUDE_DIR} ${ALLEGRO5_PRIMITIVES_INCLUDE_DIR} ${ALLEGRO5_AUDIO_INCLUDE_DIR} ${ALLEGRO5_ACODEC_INCLUDE_DIR} ${ALLEGRO5_VIDEO_INCLUDE_DIR} ${ALLEGRO5_IMAGE_INCLUDE_DIR} ${ALLEGRO5_COLOR_INCLUDE_DIR})
+	include_directories(${Allegro5_INCLUDE_DIR} ${Allegro5Font_INCLUDE_DIR} ${Allegro5TTF_INCLUDE_DIR} ${Allegro5Primitives_INCLUDE_DIR} ${Allegro5Audio_INCLUDE_DIR} ${Allegro5Acodec_INCLUDE_DIR} ${Allegro5Video_INCLUDE_DIR} ${Allegro5Image_INCLUDE_DIR} ${Allegro5Color_INCLUDE_DIR})
 
 	MACRO(register_gamestate name sources)
 
@@ -547,7 +547,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_js
 				DEPENDS ${LIBSUPERDERPY_GAMENAME}_install ${LIBSUPERDERPY_GAMENAME}_flac_to_lossy ${LIBSUPERDERPY_GAMENAME}_img_to_webp ${CMAKE_BINARY_DIR}/emscripten-imports.json
 				WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${LIBSUPERDERPY_GAMENAME}"
-				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../${BIN_DIR}/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/lib${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${ALLEGRO5_LIBS} ${EMSCRIPTEN_FLAGS} -o ${LIBSUPERDERPY_GAMENAME}.html --pre-js ${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js --preload-file ../${SHARE_DIR}/${LIBSUPERDERPY_GAMENAME}/data@/data --preload-file gamestates@/
+				COMMAND "${CMAKE_C_COMPILER}" ${CFLAGS_LIST} ../${BIN_DIR}/${LIBSUPERDERPY_GAMENAME}${CMAKE_EXECUTABLE_SUFFIX} ../lib/libsuperderpy${CMAKE_SHARED_LIBRARY_SUFFIX} ../lib/lib${LIBSUPERDERPY_GAMENAME}${CMAKE_SHARED_LIBRARY_SUFFIX} ${Allegro5_LIBS} ${EMSCRIPTEN_FLAGS} -o ${LIBSUPERDERPY_GAMENAME}.html --pre-js ${LIBSUPERDERPY_DIR}/src/emscripten-pre-js.js --preload-file ../${SHARE_DIR}/${LIBSUPERDERPY_GAMENAME}/data@/data --preload-file gamestates@/
 				USES_TERMINAL
 				VERBATIM
 				)
@@ -583,12 +583,12 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		configure_android_file("local.properties")
 		configure_android_file("app/build.gradle")
 		configure_android_file("app/src/main/res/values/strings.xml")
-		if (ALLEGRO5_LIBRARIES MATCHES "^.*-debug.*$")
+		if (Allegro5_LIBRARIES MATCHES "^.*-debug.*$")
 			set(ALLEGRO_DEBUG_SUFFIX "-debug")
 		endif()
 		configure_android_file("app/src/main/java/net/dosowisko/libsuperderpy/Activity.java")
 
-		file(COPY ${ALLEGRO5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
+		file(COPY ${Allegro5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
 		configure_file("${ANDROID_ALLEGRO_ROOT}/lib/allegro-release.aar" ${CMAKE_BINARY_DIR}/android/app/libs/allegro.aar COPYONLY)
 
 		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/assets/" PATTERN "stuff" EXCLUDE

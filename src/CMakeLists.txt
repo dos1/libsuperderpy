@@ -57,7 +57,7 @@ if (NOT LIBSUPERDERPY_STATIC_GAMESTATES)
 	target_link_libraries("libsuperderpy" dl)
 endif()
 
-target_link_libraries("libsuperderpy" ${ALLEGRO5_TTF_LIBRARIES} ${ALLEGRO5_FONT_LIBRARIES} ${ALLEGRO5_PRIMITIVES_LIBRARIES} ${ALLEGRO5_ACODEC_LIBRARIES} ${ALLEGRO5_AUDIO_LIBRARIES} ${ALLEGRO5_VIDEO_LIBRARIES} ${ALLEGRO5_COLOR_LIBRARIES} ${ALLEGRO5_IMAGE_LIBRARIES} ${ALLEGRO5_LIBRARIES} m)
+target_link_libraries("libsuperderpy" ${Allegro5TTF_LIBRARIES} ${Allegro5Font_LIBRARIES} ${Allegro5Primitives_LIBRARIES} ${Allegro5ACodec_LIBRARIES} ${Allegro5Audio_LIBRARIES} ${Allegro5Video_LIBRARIES} ${Allegro5Color_LIBRARIES} ${Allegro5Image_LIBRARIES} ${Allegro5_LIBRARIES} m)
 
 if (LIBSUPERDERPY_IMGUI)
 	target_link_libraries("libsuperderpy" cimgui)

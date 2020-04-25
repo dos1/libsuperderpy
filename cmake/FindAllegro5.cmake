@@ -1,24 +1,24 @@
 # Try to find allegro 5
 #
-#  ALLEGRO5_FOUND - system has allegro5
-#  ALLEGRO5_INCLUDE_DIR - the allrgo5 include directory
-#  ALLEGRO5_LIBRARIES - Link these to use allegro5
+#  Allegro5_FOUND - system has allegro5
+#  Allegro5_INCLUDE_DIR - the allrgo5 include directory
+#  Allegro5_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_INCLUDE_DIR allegro5/allegro.h)
+FIND_PATH(Allegro5_INCLUDE_DIR allegro5/allegro.h)
 
-SET(ALLEGRO5_NAMES ${ALLEGRO5_NAMES} allegro liballegro Allegro-5.2 allegro-debug allegro-static liballegro_static allegro_static)
-FIND_LIBRARY(ALLEGRO5_LIBRARY NAMES ${ALLEGRO5_NAMES})
+SET(Allegro5_NAMES ${Allegro5_NAMES} allegro liballegro Allegro-5.2 allegro-debug allegro-static liballegro_static allegro_static)
+FIND_LIBRARY(Allegro5_LIBRARY NAMES ${Allegro5_NAMES})
 
-# handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set Allegro5_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALLEGRO5 DEFAULT_MSG ALLEGRO5_LIBRARY ALLEGRO5_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Allegro5 DEFAULT_MSG Allegro5_LIBRARY Allegro5_INCLUDE_DIR)
 
-IF(ALLEGRO5_FOUND)
-	SET(ALLEGRO5_LIBRARIES ${ALLEGRO5_LIBRARY})
-	SET(ALLEGRO5_LIBS ${ALLEGRO5_LIBS} ${ALLEGRO5_LIBRARIES})
-	get_filename_component(ALLEGRO5_DIRECTORY ${ALLEGRO5_LIBRARY} PATH)
-ENDIF(ALLEGRO5_FOUND)
+IF(Allegro5_FOUND)
+	SET(Allegro5_LIBRARIES ${Allegro5_LIBRARY})
+	SET(Allegro5_LIBS ${Allegro5_LIBS} ${Allegro5_LIBRARIES})
+	get_filename_component(Allegro5_DIRECTORY ${Allegro5_LIBRARY} PATH)
+ENDIF(Allegro5_FOUND)
 
-MARK_AS_ADVANCED(ALLEGRO5_LIBRARY ALLEGRO5_INCLUDE_DIR ALLEGRO5_DIRECTORY)
+MARK_AS_ADVANCED(Allegro5_LIBRARY Allegro5_INCLUDE_DIR Allegro5_DIRECTORY)

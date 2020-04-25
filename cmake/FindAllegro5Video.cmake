@@ -1,23 +1,23 @@
 # Try to find allegro 5
 #
-#  ALLEGRO5_VIDEO_FOUND - system has allegro5
-#  ALLEGRO5_VIDEO_INCLUDE_DIR - the allrgo5 include directory
-#  ALLEGRO5_VIDEO_LIBRARIES - Link these to use allegro5
+#  Allegro5Video_FOUND - system has allegro5
+#  Allegro5Video_INCLUDE_DIR - the allrgo5 include directory
+#  Allegro5Video_LIBRARIES - Link these to use allegro5
 #
 
-FIND_PATH(ALLEGRO5_VIDEO_INCLUDE_DIR allegro5/allegro_video.h HINTS ${ALLEGRO5_INCLUDE_DIR})
+FIND_PATH(Allegro5Video_INCLUDE_DIR allegro5/allegro_video.h HINTS ${Allegro5_INCLUDE_DIR})
 
-SET(ALLEGRO5_VIDEO_NAMES ${ALLEGRO5_VIDEO_NAMES} allegro_video liballegro_video AllegroVideo-5.2 allegro_video-debug allegro_video-static allegro_video_static liballegro_video_static)
-FIND_LIBRARY(ALLEGRO5_VIDEO_LIBRARY NAMES ${ALLEGRO5_VIDEO_NAMES} HINTS ${ALLEGRO5_DIRECTORY})
+SET(Allegro5Video_NAMES ${Allegro5Video_NAMES} allegro_video liballegro_video AllegroVideo-5.2 allegro_video-debug allegro_video-static allegro_video_static liballegro_video_static)
+FIND_LIBRARY(Allegro5Video_LIBRARY NAMES ${Allegro5Video_NAMES} HINTS ${Allegro5_DIRECTORY})
 
-# handle the QUIETLY and REQUIRED arguments and set ALLEGRO5_VIDEO_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set Allegro5Video_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALLEGRO5_VIDEO DEFAULT_MSG ALLEGRO5_VIDEO_LIBRARY ALLEGRO5_VIDEO_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Allegro5Video DEFAULT_MSG Allegro5Video_LIBRARY Allegro5Video_INCLUDE_DIR)
 
-IF(ALLEGRO5_VIDEO_FOUND)
-	SET(ALLEGRO5_VIDEO_LIBRARIES ${ALLEGRO5_VIDEO_LIBRARY})
-	SET(ALLEGRO5_LIBS ${ALLEGRO5_LIBS} ${ALLEGRO5_VIDEO_LIBRARIES})
-ENDIF(ALLEGRO5_VIDEO_FOUND)
+IF(Allegro5Video_FOUND)
+	SET(Allegro5Video_LIBRARIES ${Allegro5Video_LIBRARY})
+	SET(Allegro5_LIBS ${Allegro5_LIBS} ${Allegro5Video_LIBRARIES})
+ENDIF(Allegro5Video_FOUND)
 
-MARK_AS_ADVANCED(ALLEGRO5_VIDEO_LIBRARY ALLEGRO5_VIDEO_INCLUDE_DIR )
+MARK_AS_ADVANCED(Allegro5Video_LIBRARY Allegro5Video_INCLUDE_DIR )

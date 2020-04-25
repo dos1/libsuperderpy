@@ -19,7 +19,7 @@ endif(APPLE)
 add_libsuperderpy_target("${EXECUTABLE_SRC_LIST}")
 target_link_libraries(${EXECUTABLE} "lib${LIBSUPERDERPY_GAMENAME}")
 if (APPLE)
-	target_link_libraries(${EXECUTABLE} ${ALLEGRO5_MAIN_LIBRARIES})
+	target_link_libraries(${EXECUTABLE} ${Allegro5Main_LIBRARIES})
 endif(APPLE)
 install(TARGETS ${EXECUTABLE} DESTINATION ${CMAKE_INSTALL_PREFIX}/${BIN_DIR})
 
