@@ -87,9 +87,9 @@ SYMBOL_INTERNAL void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
 	// Backup Allegro state that will be modified
 	ALLEGRO_TRANSFORM last_transform = *al_get_current_transform();
 	ALLEGRO_TRANSFORM last_projection_transform = *al_get_current_projection_transform();
-	int last_clip_x, last_clip_y, last_clip_w, last_clip_h;
+	int last_clip_x = 0, last_clip_y = 0, last_clip_w = 0, last_clip_h = 0;
 	al_get_clipping_rectangle(&last_clip_x, &last_clip_y, &last_clip_w, &last_clip_h);
-	int last_blender_op, last_blender_src, last_blender_dst;
+	int last_blender_op = 0, last_blender_src = 0, last_blender_dst = 0;
 	al_get_blender(&last_blender_op, &last_blender_src, &last_blender_dst);
 
 	// Setup desired render state
@@ -165,8 +165,8 @@ SYMBOL_INTERNAL void ImGui_ImplAllegro5_RenderDrawData(ImDrawData* draw_data) {
 SYMBOL_INTERNAL bool ImGui_ImplAllegro5_CreateDeviceObjects() {
 	// Build texture atlas
 	ImGuiIO* io = igGetIO();
-	unsigned char* pixels;
-	int width, height;
+	unsigned char* pixels = NULL;
+	int width = 0, height = 0;
 	ImFontAtlas_GetTexDataAsRGBA32(io->Fonts, &pixels, &width, &height, NULL);
 
 	// Create texture
@@ -390,7 +390,7 @@ SYMBOL_INTERNAL void ImGui_ImplAllegro5_NewFrame() {
 	ImGuiIO* io = igGetIO();
 
 	// Setup display size (every frame to accommodate for window resizing)
-	int w, h;
+	int w = 0, h = 0;
 	w = al_get_display_width(g_Display);
 	h = al_get_display_height(g_Display);
 	io->DisplaySize = (ImVec2){.x = w, .y = h};

@@ -142,7 +142,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		};
 
 	optind = 1;
-	int opt;
+	int opt = 0;
 	while ((opt = getopt_long(argc, argv, "dfw", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'd':
@@ -533,7 +533,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 
 	ClearGarbage(game);
 
-	struct Gamestate *tmp = game->_priv.gamestates, *pom;
+	struct Gamestate *tmp = game->_priv.gamestates, *pom = NULL;
 	while (tmp) {
 		if (tmp->started) {
 			PrintConsole(game, "Stopping gamestate \"%s\"...", tmp->name);

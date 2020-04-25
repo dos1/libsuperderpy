@@ -33,7 +33,7 @@ static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 
 	while (true) {
 		char buf[512];
-		size_t n;
+		size_t n = 0;
 		ALLEGRO_USTR_INFO info;
 
 		n = al_fread(fp, buf, sizeof(buf));
@@ -47,7 +47,7 @@ static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 }
 
 static bool AttachToShader(struct Game* game, ALLEGRO_SHADER* shader, ALLEGRO_SHADER_TYPE type, const char* filename) {
-	bool ret;
+	bool ret = 0;
 	if (filename) {
 		ALLEGRO_USTR* src = GetShaderSource(game, filename);
 		if (!src) {
@@ -59,8 +59,7 @@ static bool AttachToShader(struct Game* game, ALLEGRO_SHADER* shader, ALLEGRO_SH
 		ret = al_attach_shader_source(shader, type, al_get_default_shader_source(al_get_shader_platform(shader), type));
 	}
 	if (!ret) {
-		const char* log;
-		log = al_get_shader_log(shader);
+		const char* log = al_get_shader_log(shader);
 		if (log) {
 			FatalError(game, false, "%s", log);
 		}

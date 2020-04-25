@@ -18,7 +18,7 @@
 #include "internal.h"
 
 static void DestroyArgs(struct TM_Arguments* args) {
-	struct TM_Arguments* pom;
+	struct TM_Arguments* pom = NULL;
 	while (args) {
 		pom = args->next;
 		free(args);
@@ -129,8 +129,7 @@ SYMBOL_EXPORT void TM_Process(struct Timeline* timeline, double delta) {
 	delta = origDelta;
 
 	/* process all elements from background queue */
-	struct TM_Action *tmp, *tmp2, *pom = timeline->background;
-	tmp = NULL;
+	struct TM_Action *tmp = NULL, *tmp2 = NULL, *pom = timeline->background;
 	while (pom != NULL) {
 		bool destroy = false;
 		pom->delta = delta;
@@ -297,7 +296,7 @@ SYMBOL_EXPORT void TM_AddDelay(struct Timeline* timeline, double delay) {
 
 SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: cleaning queue", timeline->name);
-	struct TM_Action *tmp, *pom = timeline->queue;
+	struct TM_Action *tmp = NULL, *pom = timeline->queue;
 	while (pom != NULL) {
 		if (*pom->function) {
 			if (pom->active) {
@@ -318,7 +317,7 @@ SYMBOL_EXPORT void TM_CleanQueue(struct Timeline* timeline) {
 
 SYMBOL_EXPORT void TM_CleanBackgroundQueue(struct Timeline* timeline) {
 	PrintConsole(timeline->game, "Timeline Manager[%s]: cleaning background queue", timeline->name);
-	struct TM_Action *tmp, *pom = timeline->background;
+	struct TM_Action *tmp = NULL, *pom = timeline->background;
 	while (pom != NULL) {
 		if (*pom->function) {
 			if (pom->active) {
@@ -361,10 +360,9 @@ SYMBOL_EXPORT void TM_Destroy(struct Timeline* timeline) {
 
 SYMBOL_EXPORT struct TM_Arguments* TM_AddToArgs(struct TM_Arguments* args, int num, ...) {
 	va_list ap;
-	int i;
 	va_start(ap, num);
 	struct TM_Arguments* tmp = args;
-	for (i = 0; i < num; i++) {
+	for (int i = 0; i < num; i++) {
 		if (!tmp) {
 			tmp = malloc(sizeof(struct TM_Arguments));
 			tmp->value = va_arg(ap, void*);

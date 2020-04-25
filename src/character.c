@@ -359,7 +359,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s->frames[i].flipX = strtolnull(al_get_config_value(config, framename, "flipX"), 0);
 		s->frames[i].flipY = strtolnull(al_get_config_value(config, framename, "flipY"), 0);
 
-		double r, g, b, a;
+		double r = 0, g = 0, b = 0, a = 0;
 		r = strtodnull(al_get_config_value(config, framename, "r"), 1);
 		g = strtodnull(al_get_config_value(config, framename, "g"), 1);
 		b = strtodnull(al_get_config_value(config, framename, "b"), 1);
@@ -753,9 +753,9 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 SYMBOL_EXPORT ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character* character) {
 	ALLEGRO_COLOR color;
 	if (character->parent && character->parent_tint) {
-		float r, g, b, a;
+		float r = 0, g = 0, b = 0, a = 0;
 		al_unmap_rgba_f(character->tint, &r, &g, &b, &a);
-		float r2, g2, b2, a2;
+		float r2 = 0, g2 = 0, b2 = 0, a2 = 0;
 		al_unmap_rgba_f(GetCharacterTint(game, character->parent), &r2, &g2, &b2, &a2);
 
 		color = al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
@@ -763,7 +763,7 @@ SYMBOL_EXPORT ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character
 		color = character->tint;
 	}
 
-	float r, g, b, a, r2, g2, b2, a2;
+	float r = 0, g = 0, b = 0, a = 0, r2 = 0, g2 = 0, b2 = 0, a2 = 0;
 	al_unmap_rgba_f(color, &r, &g, &b, &a);
 	al_unmap_rgba_f(character->frame->tint, &r2, &g2, &b2, &a2);
 	return al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);

@@ -53,7 +53,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 	// TODO: use al_do_multiline_text; and switch to al_draw_multiline_text once it returns number of lines
 
 	char stext[1024]; // Copy of the passed text.
-	char* pch; // A pointer to each word.
+	char* pch = NULL; // A pointer to each word.
 	char word[255]; // A string containing the word (for convienence)
 	char* breakchar = "\n";
 	char lines[40][1024]; // A lovely array of strings to hold all the lines (40 max atm)
@@ -76,7 +76,7 @@ SYMBOL_EXPORT int DrawWrappedText(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float
 		snprintf(word, 255, "%s ", pch);
 		strncat(temp, word, 255); // Append the word to the end of TempLine
 		// This code checks for the new line character.
-		if (strncmp(word, breakchar, 255) == 0) {
+		if (strncmp(word, breakchar, 1) == 0) {
 			line += 1; // Move down a Line
 			strncpy(temp, "", 1023); // Clear the tempstring
 		} else {
@@ -132,7 +132,7 @@ SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
 	if (game->_priv.current_gamestate && GetFramebuffer(game) == target && al_get_parent_bitmap(target) == al_get_backbuffer(game->display)) {
 		al_set_target_backbuffer(game->display);
 	}
-	int x, y, w, h;
+	int x = 0, y = 0, w = 0, h = 0;
 	al_get_clipping_rectangle(&x, &y, &w, &h);
 	al_reset_clipping_rectangle();
 	al_clear_to_color(color);
@@ -154,7 +154,7 @@ SYMBOL_EXPORT void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 		al_draw_bitmap(source, 0, 0, 0);
 		return;
 	}
-	int x, y;
+	int x = 0, y = 0;
 	al_lock_bitmap(al_get_target_bitmap(), ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
 	al_lock_bitmap(source, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
 
@@ -183,7 +183,7 @@ SYMBOL_EXPORT void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height) {
 
 SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height) {
 	bool memoryscale = !strtol(GetConfigOptionDefault(game, "SuperDerpy", "GPU_scaling", "1"), NULL, 10);
-	ALLEGRO_BITMAP *source, *target = al_create_bitmap(width, height);
+	ALLEGRO_BITMAP *source = NULL, *target = al_create_bitmap(width, height);
 	al_set_target_bitmap(target);
 	al_clear_to_color(al_map_rgba(0, 0, 0, 0));
 
@@ -305,8 +305,7 @@ SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char
 
 // FIXME: implement proper event loop there
 #ifndef __EMSCRIPTEN__
-		int i;
-		for (i = 0; i < ALLEGRO_KEY_PAUSE; i++) {
+		for (int i = 0; i < ALLEGRO_KEY_PAUSE; i++) {
 			if (al_key_down(&kb, i)) {
 				done = true;
 				break;
@@ -558,7 +557,7 @@ SYMBOL_EXPORT void PrintConsoleWithContext(struct Game* game, int line, const ch
 }
 
 SYMBOL_EXPORT void WindowCoordsToViewport(struct Game* game, int* x, int* y) {
-	int clipX, clipY, clipWidth, clipHeight;
+	int clipX = 0, clipY = 0, clipWidth = 0, clipHeight = 0;
 	al_get_clipping_rectangle(&clipX, &clipY, &clipWidth, &clipHeight);
 	*x -= clipX;
 	*y -= clipY;
@@ -638,7 +637,7 @@ SYMBOL_EXPORT char* StrToLower(struct Game* game, const char* text) {
 	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
-		*iter = tolower(*iter);
+		*iter = tolower((unsigned char)*iter);
 		iter++;
 	}
 	return AddGarbage(game, res);
@@ -648,7 +647,7 @@ SYMBOL_EXPORT char* StrToUpper(struct Game* game, const char* text) {
 	// FIXME: UTF-8
 	char *res = strdup(text), *iter = res;
 	while (*iter) {
-		*iter = toupper(*iter);
+		*iter = toupper((unsigned char)*iter);
 		iter++;
 	}
 	return AddGarbage(game, res);

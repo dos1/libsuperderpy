@@ -489,7 +489,7 @@ SYMBOL_INTERNAL struct List* FindInList(struct List* list, void* data, bool (*id
 }
 
 SYMBOL_INTERNAL void* RemoveFromList(struct List** list, void* data, bool (*identity)(struct List* elem, void* data)) {
-	struct List *prev = NULL, *tmp = *list, *start;
+	struct List *prev = NULL, *tmp = *list, *start = NULL;
 	void* d = NULL;
 	if (!identity) {
 		identity = Identity;
@@ -521,7 +521,7 @@ SYMBOL_INTERNAL void* AddGarbage(struct Game* game, void* data) {
 }
 
 SYMBOL_INTERNAL void ClearGarbage(struct Game* game) {
-	struct List* tmp;
+	struct List* tmp = NULL;
 	while (game->_priv.garbage) {
 		free(game->_priv.garbage->data);
 		tmp = game->_priv.garbage->next;
@@ -683,7 +683,7 @@ SYMBOL_INTERNAL char* GetGameName(struct Game* game, const char* format) {
 
 static int HashString(struct Game* game, const char* str) {
 	unsigned long hash = 5381;
-	int c;
+	char c = 0;
 
 	while ((c = *str++)) {
 		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
@@ -701,7 +701,7 @@ static bool RefCountIdentity(struct List* elem, void* data) {
 SYMBOL_INTERNAL ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename) {
 	int bucket = HashString(game, filename);
 	struct List* item = FindInList(game->_priv.bitmaps[bucket], filename, RefCountIdentity);
-	struct RefCount* rc;
+	struct RefCount* rc = NULL;
 	if (item) {
 		rc = item->data;
 		rc->counter++;
