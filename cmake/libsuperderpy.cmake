@@ -271,7 +271,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s SIDE_MODULE=2 -s EXPORTED_FUNCTIONS=[\"_Gamestate_ProgressCount\"]")
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --ignore-dynamic-linking")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --ignore-dynamic-linking")
-		set(EMSCRIPTEN_FLAGS -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY}MB --emit-symbol-map --llvm-lto 3 --use-preload-plugins --use-preload-cache --lz4 -s FULL_ES2=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_FILE=\"${LIBSUPERDERPY_GAMENAME}.emterpret.js\" -s EMTERPRETIFY_ASYNC=1 -s EMTERPRETIFY_WHITELIST=[\"_libsuperderpy_emscripten_mainloop\",\"_libsuperderpy_mainloop\",\"_MainloopTick\",\"_GamestateLoadingThread\"] -s INCLUDE_FULL_LIBRARY=1 -s ERROR_ON_MISSING_LIBRARIES=1)
+		set(EMSCRIPTEN_FLAGS -s TOTAL_MEMORY=${EMSCRIPTEN_TOTAL_MEMORY}MB --emit-symbol-map --llvm-lto 3 --use-preload-plugins --use-preload-cache -s FULL_ES2=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_FILE=\"${LIBSUPERDERPY_GAMENAME}.emterpret.js\" -s EMTERPRETIFY_ASYNC=1 -s EMTERPRETIFY_WHITELIST=[\"_libsuperderpy_emscripten_mainloop\",\"_libsuperderpy_mainloop\",\"_MainloopTick\",\"_GamestateLoadingThread\"] -s INCLUDE_FULL_LIBRARY=1 -s ERROR_ON_MISSING_LIBRARIES=1)
 
 		set(LIBSUPERDERPY_EMSCRIPTEN_MODE "wasm" CACHE STRING "Emscripten compilation mode (JavaScript or WebAssembly)")
 		set_property(CACHE LIBSUPERDERPY_EMSCRIPTEN_MODE PROPERTY STRINGS "asm.js;wasm")
