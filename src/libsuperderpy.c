@@ -500,7 +500,7 @@ SYMBOL_INTERNAL void libsuperderpy_emscripten_mainloop(void* game) {
 	}
 }
 
-SYMBOL_INTERNAL EM_BOOL libsuperderpy_emscripten_visibility_change(int eventType, const EmscriptenVisibilityChangeEvent* visibilityChangeEvent, void* game) {
+SYMBOL_INTERNAL EM_BOOL libsuperderpy_emscripten_focus_change(int eventType, const EmscriptenFocusEvent* focusEvent, void* game) {
 	libsuperderpy_emscripten_mainloop(game);
 	return false;
 }
@@ -513,7 +513,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 		return ret;
 	}
 #ifdef __EMSCRIPTEN__
-	emscripten_set_visibilitychange_callback(game, false, libsuperderpy_emscripten_visibility_change);
+	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, game, false, libsuperderpy_emscripten_focus_change);
 	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, true);
 	return 0;
 #else
