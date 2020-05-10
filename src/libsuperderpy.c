@@ -518,7 +518,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 		PrintConsole(game, "Window not focused, autopausing...");
 		PauseExecution(game);
 	}
-	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, true);
+	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, false);
 	return 0;
 #else
 	while (libsuperderpy_mainloop(game)) {}
