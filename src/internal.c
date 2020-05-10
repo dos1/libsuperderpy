@@ -213,6 +213,14 @@ SYMBOL_INTERNAL int SetupAudio(struct Game* game) {
 	return 0;
 }
 
+SYMBOL_INTERNAL void StopAudio(struct Game* game) {
+	if (game->audio.v) {
+		al_detach_voice(game->audio.v);
+	}
+	al_set_default_voice(NULL);
+	game->audio.v = NULL;
+}
+
 SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 	double game_time = al_get_time();
 	if (game->show_console) {

@@ -311,7 +311,7 @@ static inline bool MainloopTick(struct Game* game) {
 	while (tmp) {
 		if (tmp->pending_unload) {
 #ifdef __EMSCRIPTEN__
-			al_detach_voice(game->audio.v);
+			StopAudio(game);
 #endif
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			tmp->loaded = false;
@@ -320,12 +320,12 @@ static inline bool MainloopTick(struct Game* game) {
 			(*tmp->api->unload)(game, tmp->data);
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 #ifdef __EMSCRIPTEN__
-			al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+			SetupAudio(game);
 #endif
 		}
 		if (tmp->pending_load) {
 #ifdef __EMSCRIPTEN__
-			al_detach_voice(game->audio.v);
+			StopAudio(game);
 #endif
 			if (tmp->show_loading && game->_priv.loading.gamestate->open) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
@@ -434,7 +434,7 @@ static inline bool MainloopTick(struct Game* game) {
 			game->loading.shown = false;
 			game->_priv.timestamp = al_get_time();
 #ifdef __EMSCRIPTEN__
-			al_attach_mixer_to_voice(game->audio.mixer, game->audio.v);
+			SetupAudio(game);
 #endif
 		}
 
