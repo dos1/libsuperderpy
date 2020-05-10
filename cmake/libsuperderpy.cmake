@@ -279,7 +279,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -s WASM=1")
 			set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy -s BINARYEN_TRAP_MODE=\"clamp\")
 
-			option(EMSCRIPTEN_DCE "Enable dead code elimination in WebAssembly build" OFF) # off by default due to issues with emterpreted functions not getting exported
+			option(EMSCRIPTEN_DCE "Enable dead code elimination in WebAssembly build" ON)
 			if (EMSCRIPTEN_DCE)
 				set(EMSCRIPTEN_FLAGS ${EMSCRIPTEN_FLAGS} -s MAIN_MODULE=2 -s EXPORTED_FUNCTIONS=@${CMAKE_BINARY_DIR}/emscripten-imports.json)
 			else (EMSCRIPTEN_DCE)
@@ -540,7 +540,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 			set(CFLAGS_LIST ${CFLAGS_L})
 
 			if("${LIBSUPERDERPY_EMSCRIPTEN_MODE}" STREQUAL "wasm")
-				add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/emscripten-imports.json COMMAND bash -c "(for file in ${CMAKE_INSTALL_PREFIX}/*.wasm.so; do wasm-dis $file; done) | grep \"(import \\\"env\\\" \" | awk '{print $3}' | sort -u | awk 'BEGIN {printf \"[\\\"_main\\\"\" } END {print \"]\"} {printf \",%s\", $1}' > ${CMAKE_BINARY_DIR}/emscripten-imports.json" DEPENDS ${LIBSUPERDERPY_GAMENAME}_install WORKING_DIRECTORY ${CMAKE_BINARY_DIR} USES_TERMINAL VERBATIM)
+				add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/emscripten-imports.json COMMAND bash -c "(for file in ${CMAKE_INSTALL_PREFIX}/*.wasm.so; do wasm-dis $file; done) | grep \"(import \\\"env\\\" \" | awk '{print $3}' | awk -F '$' '{ print $2?$2:$0}' | sort -u | awk 'BEGIN {printf \"[\\\"_main\\\"\" } END {print \"]\"} {printf \",%s\", $1}' > ${CMAKE_BINARY_DIR}/emscripten-imports.json" DEPENDS ${LIBSUPERDERPY_GAMENAME}_install WORKING_DIRECTORY ${CMAKE_BINARY_DIR} USES_TERMINAL VERBATIM)
 			else()
 				# not implemented yet for asm.js
 				add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/emscripten-imports.json COMMAND bash -c "echo '[\"_main\"]' > ${CMAKE_BINARY_DIR}/emscripten-imports.json" DEPENDS ${LIBSUPERDERPY_GAMENAME}_install WORKING_DIRECTORY ${CMAKE_BINARY_DIR} USES_TERMINAL VERBATIM)
