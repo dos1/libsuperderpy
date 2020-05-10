@@ -2,12 +2,12 @@
 A multiplatform game engine for games written in C and Allegro 5.
 
 Used by such games as:
+- [ODGŁOS](https://gitlab.com/HolyPangolin/odglos)
 - [Bob](https://gitlab.com/dosowisko.net/bob)
-- ODGŁOS
+- [Animatch](https://gitlab.com/HolyPangolin/animatch)
 - [SUPERSMOG](https://github.com/dos1/supershod/tree/supersmog)
 - [Zjedz Trawkę 2](https://gitlab.com/dosowisko.net/zjedztrawke2)
 - [SUPERSHOD: Battle Royale](https://github.com/dos1/supershod/tree/battleroyale)
-- [Animatch](https://gitlab.com/HolyPangolin/animatch)
 - [Spray Cheese](https://gitlab.com/dosowisko.net/spraycheese)
 - [ODLOT](https://gitlab.com/HolyPangolin/odlot)
 - Rumina
@@ -70,5 +70,5 @@ In turn, it's not really documented, doesn't have stable API and isn't well
 suited to use by someone else than me yet. You have been warned ;)
 
 ---
-by dos (Sebastian Krzyszkowiak)  
+by dos (Sebastian Krzyszkowiak)
 https://dosowisko.net/
