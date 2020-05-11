@@ -513,7 +513,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 		return ret;
 	}
 #ifdef __EMSCRIPTEN__
-	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, game, false, libsuperderpy_emscripten_focus_change);
+	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, game, false, libsuperderpy_emscripten_focus_change);
 	if (game->config.autopause && !EM_ASM_INT({document.hasFocus()})) {
 		PrintConsole(game, "Window not focused, autopausing...");
 		PauseExecution(game);
