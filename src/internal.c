@@ -646,6 +646,7 @@ SYMBOL_INTERNAL void PauseExecution(struct Game* game) {
 	game->audio.v = NULL;
 	FreezeGamestates(game);
 	PrintConsole(game, "Engine halted.");
+	RedrawScreen(game);
 }
 
 SYMBOL_INTERNAL void ReloadCode(struct Game* game) {
