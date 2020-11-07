@@ -48,6 +48,12 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			}
 			break;
 
+		case ALLEGRO_EVENT_DISPLAY_EXPOSE:
+			if (game->_priv.paused) {
+				RedrawScreen(game);
+			}
+			break;
+
 		case ALLEGRO_EVENT_DISPLAY_RESIZE:
 			PrintConsole(game, "Resize event: %dx%d", ev->display.width, ev->display.height);
 #ifdef LIBSUPERDERPY_IMGUI
