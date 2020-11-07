@@ -706,6 +706,24 @@ static bool RefCountIdentity(struct List* elem, void* data) {
 	return strcmp(data, item->id) == 0;
 }
 
+SYMBOL_INTERNAL void RedrawScreen(struct Game* game) {
+#ifdef LIBSUPERDERPY_IMGUI
+	ImGui_ImplAllegro5_NewFrame();
+	igNewFrame();
+#endif
+
+	DrawGamestates(game);
+
+#ifdef LIBSUPERDERPY_IMGUI
+	igRender();
+	ImGui_ImplAllegro5_RenderDrawData(igGetDrawData());
+#endif
+
+	DrawConsole(game);
+
+	al_flip_display();
+}
+
 SYMBOL_INTERNAL ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename) {
 	int bucket = HashString(game, filename);
 	struct List* item = FindInList(game->_priv.bitmaps[bucket], filename, RefCountIdentity);

@@ -138,5 +138,6 @@ __attribute__((__format__(__printf__, 2, 0))) char* GetGameName(struct Game* gam
 ALLEGRO_BITMAP* AddBitmap(struct Game* game, char* filename);
 void RemoveBitmap(struct Game* game, char* filename);
 void SetupViewport(struct Game* game);
+void RedrawScreen(struct Game* game);
 
 #endif /* LIBSUPERDERPY_INTERNAL_H */
