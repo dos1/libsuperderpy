@@ -137,7 +137,9 @@ SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
 	al_reset_clipping_rectangle();
 	al_clear_to_color(color);
 	al_set_clipping_rectangle(x, y, w, h);
-	al_set_target_bitmap(target);
+	if (al_get_target_bitmap() != target) {
+		al_set_target_bitmap(target);
+	}
 }
 
 /* linear filtering code written by SiegeLord */
