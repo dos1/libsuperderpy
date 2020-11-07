@@ -129,6 +129,10 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->config.debug.verbose = strtol(GetConfigOptionDefault(game, "debug", "verbose", "0"), NULL, 10);
 	game->config.debug.livereload = strtol(GetConfigOptionDefault(game, "debug", "livereload", "0"), NULL, 10);
 
+	if (params.no_autopause) {
+		game->config.autopause = false;
+	}
+
 #ifdef __EMSCRIPTEN__
 	game->config.fullscreen = false; // we can't start fullscreen on emscripten
 #endif

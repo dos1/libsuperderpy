@@ -140,6 +140,7 @@ struct Params {
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
 	bool fixed_size; /*!< If set to true, the game's window will not be resizable. */
+	bool no_autopause; /*!< If set to true, engine autopause is forced to be disabled. */
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
 	int sample_rate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
