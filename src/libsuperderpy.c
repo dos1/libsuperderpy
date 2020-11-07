@@ -361,7 +361,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->_priv.samplerate = game->config.samplerate;
 	if (!game->_priv.samplerate) {
-		game->_priv.samplerate = params.samplerate;
+		game->_priv.samplerate = params.sample_rate;
 		if (!game->_priv.samplerate) {
 			game->_priv.samplerate = 44100;
 		}

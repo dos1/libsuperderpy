@@ -135,15 +135,15 @@ struct Handlers {
 struct Params {
 	int width; /*!< Width of the drawing canvas. */
 	int height; /*!< Height of the drawing canvas. */
-	float aspect; /*!< When set instead of width/height pair, makes the viewport side fluid; when non-zero, locks its aspect ratio. */
-	bool integer_scaling; /*!< Ensure that the viewport is zoomed only with integer factors. */
+	float aspect; /*!< When set instead of width&height pair, makes the viewport resizeable with locked aspect ratio. */
+	bool integer_scaling; /*!< Ensure that the viewport is zoomed only by integer factors. */
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
+	bool fixed_size; /*!< If set to true, the game's window will not be resizable. */
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
-	int samplerate; /*!< Default sample rate of audio output; 0 to use engine default. */
+	int sample_rate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
 	struct Handlers handlers; /*!< A list of user callbacks to register. */
-	bool fixed_size; /*!< If set to true, the game's window with not be resizable. */
 };
 
 /*! \brief Main struct of the game. */
