@@ -573,7 +573,9 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* GetFramebuffer(struct Game* game) {
 
 SYMBOL_EXPORT void SetFramebufferAsTarget(struct Game* game) {
 	ALLEGRO_BITMAP* framebuffer = GetFramebuffer(game);
-	al_set_target_bitmap(framebuffer);
+	if (al_get_target_bitmap() != framebuffer) {
+		al_set_target_bitmap(framebuffer);
+	}
 	if (framebuffer != al_get_backbuffer(game->display)) {
 		double x = al_get_bitmap_width(framebuffer) / (double)game->viewport.width;
 		double y = al_get_bitmap_height(framebuffer) / (double)game->viewport.height;
