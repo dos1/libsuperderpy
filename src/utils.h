@@ -101,4 +101,6 @@ bool ToggleMute(struct Game* game);
 
 double GetGameSpeed(struct Game* game);
 
+void SetBackgroundColor(struct Game* game, ALLEGRO_COLOR bg);
+
 #endif /* LIBSUPERDERPY_UTILS_H */

@@ -273,6 +273,8 @@ struct Game {
 
 		int samplerate;
 
+		ALLEGRO_COLOR bg;
+
 #ifdef ALLEGRO_MACOSX
 		char cwd[MAXPATHLEN];
 #endif

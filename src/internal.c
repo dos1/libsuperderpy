@@ -26,7 +26,7 @@
 
 SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 	struct Gamestate* tmp = GetNextGamestate(game, NULL);
-	ClearToColor(game, al_map_rgb(0, 0, 0));
+	ClearToColor(game, game->_priv.bg);
 	while (tmp) {
 		if (IsGamestateVisible(game, tmp)) {
 			al_draw_bitmap(GetGamestateFramebuffer(game, tmp), game->clip_rect.x, game->clip_rect.y, 0);
@@ -52,7 +52,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 			SetFramebufferAsTarget(game);
 			if (game->_priv.params.handlers.compositor) { // don't clear when uncomposited
 				al_reset_clipping_rectangle();
-				al_clear_to_color(al_map_rgb(0, 0, 0)); // even if everything is going to be redrawn, it optimizes tiled rendering
+				al_clear_to_color(game->_priv.bg); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
 			tmp->api->draw(game, tmp->data);
 			// TODO: save and restore more state for careless gamestating
@@ -66,7 +66,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		SetFramebufferAsTarget(game);
 		if (game->_priv.params.handlers.compositor) {
 			al_reset_clipping_rectangle();
-			al_clear_to_color(al_map_rgb(0, 0, 0));
+			al_clear_to_color(game->_priv.bg);
 		}
 		game->_priv.loading.gamestate->api->draw(game, game->_priv.loading.gamestate->data);
 	}
@@ -564,7 +564,7 @@ SYMBOL_INTERNAL void RemoveTimeline(struct Game* game, struct Timeline* timeline
 SYMBOL_INTERNAL void ClearScreen(struct Game* game) {
 	al_set_target_backbuffer(game->display);
 	al_reset_clipping_rectangle();
-	al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_clear_to_color(game->_priv.bg);
 	if (game->_priv.params.depth_buffer) {
 		al_clear_depth_buffer(1.0);
 	}

@@ -580,6 +580,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	}
 	DestroyShaders(game);
 
+	SetBackgroundColor(game, al_map_rgb(0, 0, 0));
 	ClearScreen(game);
 #ifdef __EMSCRIPTEN__
 	{

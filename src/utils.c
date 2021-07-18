@@ -723,3 +723,7 @@ SYMBOL_EXPORT bool ToggleMute(struct Game* game) {
 SYMBOL_EXPORT double GetGameSpeed(struct Game* game) {
 	return game->_priv.speed;
 }
+
+SYMBOL_EXPORT void SetBackgroundColor(struct Game* game, ALLEGRO_COLOR bg) {
+	game->_priv.bg = bg;
+}
