@@ -66,11 +66,11 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -ffast-math")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ffast-math")
 
-	if (NOT MAEMO5)
-		# stack protector causes segfaults on Maemo
+	if (NOT MAEMO5 AND NOT VITA)
+		# stack protector causes segfaults on Maemo and hangs on Vita
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector")
-	endif(NOT MAEMO5)
+	endif(NOT MAEMO5 AND NOT VITA)
 
 	if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage")
