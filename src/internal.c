@@ -24,6 +24,13 @@
 #include <dlfcn.h>
 #endif
 
+#ifdef __vita__
+int _newlib_heap_size_user = LIBSUPERDERPY_VITA_HEAP_SIZE * 1024 * 1024;
+
+// PIB requires at least 2MB of SceLibc heap size
+unsigned int sceLibcHeapSize = 2 * 1024 * 1024;
+#endif
+
 SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 	struct Gamestate* tmp = GetNextGamestate(game, NULL);
 	ClearToColor(game, game->_priv.bg);
