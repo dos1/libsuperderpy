@@ -416,6 +416,16 @@ SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filena
 	}
 #endif
 
+#ifdef __vita__
+	char origfn[255] = "vita/";
+	strncat(origfn, filename, 249);
+
+	result = TestDataFilePath(game, origfn);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+#endif
+
 #ifdef LIBSUPERDERPY_FLACTOLOSSY_EXT
 	{
 		char* file = AddGarbage(game, strdup(filename));
