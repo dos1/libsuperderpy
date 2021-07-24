@@ -289,6 +289,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	al_add_new_bitmap_flag(ALLEGRO_NO_PRESERVE_TEXTURE);
 #endif
 
+	PrintConsole(game, "%s", al_get_app_name());
 	PrintConsole(game, "libsuperderpy 2 (rev " LIBSUPERDERPY_GIT_REV ")");
 	{
 		uint32_t version = al_get_allegro_version();
