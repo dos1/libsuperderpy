@@ -49,6 +49,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	add_definitions(-DLIBSUPERDERPY_ORIENTATION_${LIBSUPERDERPY_ORIENTATION}=true)
 
 	set(EMSCRIPTEN_TOTAL_MEMORY "128" CACHE STRING "Amount of memory allocated by Emscripten in asm.js builds (MB, must be multiple of 16)" )
+	set(VITA_HEAP_SIZE "64" CACHE STRING "Amount of memory allocated by newlib for heap on PS Vita (MB)" )
 	option(LIBSUPERDERPY_IMGUI "Compile with Dear ImGui support." OFF)
 	if (LIBSUPERDERPY_IMGUI)
 		enable_language(CXX)
@@ -229,7 +230,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	endif(POCKETCHIP)
 
 	if(VITA)
-		add_definitions(-DLIBSUPERDERPY_VITA_HEAP_SIZE=64)
+		add_definitions(-DLIBSUPERDERPY_VITA_HEAP_SIZE=${VITA_HEAP_SIZE})
 	endif(VITA)
 
 	if(MAEMO5 OR POCKETCHIP)
