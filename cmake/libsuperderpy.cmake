@@ -625,6 +625,35 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 
 	endif(ANDROID)
 
+	if(VITA)
+		include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
+
+		if(NOT LIBSUPERDERPY_VITA_TITLEID)
+			message(FATAL_ERROR "No TitleID for Vita provided (LIBSUPERDERPY_VITA_TITLEID)")
+		endif()
+
+		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/vita/" PATTERN "stuff" EXCLUDE
+			PATTERN ".git" EXCLUDE
+			PATTERN ".gitignore" EXCLUDE
+			PATTERN ".directory" EXCLUDE
+			PATTERN "CMakeLists.txt" EXCLUDE
+			PATTERN "vita/sce_sys" EXCLUDE)
+
+		if(EXISTS "${CMAKE_SOURCE_DIR}/data/vita/sce_sys")
+			file(COPY "${CMAKE_SOURCE_DIR}/data/vita/sce_sys" DESTINATION "${CMAKE_BINARY_DIR}/vita/")
+		else()
+			file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/vita/sce_sys")
+		endif()
+
+		vita_create_self(eboot.bin ${CMAKE_BINARY_DIR}/src/${LIBSUPERDERPY_GAMENAME} UNSAFE)
+
+		vita_create_vpk(${LIBSUPERDERPY_GAMENAME}.vpk "${LIBSUPERDERPY_VITA_TITLEID}" eboot.bin
+		  NAME "${LIBSUPERDERPY_GAMENAME_PRETTY}"
+		  FILE "${CMAKE_BINARY_DIR}/vita/sce_sys" sce_sys
+		  FILE "${CMAKE_BINARY_DIR}/vita/data" data
+		)
+	endif(VITA)
+
 	# setup default RPATH/install_name handling
 	# default is to build with RPATH for the install dir, so it doesn't need to relink
 	if (UNIX)
