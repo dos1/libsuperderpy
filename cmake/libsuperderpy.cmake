@@ -654,6 +654,46 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		  FILE "${CMAKE_BINARY_DIR}/vita/sce_sys" sce_sys
 		  FILE "${CMAKE_BINARY_DIR}/vita/data" data
 		)
+
+		if(DEFINED ENV{VITA_IP})
+
+			add_custom_target(${LIBSUPERDERPY_GAMENAME}_deploy_vpk
+				DEPENDS ${LIBSUPERDERPY_GAMENAME}.vpk
+				WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+				COMMAND curl --ftp-method nocwd -T ${LIBSUPERDERPY_GAMENAME}.vpk ftp://$ENV{VITA_IP}:1337/ux0:/data/
+				COMMAND echo destroy | nc $ENV{VITA_IP} 1338
+				COMMAND echo screen on | nc $ENV{VITA_IP} 1338
+				COMMAND echo vpk ux0:/data/${LIBSUPERDERPY_GAMENAME}.vpk | nc $ENV{VITA_IP} 1338
+				COMMAND echo screen on | nc $ENV{VITA_IP} 1338
+				COMMAND echo launch ${LIBSUPERDERPY_VITA_TITLEID} | nc $ENV{VITA_IP} 1338
+				USES_TERMINAL
+					)
+
+			add_custom_target(${LIBSUPERDERPY_GAMENAME}_deploy_eboot
+				DEPENDS eboot.bin
+				WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+				COMMAND echo destroy | nc $ENV{VITA_IP} 1338
+				COMMAND sleep 1
+				COMMAND echo screen on | nc $ENV{VITA_IP} 1338
+				COMMAND curl --ftp-method nocwd -T eboot.bin ftp://$ENV{VITA_IP}:1337/ux0:/app/${LIBSUPERDERPY_VITA_TITLEID}/
+				COMMAND echo launch ${LIBSUPERDERPY_VITA_TITLEID} | nc $ENV{VITA_IP} 1338
+				USES_TERMINAL
+					)
+
+			if(EXISTS "${CMAKE_SOURCE_DIR}/data/vita/shaders")
+				add_custom_target(${LIBSUPERDERPY_GAMENAME}_deploy_shaders
+					WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+					COMMAND echo destroy | nc $ENV{VITA_IP} 1338
+					COMMAND sleep 1
+					COMMAND echo screen on | nc $ENV{VITA_IP} 1338
+					COMMAND lftp -e 'mirror -R "${CMAKE_SOURCE_DIR}/data/vita/shaders/" ux0:/app/${LIBSUPERDERPY_VITA_TITLEID}/data/vita/shaders/ && exit' $ENV{VITA_IP} -p 1337
+					COMMAND echo launch ${LIBSUPERDERPY_VITA_TITLEID} | nc $ENV{VITA_IP} 1338
+					USES_TERMINAL
+						)
+			endif()
+		else()
+			message(STATUS "No VITA_IP found; set this env var for ability to deploy straight to Vita (using loaderCompanion)")
+		endif()
 	endif(VITA)
 
 	# setup default RPATH/install_name handling
