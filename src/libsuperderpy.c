@@ -297,9 +297,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		int revision = (version >> 8) & 255;
 		int release = version & 255;
 		if (release) {
-			PrintConsole(game, "Allegro %d.%d.%d.%d", major, minor, revision, release);
+			PrintConsole(game, "Allegro %d.%d.%d.%d", major, minor, revision, release - 1);
 		} else {
-			PrintConsole(game, "Allegro %d.%d.%d", major, minor, revision);
+			PrintConsole(game, "Allegro %d.%d.%d~", major, minor, revision);
 		}
 	}
 	{
