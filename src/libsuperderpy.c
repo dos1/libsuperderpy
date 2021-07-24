@@ -345,7 +345,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 		al_destroy_bitmap(icon);
 	}
 
-	if (game->config.fullscreen) { al_hide_mouse_cursor(game->display); }
+	if (game->config.fullscreen) {
+		al_hide_mouse_cursor(game->display);
+	}
 	al_inhibit_screensaver(true);
 
 	SetupViewport(game);
