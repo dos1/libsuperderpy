@@ -317,7 +317,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	PrintConsole(game, "NPOT bitmaps: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_NPOT_BITMAP));
 	PrintConsole(game, "Separate alpha blender: %d", al_get_display_option(game->display, ALLEGRO_SUPPORT_SEPARATE_ALPHA));
 
-	PrintConsole(game, "Connected joysticks:");
+	PrintConsole(game, "Connected joysticks:%s", al_get_num_joysticks() ? "" : " [none]");
 	for (int i = 0; i < al_get_num_joysticks(); i++) {
 		ALLEGRO_JOYSTICK* joystick = al_get_joystick(i);
 		PrintConsole(game, " - %d: %s", i, al_get_joystick_name(joystick));
