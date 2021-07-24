@@ -19,6 +19,10 @@
 
 #include "internal.h"
 
+#ifdef __vita__
+#include <psp2/power.h>
+#endif
+
 static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
 		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:
@@ -333,6 +337,12 @@ static inline bool MainloopTick(struct Game* game) {
 #ifdef __EMSCRIPTEN__
 			StopAudio(game);
 #endif
+#ifdef __vita__
+			int vita_arm_freq = scePowerGetArmClockFrequency();
+			int vita_bus_freq = scePowerGetBusClockFrequency();
+			scePowerSetArmClockFrequency(444);
+			scePowerSetBusClockFrequency(222);
+#endif
 			if (tmp->show_loading && game->_priv.loading.gamestate->open) {
 				(*game->_priv.loading.gamestate->api->start)(game, game->_priv.loading.gamestate->data);
 			}
@@ -441,6 +451,10 @@ static inline bool MainloopTick(struct Game* game) {
 			game->_priv.timestamp = al_get_time();
 #ifdef __EMSCRIPTEN__
 			SetupAudio(game);
+#endif
+#ifdef __vita__
+			scePowerSetArmClockFrequency(vita_arm_freq);
+			scePowerSetBusClockFrequency(vita_bus_freq);
 #endif
 		}
 
