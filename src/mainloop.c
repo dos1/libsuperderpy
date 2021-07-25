@@ -19,10 +19,6 @@
 
 #include "internal.h"
 
-#ifdef __vita__
-#include <psp2/power.h>
-#endif
-
 static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 	switch (ev->type) {
 		case ALLEGRO_EVENT_DISPLAY_HALT_DRAWING:

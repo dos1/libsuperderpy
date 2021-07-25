@@ -64,6 +64,8 @@ struct GamestateResources;
 #elif defined(__EMSCRIPTEN__)
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
+#elif defined(__vita__)
+#include <psp2/power.h>
 #endif
 
 #include "character.h"
