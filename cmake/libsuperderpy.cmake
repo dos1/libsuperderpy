@@ -658,7 +658,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		if(NOT EXISTS "${CMAKE_SOURCE_DIR}/data/vita/sce_sys/icon0.png")
 			add_custom_target(${LIBSUPERDERPY_GAMENAME}_vita_icon BYPRODUCTS ${CMAKE_BINARY_DIR}/vita/sce_sys/icon0.png
 				COMMAND convert ${CMAKE_SOURCE_DIR}/data/icons/128/${LIBSUPERDERPY_GAMENAME}.png -background white -flatten ${CMAKE_BINARY_DIR}/vita/icon.png
-				COMMAND pngquant 256 -f -o ${CMAKE_BINARY_DIR}/vita/sce_sys/icon0.png ${CMAKE_BINARY_DIR}/vita/icon.png
+				COMMAND pngquant 256 -f -o ${CMAKE_BINARY_DIR}/vita/icon2.png ${CMAKE_BINARY_DIR}/vita/icon.png
+				COMMAND convert ${CMAKE_BINARY_DIR}/vita/icon2.png png8:${CMAKE_BINARY_DIR}/vita/sce_sys/icon0.png
 			)
 			add_dependencies(${LIBSUPERDERPY_GAMENAME}.vpk ${LIBSUPERDERPY_GAMENAME}_vita_icon)
 		endif()
