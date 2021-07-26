@@ -112,19 +112,25 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			al_reconfigure_joysticks();
 			break;
 		case ALLEGRO_EVENT_JOYSTICK_AXIS:
-#ifdef ALLEGRO_WITH_XWINDOWS
-			// XBox pads on GNU/Linux have messed up stick/axis ordering
-			if (ev->joystick.axis == 0) {
-				if (ev->joystick.stick == 2) {
-					ev->joystick.stick = 1;
-				} else if (ev->joystick.stick == 1) {
-					ev->joystick.stick = 2;
+#if (ALLEGRO_VERSION_INT >= ((5 << 24) | (2 << 16) | (5 << 8)))
+			if ((al_get_system_id() == ALLEGRO_SYSTEM_ID_XGLX) || (al_get_system_id() == ALLEGRO_SYSTEM_ID_RASPBERRYPI)) {
+#elif defined(ALLEGRO_WITH_XWINDOWS)
+			if (true) {
+#else
+			if (false) {
+#endif
+				// XBox pads on GNU/Linux have messed up stick/axis ordering
+				if (ev->joystick.axis == 0) {
+					if (ev->joystick.stick == 2) {
+						ev->joystick.stick = 1;
+					} else if (ev->joystick.stick == 1) {
+						ev->joystick.stick = 2;
+					}
+				}
+				if (ev->joystick.stick == 1) {
+					ev->joystick.axis = 1 - ev->joystick.axis;
 				}
 			}
-			if (ev->joystick.stick == 1) {
-				ev->joystick.axis = 1 - ev->joystick.axis;
-			}
-#endif
 			break;
 #ifdef __SWITCH__
 		case ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN:
