@@ -2,6 +2,8 @@
 A multiplatform game engine for games written in C and Allegro 5.
 
 Used by such games as:
+- [Secret Santa](https://gitlab.com/dosowisko.net/secretsanta)
+- [DJ Escher](https://gitlab.com/dosowisko.net/djescher)
 - [ODGŁOS](https://gitlab.com/HolyPangolin/odglos)
 - [Bob](https://gitlab.com/dosowisko.net/bob)
 - [Animatch](https://gitlab.com/HolyPangolin/animatch)
