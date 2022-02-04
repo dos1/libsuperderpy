@@ -359,8 +359,8 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	al_init_user_event_source(&(game->event_source));
 
-	game->_priv.event_queue = al_create_event_queue();
-	if (!game->_priv.event_queue) {
+	game->event_queue = al_create_event_queue();
+	if (!game->event_queue) {
 		FatalError(game, true, "Failed to create event queue.");
 		al_destroy_display(game->display);
 		return NULL;
@@ -408,28 +408,28 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 static void ProgressStub(struct Game* game) {}
 
 SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
-	al_register_event_source(game->_priv.event_queue, al_get_display_event_source(game->display));
-	al_register_event_source(game->_priv.event_queue, al_get_keyboard_event_source());
+	al_register_event_source(game->event_queue, al_get_display_event_source(game->display));
+	al_register_event_source(game->event_queue, al_get_keyboard_event_source());
 	if (game->input.available.mouse) {
-		al_register_event_source(game->_priv.event_queue, al_get_mouse_event_source());
+		al_register_event_source(game->event_queue, al_get_mouse_event_source());
 	}
 	if (game->input.available.joystick) {
-		al_register_event_source(game->_priv.event_queue, al_get_joystick_event_source());
+		al_register_event_source(game->event_queue, al_get_joystick_event_source());
 	}
 	if (game->input.available.touch) {
-		al_register_event_source(game->_priv.event_queue, al_get_touch_input_event_source());
+		al_register_event_source(game->event_queue, al_get_touch_input_event_source());
 #ifdef LIBSUPERDERPY_MOUSE_EMULATION
-		al_register_event_source(game->_priv.event_queue, al_get_touch_input_mouse_emulation_event_source());
+		al_register_event_source(game->event_queue, al_get_touch_input_mouse_emulation_event_source());
 #endif
 	}
-	al_register_event_source(game->_priv.event_queue, &(game->event_source));
+	al_register_event_source(game->event_queue, &(game->event_source));
 
 	// HACK: some backends correct the window size only after the display has been already created.
 	// if we start loading with wrong size, it won't be corrected until the main loop is entered back,
 	// so the loading screen will stay at the wrong size.
 	// Turns out SDL/Wayland needs some help with emitting the resize event before it's too late.
 	ALLEGRO_EVENT event;
-	al_peek_next_event(game->_priv.event_queue, &event);
+	al_peek_next_event(game->event_queue, &event);
 	ClearScreen(game);
 	al_flip_display();
 
@@ -612,7 +612,7 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	Console_Unload(game);
 	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));
-	al_destroy_event_queue(game->_priv.event_queue);
+	al_destroy_event_queue(game->event_queue);
 	al_restore_default_mixer();
 	al_destroy_mixer(game->audio.fx);
 	al_destroy_mixer(game->audio.music);

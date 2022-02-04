@@ -226,8 +226,8 @@ static inline bool MainloopEvents(struct Game* game) {
 
 		if (game->_priv.paused && !IS_EMSCRIPTEN) {
 			// there's no frame flipping when paused, so avoid pointless busylooping
-			al_wait_for_event(game->_priv.event_queue, &ev);
-		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
+			al_wait_for_event(game->event_queue, &ev);
+		} else if (!al_get_next_event(game->event_queue, &ev)) {
 			break;
 		}
 
@@ -281,7 +281,7 @@ static inline bool MainloopEvents(struct Game* game) {
 			al_unref_user_event(&ev.user);
 		}
 
-	} while (!al_is_event_queue_empty(game->_priv.event_queue));
+	} while (!al_is_event_queue_empty(game->event_queue));
 	return true;
 }
 

@@ -153,6 +153,7 @@ struct Params {
 struct Game {
 	ALLEGRO_DISPLAY* display; /*!< Main Allegro display. */
 	ALLEGRO_EVENT_SOURCE event_source; /*!< Event source for user events. */
+	ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
 	struct {
 		ALLEGRO_VOICE* v; /*!< Main voice used by the game. */
 		ALLEGRO_MIXER* mixer; /*!< Main mixer of the game. */
@@ -216,7 +217,6 @@ struct Game {
 		ALLEGRO_FONT* font_bsod; /*!< Font used in Blue Screens of Derp. */
 		char console[5][1024];
 		unsigned int console_pos;
-		ALLEGRO_EVENT_QUEUE* event_queue; /*!< Main event queue. */
 		bool show_timeline;
 
 		double speed; /*!< Speed of the game */
