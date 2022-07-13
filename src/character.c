@@ -86,6 +86,9 @@ SYMBOL_EXPORT void SwitchSpritesheet(struct Game* game, struct Character* charac
 	int pos = character->pos;
 	struct Spritesheet* old = character->spritesheet;
 	bool oldrev = character->reversing;
+	if (old && strcmp(name, old->name) == 0) {
+		return;
+	}
 	SelectSpritesheet(game, character, name);
 	if (old && old->bidir && character->spritesheet->bidir && oldrev) {
 		character->reversing = oldrev;
