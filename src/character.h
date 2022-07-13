@@ -148,8 +148,6 @@ ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* cha
 ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character* character);
 
 void DrawCharacter(struct Game* game, struct Character* character);
-void DrawScaledCharacterF(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
-void DrawScaledCharacter(struct Game* game, struct Character* character, ALLEGRO_COLOR tint, float scalex, float scaley, int flags);
 
 struct Character* CreateCharacter(struct Game* game, char* name);
 void DestroyCharacter(struct Game* game, struct Character* character);
