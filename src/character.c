@@ -791,12 +791,27 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 		al_get_bitmap_width(character->frame->_priv.image) / character->spritesheet->scale, al_get_bitmap_height(character->frame->_priv.image) / character->spritesheet->scale,
 		0);
 
-	/*al_hold_bitmap_drawing(false);
+	al_use_transform(&current);
+}
+
+SYMBOL_EXPORT void DrawDebugCharacter(struct Game* game, struct Character* character) {
+	if (!game->config.debug.enabled || !game->show_console || IsCharacterHidden(game, character)) {
+		return;
+	}
+
+	ALLEGRO_TRANSFORM current = *al_get_current_transform();
+
+	ALLEGRO_TRANSFORM transform = GetCharacterTransform(game, character);
+	al_compose_transform(&transform, &current);
+	al_use_transform(&transform);
+
+	al_draw_rectangle(0, 0, character->spritesheet->width, character->spritesheet->height, al_map_rgb(0, 255, 255), 5);
+
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
 		character->spritesheet->height * character->spritesheet->pivotY - 5,
 		character->spritesheet->width * character->spritesheet->pivotX + 5,
 		character->spritesheet->height * character->spritesheet->pivotY + 5,
-		al_map_rgb(255, 255, 0));*/
+		al_map_rgb(255, 0, 255));
 
 	al_use_transform(&current);
 }
