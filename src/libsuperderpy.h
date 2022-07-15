@@ -141,6 +141,7 @@ struct Params {
 	bool integer_scaling; /*!< Ensure that the viewport is zoomed only by integer factors. */
 	bool depth_buffer; /*!< Request a depth buffer for the framebuffer's render target. */
 	bool show_loading_on_launch; /*!< Whether the loading screen should be shown when loading the initial set of gamestates. */
+	bool disable_bg_clear; /*!< If set to true, the gamestate framebuffer won't be cleared to background color before calling Gamestate_Draw. */
 	bool fixed_size; /*!< If set to true, the game's window will not be resizable. */
 	bool no_autopause; /*!< If set to true, engine autopause is forced to be disabled. */
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */

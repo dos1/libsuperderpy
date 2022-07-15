@@ -46,7 +46,7 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
-	if (!game->_priv.params.handlers.compositor) {
+	if (!game->_priv.params.disable_bg_clear && !game->_priv.params.handlers.compositor) {
 		ClearScreen(game);
 	}
 	struct Gamestate* tmp = game->_priv.gamestates;
@@ -57,7 +57,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
 			SetFramebufferAsTarget(game);
-			if (game->_priv.params.handlers.compositor) { // don't clear when uncomposited
+			if (!game->_priv.params.disable_bg_clear && game->_priv.params.handlers.compositor) { // don't clear when uncomposited
 				al_reset_clipping_rectangle();
 				al_clear_to_color(game->_priv.bg); // even if everything is going to be redrawn, it optimizes tiled rendering
 			}
@@ -71,7 +71,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		// same as above, but for the loading gamestate
 		game->_priv.current_gamestate = game->_priv.loading.gamestate;
 		SetFramebufferAsTarget(game);
-		if (game->_priv.params.handlers.compositor) {
+		if (!game->_priv.params.disable_bg_clear && game->_priv.params.handlers.compositor) {
 			al_reset_clipping_rectangle();
 			al_clear_to_color(game->_priv.bg);
 		}
