@@ -747,8 +747,9 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 
 	if (character->parent) {
 		ALLEGRO_TRANSFORM parent = GetCharacterTransform(game, character->parent);
+		struct Spritesheet* parent_spritesheet = character->parent->spritesheet;
+		al_translate_transform(&transform, parent_spritesheet->width * parent_spritesheet->pivotX, parent_spritesheet->height * parent_spritesheet->pivotY);
 		al_compose_transform(&transform, &parent);
-		// FIXME: position should be calculated in relation to parents pivot point
 	}
 
 	return transform;
