@@ -698,14 +698,13 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			if (!reachedEnd && pos != character->pos) {
 				pos = character->pos;
 				double duration = character->frame->duration;
+				ALLEGRO_BITMAP* image = character->frame->_priv.image;
 				if (character->frame->owned) {
 					al_destroy_bitmap(character->frame->bitmap);
 				}
-				al_destroy_bitmap(character->frame->_priv.image);
-				free(character->frame);
-				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
 				*(character->frame) = character->spritesheet->stream(game, duration, pos, character->spritesheet->stream_data);
-				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * character->spritesheet->scale, character->frame->sy * character->spritesheet->scale, (character->frame->sw > 0) ? (character->frame->sw * character->spritesheet->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * character->spritesheet->scale) : al_get_bitmap_height(character->frame->bitmap));
+				character->frame->_priv.image = image;
+				al_reparent_bitmap(character->frame->_priv.image, character->frame->bitmap, character->frame->sx * character->spritesheet->scale, character->frame->sy * character->spritesheet->scale, (character->frame->sw > 0) ? (character->frame->sw * character->spritesheet->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * character->spritesheet->scale) : al_get_bitmap_height(character->frame->bitmap));
 			}
 		} else {
 			character->frame = &character->spritesheet->frames[character->pos];
