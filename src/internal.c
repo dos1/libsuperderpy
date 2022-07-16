@@ -58,7 +58,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		game->_priv.loading.gamestate->api->predraw(game, game->_priv.loading.gamestate->data);
 	}
 
-	if (!game->_priv.params.disable_bg_clear && !game->_priv.params.handlers.compositor) {
+	if (!game->_priv.params.disable_bg_clear && !game->_priv.params.handlers.compositor && !game->_priv.params.handlers.predraw) {
 		ClearScreen(game);
 	}
 
