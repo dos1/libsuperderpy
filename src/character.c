@@ -712,10 +712,6 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 			}
 		}
 
-		if (character->spritesheet->frame_count == 1) {
-			character->pos = 0;
-		}
-
 		if (character->spritesheet->stream) {
 			if (!reachedEnd && pos != character->pos) {
 				pos = character->pos;
