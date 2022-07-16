@@ -171,11 +171,11 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 				}
 				tmp->frames[i]._priv.image = al_create_sub_bitmap(tmp->frames[i].bitmap, tmp->frames[i].sx * tmp->scale, tmp->frames[i].sy * tmp->scale, (tmp->frames[i].sw > 0) ? (tmp->frames[i].sw * tmp->scale) : al_get_bitmap_width(tmp->frames[i].bitmap), (tmp->frames[i].sh > 0) ? (tmp->frames[i].sh * tmp->scale) : al_get_bitmap_height(tmp->frames[i].bitmap));
 
-				int width = al_get_bitmap_width(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].x;
+				int width = al_get_bitmap_width(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].x + tmp->offsetX;
 				if (width > tmp->width) {
 					tmp->width = width;
 				}
-				int height = al_get_bitmap_height(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].y;
+				int height = al_get_bitmap_height(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].y + tmp->offsetY;
 				if (height > tmp->height) {
 					tmp->height = height;
 				}
@@ -263,11 +263,11 @@ SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Characte
 
 		spritesheet->frames[i]._priv.image = al_create_sub_bitmap(spritesheet->frames[i].bitmap, spritesheet->frames[i].sx * spritesheet->scale, spritesheet->frames[i].sy * spritesheet->scale, (spritesheet->frames[i].sw > 0) ? (spritesheet->frames[i].sw * spritesheet->scale) : al_get_bitmap_width(spritesheet->frames[i].bitmap), (spritesheet->frames[i].sh > 0) ? (spritesheet->frames[i].sh * spritesheet->scale) : al_get_bitmap_height(spritesheet->frames[i].bitmap));
 
-		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].x;
+		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].x + spritesheet->offsetX;
 		if (width > spritesheet->width) {
 			spritesheet->width = width;
 		}
-		int height = al_get_bitmap_height(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].y;
+		int height = al_get_bitmap_height(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].y + spritesheet->offsetY;
 		if (height > spritesheet->height) {
 			spritesheet->height = height;
 		}
@@ -759,7 +759,6 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1));
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
-	al_translate_transform(&transform, character->spritesheet->offsetX, character->spritesheet->offsetY);
 	al_translate_transform(&transform, GetCharacterX(game, character), GetCharacterY(game, character));
 
 	if (character->parent) {
@@ -805,7 +804,7 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 	al_draw_tinted_scaled_bitmap(character->frame->_priv.image, GetCharacterTint(game, character),
 		0, 0,
 		al_get_bitmap_width(character->frame->_priv.image), al_get_bitmap_height(character->frame->_priv.image),
-		character->frame->x, character->frame->y,
+		character->frame->x + character->spritesheet->offsetX, character->frame->y + character->spritesheet->offsetY,
 		al_get_bitmap_width(character->frame->_priv.image) / character->spritesheet->scale, al_get_bitmap_height(character->frame->_priv.image) / character->spritesheet->scale,
 		0);
 
@@ -905,11 +904,12 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 	if (test && pixelperfect) {
 		al_invert_transform(&transform);
 		al_transform_coordinates(&transform, &x, &y);
-		int xpos = (int)x - character->frame->x, ypos = (int)y - character->frame->y;
-		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->_priv.image) / character->spritesheet->scale || ypos >= al_get_bitmap_height(character->frame->_priv.image) / character->spritesheet->scale) {
+		int xpos = (x - character->frame->x - character->spritesheet->offsetX) * character->spritesheet->scale;
+		int ypos = (y - character->frame->y - character->spritesheet->offsetY) * character->spritesheet->scale;
+		if (xpos < 0 || ypos < 0 || xpos >= al_get_bitmap_width(character->frame->_priv.image) || ypos >= al_get_bitmap_height(character->frame->_priv.image)) {
 			return false;
 		}
-		ALLEGRO_COLOR color = al_get_pixel(character->frame->_priv.image, xpos * character->spritesheet->scale, ypos * character->spritesheet->scale);
+		ALLEGRO_COLOR color = al_get_pixel(character->frame->_priv.image, xpos, ypos);
 		return (color.a > 0.0);
 	}
 
