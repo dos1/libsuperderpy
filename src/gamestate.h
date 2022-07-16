@@ -26,7 +26,7 @@ struct GamestateAPI {
 	void (*draw)(struct Game* game, void* data);
 	void (*logic)(struct Game* game, void* data, double delta);
 	void (*tick)(struct Game* game, void* data);
-
+	void (*predraw)(struct Game* game, void* data);
 	void* (*load)(struct Game* game, void (*progress)(struct Game* game));
 	void (*post_load)(struct Game* game, void* data);
 	void (*start)(struct Game* game, void* data);
@@ -34,7 +34,6 @@ struct GamestateAPI {
 	void (*resume)(struct Game* game, void* data);
 	void (*stop)(struct Game* game, void* data);
 	void (*unload)(struct Game* game, void* data);
-
 	void (*process_event)(struct Game* game, void* data, ALLEGRO_EVENT* ev);
 	void (*reload)(struct Game* game, void* data);
 
@@ -77,6 +76,7 @@ bool IsGamestateVisible(struct Game* game, struct Gamestate* gamestate);
 #define Gamestate_Draw GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_Draw)
 #define Gamestate_Logic GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_Logic)
 #define Gamestate_Tick GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_Tick)
+#define Gamestate_PreDraw GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_PreDraw)
 #define Gamestate_Load GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_Load)
 #define Gamestate_PostLoad GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_PostLoad)
 #define Gamestate_Start GAMESTATE_CONCAT(LIBSUPERDERPY_GAMESTATE, _Gamestate_Start)
@@ -93,6 +93,7 @@ extern int Gamestate_ProgressCount;
 __attribute__((used)) void Gamestate_Draw(struct Game* game, struct GamestateResources* data);
 __attribute__((used)) void Gamestate_Logic(struct Game* game, struct GamestateResources* data, double delta);
 __attribute__((used)) void Gamestate_Tick(struct Game* game, struct GamestateResources* data);
+__attribute__((used)) void Gamestate_PreDraw(struct Game* game, struct GamestateResources* data);
 __attribute__((used)) void* Gamestate_Load(struct Game* game, void (*progress)(struct Game*));
 __attribute__((used)) void Gamestate_PostLoad(struct Game* game, struct GamestateResources* data);
 __attribute__((used)) void Gamestate_Start(struct Game* game, struct GamestateResources* data);
@@ -117,6 +118,7 @@ void GAMESTATE_INIT_NAME(LIBSUPERDERPY_GAMESTATE)(void) {
 		.draw = (void*)Gamestate_Draw,
 		.logic = (void*)Gamestate_Logic,
 		.tick = (void*)Gamestate_Tick,
+		.predraw = (void*)Gamestate_PreDraw,
 		.load = (void*)Gamestate_Load,
 		.post_load = (void*)Gamestate_PostLoad,
 		.start = (void*)Gamestate_Start,

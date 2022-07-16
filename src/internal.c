@@ -46,13 +46,27 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 }
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
+	struct Gamestate* tmp = game->_priv.gamestates;
+	while (tmp) {
+		if (tmp->loaded && tmp->started && tmp->api->predraw) {
+			game->_priv.current_gamestate = tmp;
+			tmp->api->predraw(game, tmp->data);
+		}
+		tmp = tmp->next;
+	}
+	if (game->loading.shown && game->_priv.loading.gamestate->api->predraw) {
+		game->_priv.loading.gamestate->api->predraw(game, game->_priv.loading.gamestate->data);
+	}
+
 	if (!game->_priv.params.disable_bg_clear && !game->_priv.params.handlers.compositor) {
 		ClearScreen(game);
 	}
-	struct Gamestate* tmp = game->_priv.gamestates;
+
 	if (game->_priv.params.handlers.predraw) {
 		game->_priv.params.handlers.predraw(game);
 	}
+
+	tmp = game->_priv.gamestates;
 	while (tmp) {
 		if ((tmp->loaded) && (tmp->started)) {
 			game->_priv.current_gamestate = tmp;
@@ -405,6 +419,7 @@ SYMBOL_INTERNAL bool LinkGamestate(struct Game* game, struct Gamestate* gamestat
 	if (!(gamestate->api->process_event = dlsym(gamestate->handle, "Gamestate_ProcessEvent"))) { GS_ERROR; }
 
 	// optional
+	gamestate->api->predraw = dlsym(gamestate->handle, "Gamestate_PreDraw");
 	gamestate->api->tick = dlsym(gamestate->handle, "Gamestate_Tick");
 	gamestate->api->post_load = dlsym(gamestate->handle, "Gamestate_PostLoad");
 	gamestate->api->pause = dlsym(gamestate->handle, "Gamestate_Pause");
