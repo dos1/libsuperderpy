@@ -171,11 +171,11 @@ SYMBOL_EXPORT void LoadSpritesheets(struct Game* game, struct Character* charact
 				}
 				tmp->frames[i]._priv.image = al_create_sub_bitmap(tmp->frames[i].bitmap, tmp->frames[i].sx * tmp->scale, tmp->frames[i].sy * tmp->scale, (tmp->frames[i].sw > 0) ? (tmp->frames[i].sw * tmp->scale) : al_get_bitmap_width(tmp->frames[i].bitmap), (tmp->frames[i].sh > 0) ? (tmp->frames[i].sh * tmp->scale) : al_get_bitmap_height(tmp->frames[i].bitmap));
 
-				int width = al_get_bitmap_width(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].x + tmp->offsetX;
+				int width = al_get_bitmap_width(tmp->frames[i]._priv.image) / tmp->scale + MAX(0, tmp->frames[i].x) + MAX(0, tmp->offsetX);
 				if (width > tmp->width) {
 					tmp->width = width;
 				}
-				int height = al_get_bitmap_height(tmp->frames[i]._priv.image) / tmp->scale + tmp->frames[i].y + tmp->offsetY;
+				int height = al_get_bitmap_height(tmp->frames[i]._priv.image) / tmp->scale + MAX(0, tmp->frames[i].y) + MAX(0, tmp->offsetY);
 				if (height > tmp->height) {
 					tmp->height = height;
 				}
@@ -263,11 +263,11 @@ SYMBOL_EXPORT void PreloadStreamedSpritesheet(struct Game* game, struct Characte
 
 		spritesheet->frames[i]._priv.image = al_create_sub_bitmap(spritesheet->frames[i].bitmap, spritesheet->frames[i].sx * spritesheet->scale, spritesheet->frames[i].sy * spritesheet->scale, (spritesheet->frames[i].sw > 0) ? (spritesheet->frames[i].sw * spritesheet->scale) : al_get_bitmap_width(spritesheet->frames[i].bitmap), (spritesheet->frames[i].sh > 0) ? (spritesheet->frames[i].sh * spritesheet->scale) : al_get_bitmap_height(spritesheet->frames[i].bitmap));
 
-		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].x + spritesheet->offsetX;
+		int width = al_get_bitmap_width(spritesheet->frames[i]._priv.image) / spritesheet->scale + MAX(0, spritesheet->frames[i].x) + MAX(0, spritesheet->offsetX);
 		if (width > spritesheet->width) {
 			spritesheet->width = width;
 		}
-		int height = al_get_bitmap_height(spritesheet->frames[i]._priv.image) / spritesheet->scale + spritesheet->frames[i].y + spritesheet->offsetY;
+		int height = al_get_bitmap_height(spritesheet->frames[i]._priv.image) / spritesheet->scale + MAX(0, spritesheet->frames[i].y) + MAX(0, spritesheet->offsetY);
 		if (height > spritesheet->height) {
 			spritesheet->height = height;
 		}
