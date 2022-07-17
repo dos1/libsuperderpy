@@ -29,6 +29,16 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 		PrintConsole(game, "ERROR: No spritesheets registered for %s!", character->name);
 		return;
 	}
+
+	if (character->spritesheet && character->spritesheet->stream && character->frame) {
+		if (character->frame->owned) {
+			al_destroy_bitmap(character->frame->bitmap);
+		}
+		al_destroy_bitmap(character->frame->_priv.image);
+		free(character->frame);
+		character->frame = NULL;
+	}
+
 	while (tmp) {
 		if (!strcmp(tmp->name, name)) {
 			if (character->successor) {
@@ -52,13 +62,6 @@ SYMBOL_EXPORT void SelectSpritesheet(struct Game* game, struct Character* charac
 			character->reversed = reversed;
 			character->reversing = tmp->reversed ^ reversed;
 			if (tmp->stream) {
-				if (character->spritesheet && character->spritesheet->stream && character->frame) {
-					if (character->frame->owned) {
-						al_destroy_bitmap(character->frame->bitmap);
-					}
-					al_destroy_bitmap(character->frame->_priv.image);
-					free(character->frame);
-				}
 				character->frame = calloc(1, sizeof(struct SpritesheetFrame));
 				*(character->frame) = tmp->stream(game, 0.0, character->pos, tmp->stream_data);
 				character->frame->_priv.image = al_create_sub_bitmap(character->frame->bitmap, character->frame->sx * tmp->scale, character->frame->sy * tmp->scale, (character->frame->sw > 0) ? (character->frame->sw * tmp->scale) : al_get_bitmap_width(character->frame->bitmap), (character->frame->sh > 0) ? (character->frame->sh * tmp->scale) : al_get_bitmap_height(character->frame->bitmap));
