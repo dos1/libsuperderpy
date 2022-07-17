@@ -143,6 +143,7 @@ void RegisterSpritesheet(struct Game* game, struct Character* character, char* n
 void RegisterStreamedSpritesheet(struct Game* game, struct Character* character, char* name, SpritesheetStream* callback, SpritesheetStreamDestructor* destructor, void* data);
 void RegisterSpritesheetFromBitmap(struct Game* game, struct Character* character, char* name, ALLEGRO_BITMAP* bitmap);
 struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name);
+void SetSpritesheetPosition(struct Game* game, struct Character* character, int frame);
 
 ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct Character* character);
 ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character* character);

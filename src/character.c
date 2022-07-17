@@ -109,6 +109,21 @@ SYMBOL_EXPORT void EnqueueSpritesheet(struct Game* game, struct Character* chara
 	character->successor = strdup(name);
 }
 
+SYMBOL_EXPORT void SetSpritesheetPosition(struct Game* game, struct Character* character, int frame) {
+	struct Spritesheet* spritesheet = character->spritesheet;
+	if (!spritesheet) {
+		return;
+	}
+	if (spritesheet->stream) {
+		PrintConsole(game, "%s: tried to set position of a streaming spritesheet %s!", character->name, spritesheet->name);
+		return;
+	}
+	if (frame < spritesheet->frame_count) {
+		character->pos = frame;
+		character->frame = &character->spritesheet->frames[character->pos];
+	}
+}
+
 SYMBOL_EXPORT struct Spritesheet* GetSpritesheet(struct Game* game, struct Character* character, char* name) {
 	struct Spritesheet* tmp = character->spritesheets;
 	while (tmp) {
