@@ -66,7 +66,10 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	}
 
 	if (game->_priv.params.handlers.predraw) {
+		al_set_target_backbuffer(game->display);
+		al_reset_clipping_rectangle();
 		game->_priv.params.handlers.predraw(game);
+		al_set_clipping_rectangle(game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 
 	tmp = game->_priv.gamestates;
