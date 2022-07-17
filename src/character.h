@@ -70,8 +70,8 @@ struct Spritesheet {
 	char* predecessor;
 	bool bidir;
 	bool reversed;
-	double pivotX;
-	double pivotY;
+	double pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
+	double pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
 	int offsetX;
 	int offsetY;
 	bool flipX;
@@ -82,6 +82,13 @@ struct Spritesheet {
 	SpritesheetStream* stream;
 	SpritesheetStreamDestructor* stream_destructor;
 	void* stream_data;
+
+	struct {
+		double x1;
+		double y1;
+		double x2;
+		double y2;
+	} hitbox;
 
 	int width;
 	int height;
@@ -112,8 +119,6 @@ struct Character {
 	float y; /*!< Vertical position of character. */
 	ALLEGRO_COLOR tint; /*!< Color with which the character's pixels will be multiplied (tinted). White for no effect. */
 	bool parent_tint; /*!< When true, the character tint is multiplied by its parent tint. */
-	//float pivotX; /*!< Pivot point's X, for scaling and rotating, relative of character's size. */
-	//float pivotY; /*!< Pivot point's Y, for scaling and rotating, relative of character's size. */
 	float scaleX; /*!< Scale factor for X axis. */
 	float scaleY; /*!< Scale factor for Y axis. */
 	float angle; /*!< Character's rotation angle (radians). */

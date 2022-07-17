@@ -367,6 +367,11 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 	s->offsetX = strtolnull(al_get_config_value(config, "offset", "x"), 0);
 	s->offsetY = strtolnull(al_get_config_value(config, "offset", "y"), 0);
 
+	s->hitbox.x1 = strtodnull(al_get_config_value(config, "hitbox", "x1"), 0.0);
+	s->hitbox.y1 = strtodnull(al_get_config_value(config, "hitbox", "y1"), 0.0);
+	s->hitbox.x2 = strtodnull(al_get_config_value(config, "hitbox", "x2"), 0.0);
+	s->hitbox.y2 = strtodnull(al_get_config_value(config, "hitbox", "y2"), 0.0);
+
 	s->frames = calloc(s->frame_count, sizeof(struct SpritesheetFrame));
 
 	for (int i = 0; i < s->frame_count; i++) {
@@ -385,11 +390,10 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s->frames[i].flipX = strtolnull(al_get_config_value(config, framename, "flipX"), 0);
 		s->frames[i].flipY = strtolnull(al_get_config_value(config, framename, "flipY"), 0);
 
-		double r = 0, g = 0, b = 0, a = 0;
-		r = strtodnull(al_get_config_value(config, framename, "r"), 1);
-		g = strtodnull(al_get_config_value(config, framename, "g"), 1);
-		b = strtodnull(al_get_config_value(config, framename, "b"), 1);
-		a = strtodnull(al_get_config_value(config, framename, "a"), 1);
+		double r = strtodnull(al_get_config_value(config, framename, "r"), 1.0);
+		double g = strtodnull(al_get_config_value(config, framename, "g"), 1.0);
+		double b = strtodnull(al_get_config_value(config, framename, "b"), 1.0);
+		double a = strtodnull(al_get_config_value(config, framename, "a"), 1.0);
 		s->frames[i].tint = al_premul_rgba_f(r, g, b, a);
 
 		s->frames[i].file = NULL;
@@ -790,6 +794,10 @@ SYMBOL_EXPORT ALLEGRO_COLOR GetCharacterTint(struct Game* game, struct Character
 	return al_map_rgba_f(r * r2, g * g2, b * b2, a * a2);
 }
 
+static bool HasValidHitbox(struct Spritesheet* spritesheet) {
+	return spritesheet->hitbox.x1 != 0.0 && spritesheet->hitbox.y1 != 0.0 && spritesheet->hitbox.x2 != 0.0 && spritesheet->hitbox.y2 != 0.0;
+}
+
 SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character) {
 	if (IsCharacterHidden(game, character)) {
 		return;
@@ -823,6 +831,12 @@ SYMBOL_EXPORT void DrawDebugCharacter(struct Game* game, struct Character* chara
 	al_use_transform(&transform);
 
 	al_draw_rectangle(0, 0, character->spritesheet->width, character->spritesheet->height, al_map_rgb(0, 255, 255), 5);
+
+	if (HasValidHitbox(character->spritesheet)) {
+		al_draw_rectangle(character->spritesheet->hitbox.x1 * character->spritesheet->width, character->spritesheet->hitbox.y1 * character->spritesheet->height,
+			character->spritesheet->hitbox.x2 * character->spritesheet->width, character->spritesheet->hitbox.y2 * character->spritesheet->height,
+			al_map_rgb(255, 255, 0), 3);
+	}
 
 	al_draw_filled_rectangle(character->spritesheet->width * character->spritesheet->pivotX - 5,
 		character->spritesheet->height * character->spritesheet->pivotY - 5,
@@ -892,6 +906,14 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 
 	float x1 = MIN(0.0, character->spritesheet->offsetX) + MIN(0.0, character->frame->x), y1 = MIN(0.0, character->spritesheet->offsetY) + MIN(0.0, character->frame->y);
 	float x2 = character->spritesheet->width, y2 = character->spritesheet->height;
+
+	if (HasValidHitbox(character->spritesheet)) {
+		PrintConsole(game, "valid %f %d", character->spritesheet->hitbox.x1, isnan(character->spritesheet->hitbox.x1));
+		x1 = character->spritesheet->hitbox.x1 * character->spritesheet->width;
+		y1 = character->spritesheet->hitbox.y1 * character->spritesheet->height;
+		x2 = character->spritesheet->hitbox.x2 * character->spritesheet->width;
+		y2 = character->spritesheet->hitbox.y2 * character->spritesheet->height;
+	}
 
 	ALLEGRO_TRANSFORM transform = GetCharacterTransform(game, character);
 	al_transform_coordinates(&transform, &x1, &y1);
