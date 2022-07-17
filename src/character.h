@@ -137,6 +137,14 @@ struct Character {
 	CharacterDestructor* destructor;
 	bool shared; /*!< Marks the list of spritesheets as shared, so it won't be freed together with the character. */
 	bool detailed_progress; /*!< Reports progress of loading individual frames. */
+
+	struct {
+		double x1;
+		double y1;
+		double x2;
+		double y2;
+		bool enabled;
+	} bounds;
 };
 
 // TODO: document functions
@@ -169,6 +177,9 @@ void MoveCharacterF(struct Game* game, struct Character* character, float x, flo
 void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle);
 void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y);
+void SetCharacterBounds(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2);
+void SetCharacterBoundsF(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2);
+void SetCharacterUnbounded(struct Game* game, struct Character* character);
 
 void SetParentCharacter(struct Game* game, struct Character* character, struct Character* parent);
 

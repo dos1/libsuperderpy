@@ -539,6 +539,7 @@ SYMBOL_EXPORT struct Character* CreateCharacter(struct Game* game, char* name) {
 	character->callback_data = NULL;
 	character->destructor = NULL;
 	character->detailed_progress = false;
+	character->bounds.enabled = false;
 
 	return character;
 }
@@ -734,6 +735,25 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 	}
 }
 
+static void BoundCharacter(struct Game* game, struct Character* character) {
+	if (!character->bounds.enabled) {
+		return;
+	}
+
+	if (character->x < character->bounds.x1) {
+		character->x = character->bounds.x1;
+	}
+	if (character->y < character->bounds.y1) {
+		character->y = character->bounds.y1;
+	}
+	if (character->x > character->bounds.x2) {
+		character->x = character->bounds.x2;
+	}
+	if (character->y > character->bounds.y2) {
+		character->y = character->bounds.y2;
+	}
+}
+
 SYMBOL_EXPORT void MoveCharacter(struct Game* game, struct Character* character, float x, float y, float angle) {
 	MoveCharacterF(game, character, x / (float)GetCharacterConfineX(game, character), y / (float)GetCharacterConfineY(game, character), angle);
 }
@@ -742,12 +762,14 @@ SYMBOL_EXPORT void MoveCharacterF(struct Game* game, struct Character* character
 	character->x += x;
 	character->y += y;
 	character->angle += angle;
+	BoundCharacter(game, character);
 }
 
 SYMBOL_EXPORT void SetCharacterPositionF(struct Game* game, struct Character* character, float x, float y, float angle) {
 	character->x = x;
 	character->y = y;
 	character->angle = angle;
+	BoundCharacter(game, character);
 }
 
 SYMBOL_EXPORT void SetCharacterPosition(struct Game* game, struct Character* character, float x, float y, float angle) {
@@ -873,6 +895,24 @@ SYMBOL_EXPORT void SetParentCharacter(struct Game* game, struct Character* chara
 SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* character, int x, int y) {
 	character->confineX = x;
 	character->confineY = y;
+}
+
+void SetCharacterBounds(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
+	SetCharacterBoundsF(game, character,
+		x1 / GetCharacterConfineX(game, character), y1 / GetCharacterConfineY(game, character),
+		x2 / GetCharacterConfineX(game, character), y2 / GetCharacterConfineY(game, character));
+}
+
+void SetCharacterBoundsF(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
+	character->bounds.x1 = x1;
+	character->bounds.y1 = y1;
+	character->bounds.x2 = x2;
+	character->bounds.y2 = y2;
+	character->bounds.enabled = true;
+}
+
+void SetCharacterUnbounded(struct Game* game, struct Character* character) {
+	character->bounds.enabled = false;
 }
 
 SYMBOL_EXPORT int GetCharacterConfineX(struct Game* game, struct Character* character) {
