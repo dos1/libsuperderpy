@@ -30,5 +30,6 @@ double Clamp(double left, double right, double val);
 double Lerp(double left, double right, double pos);
 int Sign(double val);
 double Fract(double val);
+double Distance(double x1, double y1, double x2, double y2);
 
 #endif /* LIBSUPERDERPY_MATHS_H */
