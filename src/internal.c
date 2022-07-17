@@ -47,6 +47,7 @@ SYMBOL_INTERNAL void SimpleCompositor(struct Game* game) {
 
 SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 	struct Gamestate* tmp = game->_priv.gamestates;
+
 	while (tmp) {
 		if (tmp->loaded && tmp->started && tmp->api->predraw) {
 			game->_priv.current_gamestate = tmp;
@@ -55,8 +56,10 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		tmp = tmp->next;
 	}
 	if (game->loading.shown && game->_priv.loading.gamestate->api->predraw) {
+		game->_priv.current_gamestate = game->_priv.loading.gamestate;
 		game->_priv.loading.gamestate->api->predraw(game, game->_priv.loading.gamestate->data);
 	}
+	game->_priv.current_gamestate = NULL;
 
 	if (!game->_priv.params.disable_bg_clear && !game->_priv.params.handlers.compositor && !game->_priv.params.handlers.predraw) {
 		ClearScreen(game);
@@ -91,6 +94,8 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		}
 		game->_priv.loading.gamestate->api->draw(game, game->_priv.loading.gamestate->data);
 	}
+
+	game->_priv.current_gamestate = NULL;
 
 	al_set_target_backbuffer(game->display);
 
@@ -132,6 +137,7 @@ SYMBOL_INTERNAL void LogicGamestates(struct Game* game, double delta) {
 		}
 		tmp = tmp->next;
 	}
+	game->_priv.current_gamestate = NULL;
 	if (game->_priv.params.handlers.postlogic) {
 		game->_priv.params.handlers.postlogic(game, delta);
 	}
@@ -150,8 +156,10 @@ SYMBOL_INTERNAL void ReloadGamestates(struct Game* game) {
 		tmp = tmp->next;
 	}
 	if (game->_priv.loading.gamestate->api->reload) {
+		game->_priv.current_gamestate = game->_priv.loading.gamestate;
 		game->_priv.loading.gamestate->api->reload(game, game->_priv.loading.gamestate->data);
 	}
+	game->_priv.current_gamestate = NULL;
 }
 
 SYMBOL_INTERNAL void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev) {
@@ -163,6 +171,7 @@ SYMBOL_INTERNAL void EventGamestates(struct Game* game, ALLEGRO_EVENT* ev) {
 		}
 		tmp = tmp->next;
 	}
+	game->_priv.current_gamestate = NULL;
 }
 
 SYMBOL_INTERNAL void FreezeGamestates(struct Game* game) {
