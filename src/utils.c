@@ -207,6 +207,22 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename
 	return target;
 }
 
+SYMBOL_EXPORT ALLEGRO_BITMAP* LoadMemoryBitmap(const char* filename) {
+	int flags = al_get_new_bitmap_flags();
+	al_set_new_bitmap_flags((flags | ALLEGRO_MEMORY_BITMAP) & ~(ALLEGRO_VIDEO_BITMAP | ALLEGRO_CONVERT_BITMAP));
+	ALLEGRO_BITMAP* bitmap = al_load_bitmap(filename);
+	al_set_new_bitmap_flags(flags);
+	return bitmap;
+}
+
+SYMBOL_EXPORT ALLEGRO_BITMAP* CreateMemoryBitmap(int width, int height) {
+	int flags = al_get_new_bitmap_flags();
+	al_set_new_bitmap_flags((flags | ALLEGRO_MEMORY_BITMAP) & ~(ALLEGRO_VIDEO_BITMAP | ALLEGRO_CONVERT_BITMAP));
+	ALLEGRO_BITMAP* bitmap = al_create_bitmap(width, height);
+	al_set_new_bitmap_flags(flags);
+	return bitmap;
+}
+
 SYMBOL_EXPORT void FatalErrorWithContext(struct Game* game, int line, const char* file, const char* func, bool exit, char* format, ...) {
 	char text[1024] = {0};
 	PrintConsole(game, "Fatal Error, displaying Blue Screen of Derp...");

@@ -52,6 +52,12 @@ void ScaleBitmap(ALLEGRO_BITMAP* source, int width, int height);
 /*! \brief Loads bitmap into memory and scales it with software linear filtering. */
 ALLEGRO_BITMAP* LoadScaledBitmap(struct Game* game, char* filename, int width, int height);
 
+/*! \brief Creates a memory bitmap loaded from a file. */
+ALLEGRO_BITMAP* LoadMemoryBitmap(const char* filename);
+
+/*! \brief Creates a memory bitmap with specified dimensions. */
+ALLEGRO_BITMAP* CreateMemoryBitmap(int width, int height);
+
 /*! \brief Finds the path for data file. Returns NULL when the file can't be found, or ephemeral string otherwise. */
 const char* FindDataFilePath(struct Game* game, const char* filename);
 /*! \brief Finds the path for data file. Triggers BSOD and quits when the file can't be found, returns ephemeral string otherwise. */
