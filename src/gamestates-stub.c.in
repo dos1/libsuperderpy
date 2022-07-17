@@ -29,7 +29,7 @@ void GAMESTATES_STUB_CONCAT(name, _Gamestate_Tick)() {} \
 void GAMESTATES_STUB_CONCAT(name, _Gamestate_PostLoad)() {} \
 void GAMESTATES_STUB_CONCAT(name, _Gamestate_Pause)() {} \
 void GAMESTATES_STUB_CONCAT(name, _Gamestate_Resume)() {} \
-void GAMESTATES_STUB_CONCAT(name, _Gamestate_Reload)() {}
+void GAMESTATES_STUB_CONCAT(name, _Gamestate_Reload)() {} \
 void GAMESTATES_STUB_CONCAT(name, _Gamestate_PreDraw)() {}
 
 
