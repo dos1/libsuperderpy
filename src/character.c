@@ -639,7 +639,9 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 
 			if (character->frame->start) {
 				if (character->spritesheet->bidir) {
-					character->pos++;
+					if (!character->frame->end) {
+						character->pos++;
+					}
 					character->reversing = false;
 					if (!character->reversed) {
 						reachedEnd = true;
@@ -659,7 +661,9 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 						QuitGame(game, false);
 						return;
 					}
-					character->pos--;
+					if (!character->frame->start) {
+						character->pos--;
+					}
 					character->reversing = true;
 					if (character->reversed) {
 						reachedEnd = true;
