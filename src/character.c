@@ -890,7 +890,7 @@ SYMBOL_EXPORT bool IsOnCharacter(struct Game* game, struct Character* character,
 		return false;
 	}
 
-	float x1 = 0.0, y1 = 0.0;
+	float x1 = MIN(0.0, character->spritesheet->offsetX) + MIN(0.0, character->frame->x), y1 = MIN(0.0, character->spritesheet->offsetY) + MIN(0.0, character->frame->y);
 	float x2 = character->spritesheet->width, y2 = character->spritesheet->height;
 
 	ALLEGRO_TRANSFORM transform = GetCharacterTransform(game, character);
