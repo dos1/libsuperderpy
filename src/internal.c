@@ -261,6 +261,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 		ALLEGRO_TRANSFORM trans;
 		al_identity_transform(&trans);
 		al_use_transform(&trans);
+		al_reset_clipping_rectangle();
 
 		al_hold_bitmap_drawing(true);
 
@@ -289,6 +290,7 @@ SYMBOL_INTERNAL void DrawConsole(struct Game* game) {
 
 		al_hold_bitmap_drawing(false);
 		al_use_transform(&game->_priv.projection);
+		al_set_clipping_rectangle(game->clip_rect.x, game->clip_rect.y, game->clip_rect.w, game->clip_rect.h);
 	}
 
 	if (game_time - game->_priv.fps_count.old_time >= 1.0) {
