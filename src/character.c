@@ -756,7 +756,7 @@ SYMBOL_EXPORT ALLEGRO_TRANSFORM GetCharacterTransform(struct Game* game, struct 
 	al_identity_transform(&transform);
 
 	al_translate_transform(&transform, -w * character->spritesheet->pivotX, -h * character->spritesheet->pivotY);
-	al_scale_transform(&transform, ((character->flipX ^ character->spritesheet->flipX ^ character->frame->flipX) ? -1 : 1), ((character->flipY ^ character->spritesheet->flipY ^ character->frame->flipY) ? -1 : 1));
+	al_scale_transform(&transform, character->flipX ? -1 : 1, character->flipY ? -1 : 1);
 	al_scale_transform(&transform, character->scaleX, character->scaleY);
 	al_rotate_transform(&transform, character->angle);
 	al_translate_transform(&transform, GetCharacterX(game, character), GetCharacterY(game, character));
@@ -806,7 +806,7 @@ SYMBOL_EXPORT void DrawCharacter(struct Game* game, struct Character* character)
 		al_get_bitmap_width(character->frame->_priv.image), al_get_bitmap_height(character->frame->_priv.image),
 		character->frame->x + character->spritesheet->offsetX, character->frame->y + character->spritesheet->offsetY,
 		al_get_bitmap_width(character->frame->_priv.image) / character->spritesheet->scale, al_get_bitmap_height(character->frame->_priv.image) / character->spritesheet->scale,
-		0);
+		((character->spritesheet->flipX ^ character->frame->flipX) ? ALLEGRO_FLIP_HORIZONTAL : 0) | ((character->spritesheet->flipY ^ character->frame->flipY) ? ALLEGRO_FLIP_VERTICAL : 0));
 
 	al_use_transform(&current);
 }
