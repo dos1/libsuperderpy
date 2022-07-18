@@ -58,13 +58,12 @@ You can play most of the games at [itch.io](https://dos.itch.io).
 
 ## License
 
-The engine is available under the terms of GNU General Public License 3.0 or later.
+The engine is available under the terms of GNU Lesser General Public License 3.0
+or later.
 
 ## Contributing
 
-Make sure to read the [code style guide](README_codestyle.md). By contributing,
-you agree to eventually relicense the code under the terms of GNU Lesser General
-Public License 3.0 or later.
+Make sure to read the [code style guide](README_codestyle.md).
 
 ## Disclaimer
 

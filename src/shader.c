@@ -1,18 +1,22 @@
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * This file is part of libsuperderpy.
+ *
+ * libsuperderpy is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * libsuperderpy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with libsuperderpy. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Also, ponies.
  */
 
 #include "internal.h"
@@ -24,16 +28,16 @@ static ALLEGRO_USTR* GetShaderSource(struct Game* game, const char* filename) {
 		return NULL;
 	}
 
-	// Use GLSL 1.20 (GL 2.1) and GLSL ES 1.00 (GLES 2.0)
-	// We need to use 120 for GL because non-core GL profile on macOS is limited to 2.1
-	// Even when ignoring macOS, the highest possible option right now is GLSL 1.30, because
-	// most Mesa drivers implement only OpenGL 3.0 on compatibility profile.
-	// TODO: upgrade to GLSL 1.50 (GL 3.2, highest possible on macOS) once Allegro works on core profiles
-	#ifndef __vita__
+// Use GLSL 1.20 (GL 2.1) and GLSL ES 1.00 (GLES 2.0)
+// We need to use 120 for GL because non-core GL profile on macOS is limited to 2.1
+// Even when ignoring macOS, the highest possible option right now is GLSL 1.30, because
+// most Mesa drivers implement only OpenGL 3.0 on compatibility profile.
+// TODO: upgrade to GLSL 1.50 (GL 3.2, highest possible on macOS) once Allegro works on core profiles
+#ifndef __vita__
 	ALLEGRO_USTR* str = al_ustr_new(al_get_opengl_variant() == ALLEGRO_OPENGL_ES ? "#version 100\n" : "#version 120\n");
-	#else
+#else
 	ALLEGRO_USTR* str = al_ustr_new("");
-	#endif
+#endif
 
 	while (true) {
 		char buf[512];
