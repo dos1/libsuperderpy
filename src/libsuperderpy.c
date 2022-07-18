@@ -39,6 +39,9 @@ static char* GetDefaultWindowWidth(struct Game* game) {
 		aspect = 1.0;
 	}
 	snprintf(buf, 255, "%d", (int)(720 * aspect));
+#ifdef POCKETCHIP
+	snprintf(buf, 255, "%d", 480);
+#endif
 	return AddGarbage(game, buf);
 }
 
@@ -49,6 +52,9 @@ static char* GetDefaultWindowHeight(struct Game* game) {
 		aspect = 1.0;
 	}
 	snprintf(buf, 255, "%d", (int)(720 / aspect));
+#ifdef POCKETCHIP
+	snprintf(buf, 255, "%d", 273);
+#endif
 	return AddGarbage(game, buf);
 }
 
@@ -116,7 +122,7 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 
 	game->_priv.mutex = al_create_mutex();
 
-	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", "1"), NULL, 10);
+	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", IS_POCKETCHIP ? "0" : "1"), NULL, 10);
 	game->config.music = strtol(GetConfigOptionDefault(game, "SuperDerpy", "music", "10"), NULL, 10);
 	game->config.voice = strtol(GetConfigOptionDefault(game, "SuperDerpy", "voice", "10"), NULL, 10);
 	game->config.fx = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fx", "10"), NULL, 10);

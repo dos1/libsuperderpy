@@ -52,6 +52,12 @@
 #define IS_EMSCRIPTEN false
 #endif
 
+#ifdef POCKETCHIP
+#define IS_POCKETCHIP true
+#else
+#define IS_POCKETCHIP false
+#endif
+
 #ifdef ALLEGRO_WINDOWS
 #define LIBRARY_EXTENSION ".dll"
 #elif defined(__EMSCRIPTEN__)
