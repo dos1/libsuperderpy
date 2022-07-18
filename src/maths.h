@@ -23,6 +23,14 @@
 
 #include "libsuperderpy.h"
 
+#ifndef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 double DotProduct(const double v[], const double u[], int n);
 double VectorLength(double x, double y, double z);
 double Wrap(double left, double right, double val);
