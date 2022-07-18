@@ -897,13 +897,13 @@ SYMBOL_EXPORT void SetCharacterConfines(struct Game* game, struct Character* cha
 	character->confineY = y;
 }
 
-void SetCharacterBounds(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
+SYMBOL_EXPORT void SetCharacterBounds(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
 	SetCharacterBoundsF(game, character,
 		x1 / GetCharacterConfineX(game, character), y1 / GetCharacterConfineY(game, character),
 		x2 / GetCharacterConfineX(game, character), y2 / GetCharacterConfineY(game, character));
 }
 
-void SetCharacterBoundsF(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
+SYMBOL_EXPORT void SetCharacterBoundsF(struct Game* game, struct Character* character, float x1, float y1, float x2, float y2) {
 	character->bounds.x1 = x1;
 	character->bounds.y1 = y1;
 	character->bounds.x2 = x2;
@@ -911,7 +911,7 @@ void SetCharacterBoundsF(struct Game* game, struct Character* character, float x
 	character->bounds.enabled = true;
 }
 
-void SetCharacterUnbounded(struct Game* game, struct Character* character) {
+SYMBOL_EXPORT void SetCharacterUnbounded(struct Game* game, struct Character* character) {
 	character->bounds.enabled = false;
 }
 
