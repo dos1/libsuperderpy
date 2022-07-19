@@ -114,7 +114,9 @@ static inline bool HandleEvent(struct Game* game, ALLEGRO_EVENT* ev) {
 			al_reconfigure_joysticks();
 			break;
 		case ALLEGRO_EVENT_JOYSTICK_AXIS:
-#if (ALLEGRO_VERSION_INT >= ((5 << 24) | (2 << 16) | (5 << 8)))
+#if (defined(ALLEGRO_SDL) && !defined(__SWITCH__) && !defined(__vita__))
+			if (true) {
+#elif (ALLEGRO_VERSION_INT >= ((5 << 24) | (2 << 16) | (5 << 8)))
 			if ((al_get_system_id() == ALLEGRO_SYSTEM_ID_XGLX) || (al_get_system_id() == ALLEGRO_SYSTEM_ID_RASPBERRYPI)) {
 #elif defined(ALLEGRO_WITH_XWINDOWS)
 			if (true) {
