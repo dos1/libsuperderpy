@@ -54,7 +54,11 @@ SYMBOL_EXPORT void SetConfigOption(struct Game* game, char* section, char* name,
 #ifdef __EMSCRIPTEN__
 	EM_ASM({
 		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
-		window.localStorage.setItem(key, UTF8ToString($2));
+		try {
+			window.localStorage.setItem(key, UTF8ToString($2));
+		} catch (e) {
+			console.error(e);
+		}
 	},
 		section, name, value);
 #endif
@@ -65,7 +69,12 @@ SYMBOL_EXPORT const char* GetConfigOption(struct Game* game, char* section, char
 #ifdef __EMSCRIPTEN__
 	char* buf = (char*)EM_ASM_INT({
 		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
-		var value = window.localStorage.getItem(key);
+		var value;
+		try {
+			value = window.localStorage.getItem(key);
+		} catch (e) {
+			console.error(e);
+		}
 		if (value) {
 			var buf = _malloc(255);
 			stringToUTF8(value, buf, 255);
@@ -92,7 +101,11 @@ SYMBOL_EXPORT void DeleteConfigOption(struct Game* game, char* section, char* na
 #ifdef __EMSCRIPTEN__
 	EM_ASM({
 		var key = '[' + UTF8ToString($0) + '] ' + UTF8ToString($1);
-		window.localStorage.removeItem(key);
+		try {
+			window.localStorage.removeItem(key);
+		} catch (e) {
+			console.error(e);
+		}
 	},
 		section, name);
 #endif
