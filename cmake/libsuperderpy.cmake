@@ -229,6 +229,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		add_definitions(-DPOCKETCHIP=1)
 	endif(POCKETCHIP)
 
+	if(RASPBERRYPI)
+		add_definitions(-DRASPBERRYPI=1)
+	endif(RASPBERRYPI)
+
 	if(VITA)
 		add_definitions(-DLIBSUPERDERPY_VITA_HEAP_SIZE=${VITA_HEAP_SIZE})
 	endif(VITA)
