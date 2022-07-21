@@ -426,6 +426,16 @@ SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filena
 	}
 #endif
 
+#ifdef RASPBERRYPI
+	char origfn[255] = "raspberrypi/";
+	strncat(origfn, filename, 242);
+
+	result = TestDataFilePath(game, origfn);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+#endif
+
 #ifdef __EMSCRIPTEN__
 	char origfn[255] = "emscripten/";
 	strncat(origfn, filename, 243);
