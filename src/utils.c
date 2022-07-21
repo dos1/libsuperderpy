@@ -673,6 +673,10 @@ SYMBOL_EXPORT void PushTransform(struct Game* game, ALLEGRO_TRANSFORM* t) {
 }
 
 SYMBOL_EXPORT void PopTransform(struct Game* game) {
+	if (game->_priv.transforms_no == 0) {
+		PrintConsole(game, "Tried to pop a non-existent transform!");
+		return;
+	}
 	al_use_transform(&game->_priv.transforms[--game->_priv.transforms_no]);
 }
 
