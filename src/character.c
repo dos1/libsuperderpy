@@ -426,7 +426,7 @@ SYMBOL_EXPORT void RegisterSpritesheet(struct Game* game, struct Character* char
 		s->frames[i].end = i == (s->frame_count - 1) ? true : false;
 	}
 
-	s->scale = LIBSUPERDERPY_IMAGE_SCALE;
+	s->scale = strtodnull(al_get_config_value(config, "animation", "scale"), 1.0) * LIBSUPERDERPY_IMAGE_SCALE;
 
 	s->stream = NULL;
 	s->stream_data = NULL;
