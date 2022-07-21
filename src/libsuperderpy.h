@@ -149,6 +149,7 @@ struct Params {
 	bool disable_bg_clear; /*!< If set to true, the gamestate framebuffer won't be cleared to background color before calling Gamestate_Draw. */
 	bool fixed_size; /*!< If set to true, the game's window will not be resizable. */
 	bool no_autopause; /*!< If set to true, engine autopause is forced to be disabled. */
+	bool show_cursor; /*!< If set to true, system cursor won't be hidden in fullscreen. */
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
 	int sample_rate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
