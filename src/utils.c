@@ -131,6 +131,17 @@ SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLO
 		x, y, sx, sy, 0, flags);
 }
 
+SYMBOL_EXPORT void DrawFullscreen(ALLEGRO_BITMAP* bitmap, int flags) {
+	int x, y, w, h;
+	ALLEGRO_TRANSFORM transform, orig = *al_get_current_transform();
+	al_identity_transform(&transform);
+	al_get_clipping_rectangle(&x, &y, &w, &h);
+	al_use_transform(&transform);
+	al_draw_scaled_bitmap(bitmap, 0, 0, al_get_bitmap_width(bitmap), al_get_bitmap_height(bitmap),
+		x, y, w, h, flags);
+	al_use_transform(&orig);
+}
+
 SYMBOL_EXPORT void ClearToColor(struct Game* game, ALLEGRO_COLOR color) {
 	ALLEGRO_BITMAP* target = al_get_target_bitmap();
 	if (game->_priv.current_gamestate && GetFramebuffer(game) == target && al_get_parent_bitmap(target) == al_get_backbuffer(game->display)) {
