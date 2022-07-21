@@ -152,6 +152,7 @@ struct Params {
 	int samples; /*!< How many samples should be used for multisampling; 0 to disable. */
 	int sample_rate; /*!< Default sample rate of audio output; 0 to use engine default. */
 	char* window_title; /*!< A title of the game's window. When NULL, al_get_app_name() is used. */
+	ALLEGRO_COLOR bg_color; /*!< Default background color of the game window. Only opaque colors are supported. */
 	struct Handlers handlers; /*!< A list of user callbacks to register. */
 };
 

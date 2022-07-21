@@ -120,6 +120,9 @@ SYMBOL_EXPORT struct Game* libsuperderpy_init(int argc, char** argv, const char*
 	game->_priv.window_width = 0;
 	game->_priv.window_height = 0;
 
+	game->_priv.bg = params.bg_color;
+	game->_priv.bg.a = 1.0;
+
 	game->_priv.mutex = al_create_mutex();
 
 	game->config.fullscreen = strtol(GetConfigOptionDefault(game, "SuperDerpy", "fullscreen", IS_POCKETCHIP ? "0" : "1"), NULL, 10);
