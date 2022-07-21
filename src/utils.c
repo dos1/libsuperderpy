@@ -436,6 +436,16 @@ SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filena
 	}
 #endif
 
+#ifdef STEAMLINK
+	char origfn[255] = "steamlink/";
+	strncat(origfn, filename, 244);
+
+	result = TestDataFilePath(game, origfn);
+	if (result) {
+		return AddGarbage(game, result);
+	}
+#endif
+
 #ifdef __EMSCRIPTEN__
 	char origfn[255] = "emscripten/";
 	strncat(origfn, filename, 243);
