@@ -798,4 +798,10 @@ SYMBOL_EXPORT double GetGameSpeed(struct Game* game) {
 
 SYMBOL_EXPORT void SetBackgroundColor(struct Game* game, ALLEGRO_COLOR bg) {
 	game->_priv.bg = bg;
+#ifdef __EMSCRIPTEN__
+	EM_ASM({
+		document.body.style.backgroundColor = 'rgb(' + $0 + ',' + $1 + ',' + $2 + ')';
+	},
+		(int)(bg.r * 255), (int)(bg.g * 255), (int)(bg.b * 255));
+#endif
 }
