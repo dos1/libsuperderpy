@@ -597,7 +597,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "android")
 
 		file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/android")
-		file(INSTALL "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
+		file(COPY "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
 
 		MACRO(configure_android_file PATH)
 			configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
