@@ -407,69 +407,9 @@ static char* TestDataFilePath(struct Game* game, const char* filename) {
 SYMBOL_EXPORT const char* FindDataFilePath(struct Game* game, const char* filename) {
 	char* result = 0;
 
-#ifdef ALLEGRO_ANDROID
-	char origfn[255] = "android/";
-	strncat(origfn, filename, 246);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef MAEMO5
-	char origfn[255] = "maemo5/";
-	strncat(origfn, filename, 247);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef POCKETCHIP
-	char origfn[255] = "pocketchip/";
-	strncat(origfn, filename, 243);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef RASPBERRYPI
-	char origfn[255] = "raspberrypi/";
-	strncat(origfn, filename, 242);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef STEAMLINK
-	char origfn[255] = "steamlink/";
-	strncat(origfn, filename, 244);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef __EMSCRIPTEN__
-	char origfn[255] = "emscripten/";
-	strncat(origfn, filename, 243);
-
-	result = TestDataFilePath(game, origfn);
-	if (result) {
-		return AddGarbage(game, result);
-	}
-#endif
-
-#ifdef __vita__
-	char origfn[255] = "vita/";
-	strncat(origfn, filename, 249);
+#ifdef LIBSUPERDERPY_PLATFORM_OVERRIDE
+	char origfn[255] = LIBSUPERDERPY_PLATFORM_OVERRIDE "/";
+	strncat(origfn, filename, 254 - strlen(LIBSUPERDERPY_PLATFORM_OVERRIDE));
 
 	result = TestDataFilePath(game, origfn);
 	if (result) {

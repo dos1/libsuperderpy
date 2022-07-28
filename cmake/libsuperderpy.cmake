@@ -223,19 +223,27 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	if(MAEMO5)
 		add_definitions(-DMAEMO5=1)
 		add_definitions(-D_Noreturn=)
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "maemo5")
 	endif(MAEMO5)
 
 	if(POCKETCHIP)
 		add_definitions(-DPOCKETCHIP=1)
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "pocketchip")
 	endif(POCKETCHIP)
 
 	if(RASPBERRYPI)
 		add_definitions(-DRASPBERRYPI=1)
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "raspberrypi")
 	endif(RASPBERRYPI)
 
 	if(VITA)
 		add_definitions(-DLIBSUPERDERPY_VITA_HEAP_SIZE=${VITA_HEAP_SIZE})
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "vita")
 	endif(VITA)
+
+	if(STEAMLINK)
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "steamlink")
+	endif(STEAMLINK)
 
 	if(MAEMO5 OR POCKETCHIP)
 		add_definitions(-DLIBSUPERDERPY_EMULATE_TOUCH=1)
@@ -279,6 +287,8 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}/${LIBSUPERDERPY_GAMENAME}:\$ORIGIN/gamestates:\$ORIGIN:\$ORIGIN/../${LIB_DIR}:\$ORIGIN/${LIB_DIR}:\$ORIGIN/${BIN_DIR}")
 
 	if(EMSCRIPTEN)
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "emscripten")
+
 		set(CMAKE_EXECUTABLE_SUFFIX ".bc")
 		set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 
@@ -584,8 +594,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		set(ANDROID_TARGET "android-30" CACHE STRING "What Android target to compile for.")
 		STRING(REGEX REPLACE "^android-" "" ANDROID_TARGET_VERSION ${ANDROID_TARGET})
 
+		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "android")
+
 		file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/android")
-		file(COPY "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
+		file(INSTALL "${LIBSUPERDERPY_DIR}/android" DESTINATION "${CMAKE_BINARY_DIR}")
 
 		MACRO(configure_android_file PATH)
 			configure_file("${CMAKE_BINARY_DIR}/android/${PATH}.in" "${CMAKE_BINARY_DIR}/android/${PATH}" ${ARGN})
@@ -613,20 +625,37 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 		configure_android_file("app/src/main/java/net/dosowisko/libsuperderpy/Activity.java")
 
-		file(COPY ${Allegro5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
+		file(INSTALL ${Allegro5_LIBS} DESTINATION ${LIBRARY_OUTPUT_PATH})
 		configure_file("${ANDROID_ALLEGRO_ROOT}/lib/allegro-release.aar" ${CMAKE_BINARY_DIR}/android/app/libs/allegro.aar COPYONLY)
 
-		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/assets/" PATTERN "stuff" EXCLUDE
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/assets/"
+			PATTERN "stuff" EXCLUDE
 			PATTERN ".git" EXCLUDE
 			PATTERN ".gitignore" EXCLUDE
 			PATTERN ".directory" EXCLUDE
-			PATTERN "CMakeLists.txt" EXCLUDE)
+			PATTERN "CMakeLists.txt" EXCLUDE
+			PATTERN "android" EXCLUDE
+			PATTERN "maemo5" EXCLUDE
+			PATTERN "pocketchip" EXCLUDE
+			PATTERN "raspberrypi" EXCLUDE
+			PATTERN "steamlink" EXCLUDE
+			PATTERN "emscripten" EXCLUDE
+			PATTERN "vita" EXCLUDE
+		)
 
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/48/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-mdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/72/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-hdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/96/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xhdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/144/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxhdpi/")
-		file(COPY "${CMAKE_SOURCE_DIR}/data/icons/192/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxxhdpi/")
+		if(EXISTS "${CMAKE_SOURCE_DIR}/data/android")
+			file(INSTALL "${CMAKE_SOURCE_DIR}/data/android/" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/assets/data/"
+				PATTERN ".git" EXCLUDE
+				PATTERN ".gitignore" EXCLUDE
+				PATTERN ".directory" EXCLUDE
+			)
+		endif()
+
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data/icons/48/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-mdpi/")
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data/icons/72/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-hdpi/")
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data/icons/96/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xhdpi/")
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data/icons/144/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxhdpi/")
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data/icons/192/${LIBSUPERDERPY_GAMENAME}.png" DESTINATION "${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxxhdpi/")
 
 	endif(ANDROID)
 
@@ -638,15 +667,33 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 		endif()
 
 		file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/vita")
-		file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/vita/" PATTERN "stuff" EXCLUDE
+		file(INSTALL "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}/vita/"
+			PATTERN "stuff" EXCLUDE
 			PATTERN ".git" EXCLUDE
 			PATTERN ".gitignore" EXCLUDE
 			PATTERN ".directory" EXCLUDE
 			PATTERN "CMakeLists.txt" EXCLUDE
-			PATTERN "vita/sce_sys" EXCLUDE)
+			PATTERN "android" EXCLUDE
+			PATTERN "maemo5" EXCLUDE
+			PATTERN "pocketchip" EXCLUDE
+			PATTERN "raspberrypi" EXCLUDE
+			PATTERN "steamlink" EXCLUDE
+			PATTERN "emscripten" EXCLUDE
+			PATTERN "vita" EXCLUDE
+		)
+
+		if(EXISTS "${CMAKE_SOURCE_DIR}/data/vita")
+			file(INSTALL "${CMAKE_SOURCE_DIR}/data/vita/" DESTINATION "${CMAKE_BINARY_DIR}/vita/data/"
+				PATTERN ".git" EXCLUDE
+				PATTERN ".gitignore" EXCLUDE
+				PATTERN ".directory" EXCLUDE
+				PATTERN "sce_sys" EXCLUDE
+			)
+		endif()
+
 
 		if(EXISTS "${CMAKE_SOURCE_DIR}/data/vita/sce_sys")
-			file(COPY "${CMAKE_SOURCE_DIR}/data/vita/sce_sys" DESTINATION "${CMAKE_BINARY_DIR}/vita/")
+			file(INSTALL "${CMAKE_SOURCE_DIR}/data/vita/sce_sys" DESTINATION "${CMAKE_BINARY_DIR}/vita/")
 		else()
 			file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/vita/sce_sys")
 		endif()
@@ -725,6 +772,10 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	# uninstall target
 	configure_file("${LIBSUPERDERPY_DIR}/cmake/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 	add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+	if (LIBSUPERDERPY_PLATFORM_OVERRIDE)
+		add_definitions(-DLIBSUPERDERPY_PLATFORM_OVERRIDE=\"${LIBSUPERDERPY_PLATFORM_OVERRIDE}\")
+	endif()
 
 	set(LIBSUPERDERPY_CONFIG_INCLUDED 1)
 
