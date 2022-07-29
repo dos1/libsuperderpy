@@ -76,6 +76,8 @@ static void character_spritesheet_stops(void** state) {
 	assert_int_equal(character->pos, 2);
 	AnimateCharacter(game, character, 0.1, 1.0);
 	assert_int_equal(character->pos, 2);
+
+	DestroyCharacter(game, character);
 }
 
 static void character_spritesheet_reversed_stops(void** state) {
@@ -93,6 +95,8 @@ static void character_spritesheet_reversed_stops(void** state) {
 	assert_int_equal(character->pos, 0);
 	AnimateCharacter(game, character, 0.1, 1.0);
 	assert_int_equal(character->pos, 0);
+
+	DestroyCharacter(game, character);
 }
 
 int test_character(void) {
