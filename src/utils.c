@@ -132,7 +132,7 @@ SYMBOL_EXPORT void DrawCenteredTintedScaled(ALLEGRO_BITMAP* bitmap, ALLEGRO_COLO
 }
 
 SYMBOL_EXPORT void DrawFullscreen(ALLEGRO_BITMAP* bitmap, int flags) {
-	int x, y, w, h;
+	int x = 0, y = 0, w = 0, h = 0;
 	ALLEGRO_TRANSFORM transform, orig = *al_get_current_transform();
 	al_identity_transform(&transform);
 	al_get_clipping_rectangle(&x, &y, &w, &h);
