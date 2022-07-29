@@ -57,7 +57,7 @@ SYMBOL_INTERNAL void DrawGamestates(struct Game* game) {
 		}
 		tmp = tmp->next;
 	}
-	if (game->loading.shown && game->_priv.loading.gamestate->api->predraw) {
+	if (game->loading.shown && game->_priv.loading.gamestate && game->_priv.loading.gamestate->api->predraw) {
 		game->_priv.current_gamestate = game->_priv.loading.gamestate;
 		game->_priv.loading.gamestate->api->predraw(game, game->_priv.loading.gamestate->data);
 	}

@@ -635,7 +635,7 @@ SYMBOL_EXPORT void AnimateCharacter(struct Game* game, struct Character* charact
 
 	int pos = character->pos;
 
-	while (character->delta >= character->frame->duration) {
+	while (character->frame && character->delta >= character->frame->duration) {
 		bool reachedEnd = false;
 		character->delta -= character->frame->duration;
 
