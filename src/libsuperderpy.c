@@ -498,40 +498,20 @@ SYMBOL_EXPORT int libsuperderpy_start(struct Game* game) {
 	return 0;
 }
 
-#ifdef __EMSCRIPTEN__
-SYMBOL_INTERNAL void libsuperderpy_emscripten_mainloop(void* game) {
-	if (!libsuperderpy_mainloop(game)) {
-		libsuperderpy_destroy(game);
-		printf("Halted.\n");
-		emscripten_cancel_main_loop();
-	}
-}
-
-SYMBOL_INTERNAL EM_BOOL libsuperderpy_emscripten_focus_change(int eventType, const EmscriptenFocusEvent* focusEvent, void* game) {
-	libsuperderpy_emscripten_mainloop(game);
-	return false;
-}
-
-#endif
-
 SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	int ret = libsuperderpy_start(game);
 	if (ret) {
 		return ret;
 	}
 #ifdef __EMSCRIPTEN__
-	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, game, false, libsuperderpy_emscripten_focus_change);
 	if (game->config.autopause && !EM_ASM_INT({document.hasFocus()})) {
 		PrintConsole(game, "Window not focused, autopausing...");
 		PauseExecution(game);
 	}
-	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, false);
-	return 0;
-#else
+#endif
 	while (libsuperderpy_mainloop(game)) {}
 	libsuperderpy_destroy(game);
 	return 0;
-#endif
 }
 
 SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
@@ -583,8 +563,20 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	}
 	DestroyShaders(game);
 
+	PrintConsole(game, "Shutting down...");
+
 	SetBackgroundColor(game, al_map_rgb(0, 0, 0));
 	ClearScreen(game);
+	DrawConsole(game);
+	al_flip_display();
+
+	while (game->_priv.garbage) {
+		free(game->_priv.garbage->data);
+		game->_priv.garbage = game->_priv.garbage->next;
+	}
+	free(game->_priv.transforms);
+	Console_Unload(game);
+
 #ifdef __EMSCRIPTEN__
 	{
 		ALLEGRO_BITMAP* bmp = al_create_bitmap(320, 180);
@@ -594,23 +586,19 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 		al_draw_text(font, al_map_rgb(228, 127, 59), 320 / 2, 180 / 2 - 8 - 6, ALLEGRO_ALIGN_CENTER, "It's now safe to turn off");
 		al_draw_text(font, al_map_rgb(228, 127, 59), 320 / 2, 180 / 2 - 8 + 6, ALLEGRO_ALIGN_CENTER, "your browser.");
 		al_set_target_backbuffer(game->display);
-		al_draw_scaled_bitmap(bmp, 0, 0, 320, 180, 0, -game->viewport.height * 0.2, game->viewport.width, game->viewport.height * 1.4, 0);
+		al_reset_clipping_rectangle();
+		ALLEGRO_TRANSFORM t;
+		al_identity_transform(&t);
+		al_use_transform(&t);
+		al_draw_scaled_bitmap(bmp, 0, 0, 320, 180, 0, -al_get_display_height(game->display) * 0.2, al_get_display_width(game->display), al_get_display_height(game->display) * 1.4, 0);
 		al_flip_display();
 		al_destroy_bitmap(bmp);
 		al_destroy_font(font);
 	}
+	printf("Halted.\n");
+	return;
 #endif
 
-	PrintConsole(game, "Shutting down...");
-	DrawConsole(game);
-	al_flip_display();
-	while (game->_priv.garbage) {
-		free(game->_priv.garbage->data);
-		game->_priv.garbage = game->_priv.garbage->next;
-	}
-	free(game->_priv.transforms);
-	Console_Unload(game);
-	al_destroy_display(game->display);
 	al_destroy_user_event_source(&(game->event_source));
 	al_destroy_event_queue(game->_priv.event_queue);
 	al_restore_default_mixer();
@@ -624,11 +612,10 @@ SYMBOL_EXPORT void libsuperderpy_destroy(struct Game* game) {
 	al_destroy_cond(game->_priv.bsod_cond);
 	al_destroy_mutex(game->_priv.bsod_mutex);
 	al_destroy_mutex(game->_priv.mutex);
-	al_uninstall_audio();
 	DeinitConfig(game);
-#ifndef __EMSCRIPTEN__ // ???
+	al_uninstall_audio();
+	al_destroy_display(game->display);
 	al_uninstall_system();
-#endif
 
 #ifndef LIBSUPERDERPY_NO_RESTART
 	char** argv = game->_priv.argv;

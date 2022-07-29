@@ -224,7 +224,7 @@ static inline bool MainloopEvents(struct Game* game) {
 	do {
 		ALLEGRO_EVENT ev;
 
-		if (game->_priv.paused && !IS_EMSCRIPTEN) {
+		if (game->_priv.paused) {
 			// there's no frame flipping when paused, so avoid pointless busylooping
 			al_wait_for_event(game->_priv.event_queue, &ev);
 		} else if (!al_get_next_event(game->_priv.event_queue, &ev)) {
@@ -292,10 +292,6 @@ static inline bool MainloopTick(struct Game* game) {
 
 	struct Gamestate* tmp = game->_priv.gamestates;
 
-#ifdef __EMSCRIPTEN__
-	emscripten_pause_main_loop();
-#endif
-
 	game->_priv.loading.to_load = 0;
 	game->_priv.loading.loaded = 0;
 	game->_priv.loading.lock = true;
@@ -323,7 +319,7 @@ static inline bool MainloopTick(struct Game* game) {
 	while (tmp) {
 		if (tmp->pending_unload) {
 #ifdef __EMSCRIPTEN__
-			StopAudio(game);
+			//StopAudio(game);
 #endif
 			PrintConsole(game, "Unloading gamestate \"%s\"...", tmp->name);
 			tmp->loaded = false;
@@ -332,12 +328,12 @@ static inline bool MainloopTick(struct Game* game) {
 			(*tmp->api->unload)(game, tmp->data);
 			PrintConsole(game, "Gamestate \"%s\" unloaded successfully.", tmp->name);
 #ifdef __EMSCRIPTEN__
-			SetupAudio(game);
+			//SetupAudio(game);
 #endif
 		}
 		if (tmp->pending_load) {
 #ifdef __EMSCRIPTEN__
-			StopAudio(game);
+			//StopAudio(game);
 #endif
 #ifdef __vita__
 			int vita_arm_freq = scePowerGetArmClockFrequency();
@@ -372,12 +368,7 @@ static inline bool MainloopTick(struct Game* game) {
 				CalculateProgress(game);
 				if (tmp->show_loading) {
 					game->loading.shown = true;
-					DrawGamestates(game);
-					DrawConsole(game);
-					al_flip_display();
-#ifdef __EMSCRIPTEN__
-					emscripten_sleep(0);
-#endif
+					RedrawScreen(game);
 				}
 #ifndef LIBSUPERDERPY_SINGLE_THREAD
 				al_run_detached_thread(GamestateLoadingThread, &data);
@@ -388,15 +379,13 @@ static inline bool MainloopTick(struct Game* game) {
 					if (game->loading.shown && game->_priv.loading.gamestate->open) {
 						(*game->_priv.loading.gamestate->api->logic)(game, game->_priv.loading.gamestate->data, delta);
 					}
-					DrawGamestates(game);
 					if (game->_priv.texture_sync) {
 						al_convert_memory_bitmaps();
 						game->_priv.texture_sync = false;
 						al_signal_cond(game->_priv.texture_sync_cond);
 						game->_priv.loading.time = al_get_time(); // TODO: rethink time management during loading
 					}
-					DrawConsole(game);
-					al_flip_display();
+					RedrawScreen(game);
 
 					if (game->_priv.bsod_sync) {
 						al_set_target_bitmap(NULL);
@@ -412,12 +401,7 @@ static inline bool MainloopTick(struct Game* game) {
 				}
 #else
 				GamestateLoadingThread(&data);
-				DrawGamestates(game);
-				DrawConsole(game);
-				al_flip_display();
-#ifdef __EMSCRIPTEN__
-				emscripten_sleep(0);
-#endif
+				RedrawScreen(game);
 #endif
 				al_convert_memory_bitmaps();
 
@@ -435,12 +419,7 @@ static inline bool MainloopTick(struct Game* game) {
 				PrintConsole(game, "Gamestate \"%s\" loaded successfully in %f seconds.", tmp->name, al_get_time() - time);
 				game->_priv.loading.loaded++;
 
-				DrawGamestates(game);
-				DrawConsole(game);
-				al_flip_display();
-#ifdef __EMSCRIPTEN__
-				emscripten_sleep(0);
-#endif
+				RedrawScreen(game);
 
 				tmp->loaded = true;
 				tmp->pending_load = false;
@@ -452,7 +431,7 @@ static inline bool MainloopTick(struct Game* game) {
 			game->loading.shown = false;
 			game->_priv.timestamp = al_get_time();
 #ifdef __EMSCRIPTEN__
-			SetupAudio(game);
+			//SetupAudio(game);
 #endif
 #ifdef __vita__
 			scePowerSetArmClockFrequency(vita_arm_freq);
@@ -465,12 +444,6 @@ static inline bool MainloopTick(struct Game* game) {
 
 	if (game->_priv.loading.loaded) {
 		MainloopEvents(game); // consume queued events
-#ifdef __EMSCRIPTEN__
-		DrawGamestates(game);
-		DrawConsole(game);
-		al_flip_display();
-		emscripten_sleep(0);
-#endif
 	}
 
 	bool gameActive = false;
@@ -500,15 +473,11 @@ static inline bool MainloopTick(struct Game* game) {
 	}
 
 	game->_priv.loading.lock = false;
-#ifdef __EMSCRIPTEN__
-	emscripten_resume_main_loop();
-#endif
 
 	if (!gameActive) {
 		PrintConsole(game, "No gamestates left, exiting...");
 		ClearScreen(game);
-		DrawConsole(game);
-		al_flip_display();
+		RedrawScreen(game);
 		return false;
 	}
 
@@ -518,22 +487,9 @@ static inline bool MainloopTick(struct Game* game) {
 	game->_priv.timestamp += delta;
 	delta *= game->_priv.speed;
 
-#ifdef LIBSUPERDERPY_IMGUI
-	ImGui_ImplAllegro5_NewFrame();
-	igNewFrame();
-#endif
-
 	LogicGamestates(game, delta);
-	DrawGamestates(game);
+	RedrawScreen(game);
 
-#ifdef LIBSUPERDERPY_IMGUI
-	igRender();
-	ImGui_ImplAllegro5_RenderDrawData(igGetDrawData());
-#endif
-
-	DrawConsole(game);
-
-	al_flip_display();
 	return true;
 }
 

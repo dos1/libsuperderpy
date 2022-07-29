@@ -31,5 +31,7 @@ FOREACH(gamestate ${gamestates})
 ENDFOREACH(gamestate)
 
 if (LIBSUPERDERPY_STATIC_GAMESTATES)
-	target_link_libraries("libsuperderpy-gamestates" "-Wl,--allow-multiple" libsuperderpy-gamestates-stub)
+	if (NOT EMSCRIPTEN)
+		target_link_libraries("libsuperderpy-gamestates" "-Wl,--allow-multiple" libsuperderpy-gamestates-stub)
+	endif (NOT EMSCRIPTEN)
 endif (LIBSUPERDERPY_STATIC_GAMESTATES)

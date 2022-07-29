@@ -358,9 +358,7 @@ SYMBOL_INTERNAL void GamestateProgress(struct Game* game) {
 	if (game->loading.shown) {
 		game->_priv.loading.gamestate->api->logic(game, game->_priv.loading.gamestate->data, delta);
 	}
-	DrawGamestates(game);
-	DrawConsole(game);
-	al_flip_display();
+	RedrawScreen(game);
 #endif
 }
 
