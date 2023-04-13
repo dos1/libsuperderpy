@@ -254,6 +254,10 @@ SYMBOL_EXPORT ALLEGRO_BITMAP* GetGamestateFramebuffer(struct Game* game, struct 
 	return gamestate->fb;
 }
 
+SYMBOL_EXPORT char* GetGamestateName(struct Game* game, struct Gamestate* gamestate) {
+	return AddGarbage(game, strdup(gamestate->name));
+}
+
 SYMBOL_EXPORT struct Gamestate* GetNextGamestate(struct Game* game, struct Gamestate* gamestate) {
 	if (!gamestate) {
 		return game->_priv.gamestates;

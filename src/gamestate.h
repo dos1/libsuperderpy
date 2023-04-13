@@ -67,6 +67,7 @@ void UnloadCurrentGamestate(struct Game* game);
 struct Gamestate* GetCurrentGamestate(struct Game* game);
 struct Gamestate* GetGamestate(struct Game* game, const char* name);
 ALLEGRO_BITMAP* GetGamestateFramebuffer(struct Game* game, struct Gamestate* gamestate);
+char* GetGamestateName(struct Game* game, struct Gamestate* gamestate);
 struct Gamestate* GetNextGamestate(struct Game* game, struct Gamestate* gamestate);
 bool IsGamestateVisible(struct Game* game, struct Gamestate* gamestate);
 
