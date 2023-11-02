@@ -36,6 +36,9 @@ int main(int argc, char** argv) {
 	al_set_app_name("libsuperderpy");
 	char* args[2] = {"", "--debug"};
 	game = libsuperderpy_init(2, args, "test", (struct Params){});
+	if (!game) {
+		return 1;
+	}
 	libsuperderpy_start(game);
 	int ret = test_timeline() || test_character();
 	libsuperderpy_destroy(game);
