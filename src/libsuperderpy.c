@@ -540,6 +540,7 @@ SYMBOL_EXPORT int libsuperderpy_run(struct Game* game) {
 	emscripten_set_main_loop_arg(libsuperderpy_emscripten_mainloop, game, 0, false);
 	EM_ASM({
 		if (Module.hideLoading) Module.hideLoading();
+		window.dispatchEvent(new Event('resize'));
 	});
 	return 0;
 #else
