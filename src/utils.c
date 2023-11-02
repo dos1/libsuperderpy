@@ -696,12 +696,16 @@ SYMBOL_EXPORT void QuitGame(struct Game* game, bool allow_pausing) {
 }
 
 SYMBOL_EXPORT bool ToggleFullscreen(struct Game* game) {
-	if (IS_EMSCRIPTEN && game->_priv.params.fixed_size) {
-		al_set_display_flag(game->display, ALLEGRO_FULLSCREEN_WINDOW, true);
+#ifdef __EMSCRIPTEN
+	if (game->_priv.params.fixed_size) {
+		EM_ASM({
+			document.documentElement.requestFullscreen();
+		});
 		SetupViewport(game);
 		PrintConsole(game, "Fullscreen toggled");
 		return true;
 	}
+#endif
 	game->config.fullscreen = !game->config.fullscreen;
 	if (game->config.fullscreen) {
 		SetConfigOption(game, "SuperDerpy", "fullscreen", "1");
@@ -711,7 +715,17 @@ SYMBOL_EXPORT bool ToggleFullscreen(struct Game* game) {
 #ifdef ALLEGRO_ANDROID
 	al_set_display_flag(game->display, ALLEGRO_FRAMELESS, game->config.fullscreen);
 #endif
+#ifdef __EMSCRIPTEN__
+	EM_ASM({
+		if ($0) {
+			document.documentElement.requestFullscreen();
+		} else if (document.fullscreenElement) {
+			document.exitFullscreen();
+		}
+	}, game->config.fullscreen);
+#else
 	al_set_display_flag(game->display, ALLEGRO_FULLSCREEN_WINDOW, game->config.fullscreen);
+#endif
 	SetupViewport(game);
 	PrintConsole(game, "Fullscreen toggled: %s", game->config.fullscreen ? "on" : "off");
 	if (!game->_priv.params.show_cursor) {
