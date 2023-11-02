@@ -1,0 +1,10 @@
+test:
+  image: debian:bookworm
+  before_script:
+    - apt-get -y update && apt-get -y install build-essential clang-tidy xvfb libcmocka-dev ninja-build cmake liballegro5-dev
+    - echo "pcm.!default { type null }" > /etc/asound.conf
+  script:
+    - mkdir build && cd build
+    - cmake .. -GNinja -DUSE_CLANG_TIDY=ON
+    - ninja
+    - xvfb-run test/engine-tests
