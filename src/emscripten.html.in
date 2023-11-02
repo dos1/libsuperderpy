@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>${LIBSUPERDERPY_GAMENAME_PRETTY}</title>
+    <style>
+      html {
+        overflow: hidden;
+      }
+      html, body {
+        background-color: black;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        /* try to fool some addons that try to invert the page colors to simulate dark themes */
+        /* if they see that there's already dark theme in the stylesheet, they may give up */
+        body {
+          background-color: #000000;
+        }
+      }
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      #canvas {
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        text-align: center;
+        border: 0px none;
+        background-color: black;
+        width: 1920px;
+        height: 1080px;
+      }
+      #wrapper {
+        position: relative;
+      }
+      #wrapper > div, #wrapper > span > div, #wrapper > noscript > div {
+        border: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 999;
+      }
+      #loading {
+        display: none;
+      }
+      #loading-border {
+        position: absolute;
+        top: 42.5%;
+        left: 25%;
+        width: 50%;
+        height: 15%;
+        background-color: black;
+        border: 1em solid white;
+        padding: 1em;
+        box-sizing: border-box;
+      }
+      #loading-bar {
+        width: 0%;
+        height: 100%;
+        background-color: white;
+        top: 0;
+        left: 0;
+      }
+      .error {
+        font-family: monospace;
+        background-color: rgba(255, 0, 0, 1);
+        text-shadow: 1px 2px 2px black;
+        font-size: 200%;
+        color: white;
+        text-align: center;
+        padding-top: 2.5em;
+        box-sizing: border-box;
+        z-index: 1001;
+        font-size: 4em;
+        user-select: text;
+      }
+      #blocker {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background: rgba(0,0,0,0.42);
+        z-index: 1000;
+      }
+      #blocker.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <canvas id="canvas" width="1920" height="1080"></canvas>
+      <div id="blocker"></div>
+      <div id="loading">
+        <div id="loading-border"><div id="loading-bar" style="width: 0px"></div></div>
+      </div>
+
+      <noscript>
+        <div class="error">
+          <p>JavaScript support required :(</p>
+        </div>
+      </noscript>
+
+    </div>
+
+    <script type='text/javascript'>
+
+      // don't allow to hijack wheel events
+
+      Element.prototype._addEventListener = Element.prototype.addEventListener;
+
+      Element.prototype.addEventListener = function(name) {
+         if (name=="wheel") return;
+         this._addEventListener.apply(this, arguments);
+      };
+
+      // for correct focus/blur handling in iframes (otherwise canvas eats the events and the engine stays paused)
+      window.addEventListener('focus', function() {
+        document.querySelector('#blocker').classList.remove('active');
+      });
+      window.addEventListener('blur', function() {
+        document.querySelector('#blocker').classList.add('active');
+      });
+      if (!document.hasFocus()) {
+        document.querySelector('#blocker').classList.add('active');
+      }
+      document.querySelector("#wrapper").style.width = '1920px';
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: console.log,
+        printErr: console.error,
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+
+          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+          // application robust, you may want to override this behavior before shipping!
+          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+
+          return canvas;
+        })(),
+        setError: function(text) {
+          var err = document.createElement('div');
+          err.classList.add('error');
+          err.innerHTML = '<p>Loading failed.</p><p>'+text+'</p><p>Please refresh the page.</p>';
+          document.getElementById('wrapper').appendChild(err);
+          Module.adjustSize();
+        },
+        drawProgress: function(progress) {
+          document.getElementById('loading-bar').style.width = (progress * 100) + '%';
+        },
+        setStatus: function(text) {
+          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+          if (text === Module.setStatus.last.text) return;
+          if (text == "Running...") Module.drawProgress(1.0);
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+          if (m) {
+            text = m[1];
+            m[2] = parseInt(m[2])
+            m[4] = parseInt(m[4])
+            //console.log(m[2], m[4]);
+            if (text == "Downloading data... ") {
+               m[2] *= 0.9;
+            } else if (text == "Preparing... ") {
+               m[2] = m[2] * 0.1 + 0.9 * m[4];
+            }
+            Module.drawProgress(m[2] / m[4]);
+          } else {
+            console.log('***** ***');
+          }
+          console.info(text);
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        },
+        adjustSize: function() {
+          var scale = Math.min(window.innerWidth/1920.0, window.innerHeight/1080.0);
+          var x = (window.innerWidth - 1920 * scale) / 2;
+          var y = (window.innerHeight - 1080 * scale) / 2;
+          document.body.style.paddingLeft = x + 'px';
+          document.body.style.paddingTop = y + 'px';
+          var wrapper = document.getElementById('wrapper');
+          Array.prototype.forEach.apply(wrapper.children, [function(elem) {
+            if (scale != 1.0) {
+              elem.style.transform = 'scale(' + scale + ')';
+              elem.style.transformOrigin = 'top left';
+            } else {
+              elem.style.transform = '';
+            }
+          }]);
+        },
+        hideLoading: function() {
+            document.getElementById('loading').style.display = 'none';
+        }
+      };
+      Module.setStatus('Downloading...');
+      Module.drawProgress(0);
+
+      window.onresize = Module.adjustSize;
+      setTimeout(function() {
+          Module.adjustSize();
+          document.getElementById('loading').style.display = 'block';
+      }, 0);
+
+      window.onerror = function() {
+        Module.setStatus('Exception thrown, see JavaScript console');
+        console.error(arguments);
+      };
+    </script>
+
+    {{{ SCRIPT }}}
+  </body>
+</html>
