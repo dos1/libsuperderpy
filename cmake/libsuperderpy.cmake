@@ -592,7 +592,7 @@ if (NOT LIBSUPERDERPY_CONFIG_INCLUDED)
 	ENDMACRO()
 
 	if(ANDROID)
-		set(ANDROID_TARGET "android-30" CACHE STRING "What Android target to compile for.")
+		set(ANDROID_TARGET "android-33" CACHE STRING "What Android target to compile for.")
 		STRING(REGEX REPLACE "^android-" "" ANDROID_TARGET_VERSION ${ANDROID_TARGET})
 
 		set(LIBSUPERDERPY_PLATFORM_OVERRIDE "android")
