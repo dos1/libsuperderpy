@@ -9,6 +9,7 @@
     <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true" android:anyDensity="true" android:resizeable="true" />
     <application android:label="@string/app_name" android:icon="@mipmap/${LIBSUPERDERPY_GAMENAME}">
         <activity android:name="net.dosowisko.libsuperderpy.Activity"
+                  android:exported="true"
                   android:label="@string/app_name"
                   android:launchMode="singleTask"
                   android:screenOrientation="${LIBSUPERDERPY_ANDROID_ORIENTATION}"
